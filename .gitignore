@@ -1,0 +1,17 @@
+﻿__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+.env
+.env.*
+runs/
+tests/run_*/
+tests/data/result/
+tests/data/origin/
+tests/data/*.png
+tests/data/*.webp
+tests/data/*.html
+vivimi-v2-upgrade/
+vivimi-v2-upgrade-validation-v1.json
