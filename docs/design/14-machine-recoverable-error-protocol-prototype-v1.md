@@ -60,6 +60,7 @@ INVALID_ENUM
 INVALID_VALUE
 INVALID_COMBINATION
 INVALID_REFERENCE
+REVISION_CONFLICT
 INPUT_NOT_FOUND
 INPUT_CHANGED
 OUTPUT_CONFLICT
@@ -161,6 +162,7 @@ internal
 - 对已有 Task 的修订必须携带 `base_revision`。
 - Acceptance Contract 路径不出现在 `allowed_amendments` 中。需要改变 Acceptance 时返回 `CREATE_NEW_TASK`。
 - Agent 只能提交 Runtime 返回的允许路径。额外修改使整次修订失败，不部分应用。
+- `REVISION_CONFLICT` 要求 Agent 重新读取最新 Task 状态；不能仅替换 `base_revision` 后重放旧 patch。
 
 ## 7. 非错误 NEEDS_BINDING
 
