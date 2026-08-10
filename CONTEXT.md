@@ -43,3 +43,11 @@ _Avoid_: Planning Failure, Invalid Request
 **Runtime Evidence**:
 Runtime 针对某个 Attempt 生成的执行与验证事实。Agent 的最终说明只能引用 Runtime Evidence，不自行声明未被记录的执行能力或验证结论。
 _Avoid_: Agent Summary, Self-reported Validation
+
+**Diagnostic**:
+Runtime 对请求字段或执行事实为何不符合公开契约的结构化描述，包含稳定原因、字段路径、期望和实际值。
+_Avoid_: Error Details, Traceback
+
+**Recovery Directive**:
+Runtime 针对 Diagnostic 给出的机器可执行恢复边界，明确恢复动作、允许修改的路径和可选补丁。Recovery Directive 不能授权缩减 Acceptance Contract。
+_Avoid_: Troubleshooting Hint, Agent Guess
