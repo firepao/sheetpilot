@@ -12,6 +12,14 @@ _Avoid_: Plan, Execution Plan, DAG
 Task Request 所表达的通用业务操作类别，例如 `summarize_table`。Task Type 不暴露其内部使用的 Molecule 或 Atom。
 _Avoid_: Recipe, Capability Name, Operation Graph
 
+**Deterministic Task Compiler**:
+Runtime 将已验证 Task Request、Acceptance Snapshot 和 Binding Snapshot 转换为稳定内部执行计划的组件。相同冻结输入和 Compiler 版本必须产生字节级相同的计划。
+_Avoid_: Planner, Agent-generated Plan
+
+**Internal Execution Plan**:
+Deterministic Task Compiler 生成并由 Runtime 独占使用的低层执行表示。Agent 不提交、修改或依赖 Internal Execution Plan。
+_Avoid_: Task Request, Public Plan
+
 **Acceptance Contract**:
 Task Request 中独立声明且在首次接收后冻结的验收范围。后续执行尝试可以修复执行参数，但不能静默缩减 Acceptance Contract。
 _Avoid_: Validation Hints, Optional Checks
@@ -59,6 +67,10 @@ _Avoid_: Agent Summary, Self-reported Validation
 **Runtime Pass**:
 某个 Attempt 的全部 Business Acceptance、System Acceptance、证据完整性和验证后发布一致性均通过的 Runtime 结论。Runtime Pass 不包含 Agent 对业务口径是否正确的判断。
 _Avoid_: PASS, Semantic Validation
+
+**Artifact Integrity**:
+当前交付文件与 Runtime Pass 时已验证发布文件之间的 hash 关系，取值为 matched、missing 或 modified。Runtime Pass 是历史结论，只有 Artifact Integrity 为 matched 时当前文件仍可交付。
+_Avoid_: Output Exists, Previous PASS
 
 **Diagnostic**:
 Runtime 对请求字段或执行事实为何不符合公开契约的结构化描述，包含稳定原因、字段路径、期望和实际值。
