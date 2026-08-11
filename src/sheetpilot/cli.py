@@ -17,6 +17,7 @@ from .validators import validate_and_publish
 from .capabilities import DEFAULT_REGISTRY
 from .recipes import DEFAULT_RECIPE_REGISTRY
 from .mvp import manifest as mvp_manifest, run_plan as run_mvp_plan, validate_run as validate_mvp_run
+from .task_api import TaskRuntime
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -88,6 +89,22 @@ def cmd_mvp_validate(args):
     return validate_mvp_run(Path(args.run_dir))
 
 
+def _task_runtime() -> TaskRuntime:
+    return TaskRuntime()
+
+
+def cmd_task_types(args):
+    return _task_runtime().task_types()
+
+
+def cmd_task_run(args):
+    return _task_runtime().run(_read_json(Path(args.request)))
+
+
+def cmd_task_status(args):
+    return _task_runtime().status(args.task_id)
+
+
 def cmd_plan(args):
     task_data = _read_json(Path(args.task))
     _validate_schema(task_data, "semantic-task.schema.json")
@@ -144,6 +161,11 @@ def build_parser():
     mvp_run.add_argument("--input", required=True); mvp_run.add_argument("--output", required=True); mvp_run.add_argument("--plan", required=True); mvp_run.add_argument("--run-dir", required=True); mvp_run.add_argument("--dynamic-script"); mvp_run.set_defaults(func=cmd_mvp_run)
     mvp_validate = sub.add_parser("mvp-validate", help="独立验证并发布轻量计划结果")
     mvp_validate.add_argument("--run-dir", required=True); mvp_validate.set_defaults(func=cmd_mvp_validate)
+    task_types = sub.add_parser("task-types", help="列出完整的 Agent-facing Task Type 契约"); task_types.set_defaults(func=cmd_task_types)
+    task_run = sub.add_parser("task-run", help="提交 Task Request；Runtime 自动管理 Task、Attempt 和发布")
+    task_run.add_argument("--request", required=True); task_run.set_defaults(func=cmd_task_run)
+    task_status = sub.add_parser("task-status", help="查询 Task 状态和发布文件完整性")
+    task_status.add_argument("--task-id", required=True); task_status.set_defaults(func=cmd_task_status)
     plan = sub.add_parser("plan"); plan.add_argument("--task", required=True); plan.add_argument("--requirements", required=True); plan.set_defaults(func=cmd_plan)
     for name, func in (("compile", cmd_compile), ("run", cmd_run)):
         command = sub.add_parser(name); command.add_argument("--task", required=True); command.add_argument("--high-level-plan", required=True); command.add_argument("--run-dir", required=True); command.set_defaults(func=func)
