@@ -72,6 +72,10 @@ _Avoid_: PASS, Semantic Validation
 当前交付文件与 Runtime Pass 时已验证发布文件之间的 hash 关系，取值为 matched、missing 或 modified。Runtime Pass 是历史结论，只有 Artifact Integrity 为 matched 时当前文件仍可交付。
 _Avoid_: Output Exists, Previous PASS
 
+**Agent-facing Black-box Test**:
+在没有仓库源码、内部 Schema、历史结果或实现提示的全新环境中，由真实 Agent 通过公开 Skill 和 CLI 完成任务的产品接口测试。结果必须同时检查 Agent 行为轨迹、Runtime Evidence 和独立 Oracle。
+_Avoid_: Skill Unit Test, CLI Integration Test
+
 **Diagnostic**:
 Runtime 对请求字段或执行事实为何不符合公开契约的结构化描述，包含稳定原因、字段路径、期望和实际值。
 _Avoid_: Error Details, Traceback
