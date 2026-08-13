@@ -20,6 +20,47 @@ from .compiler import collect_fields, compile_plan
 from .contract import acceptance_snapshot, invalid_response, stable_hash, task_type_manifest, validate_request
 
 
+SEMANTIC_CANDIDATE_FLOOR = 0.35
+_TOP_K = 3
+
+
+def _normalize_header(text: str) -> str:
+    # Collapse full-width ASCII (U+FF01..U+FF5E) to half-width, then trim
+    # whitespace and lower-case. CJK glyphs are unaffected by these steps.
+    return "".join(chr(ord(ch) - 0xFEE0) if 0xFF01 <= ord(ch) <= 0xFF5E else ch for ch in text).strip().lower()
+
+
+def _character_bigrams(text: str) -> set[str]:
+    return {text[index:index + 2] for index in range(len(text) - 1)}
+
+
+def _score_header(field: str, header: str) -> tuple[float, list[str]]:
+    """Deterministic similarity between a business word and a physical header.
+
+    Returns (confidence, evidence). 1.0 means a unique exact match candidate
+    (after normalization); lower scores are semantic candidates that must NOT
+    auto-bind (see docs/current/16 §6) but may be surfaced for the Agent.
+    """
+    normalized_field = _normalize_header(field)
+    normalized_header = _normalize_header(header)
+    if not normalized_field or not normalized_header:
+        return 0.0, []
+    if normalized_field == normalized_header:
+        return 1.0, ["exact_header_match"]
+    shorter, longer = sorted((normalized_field, normalized_header), key=len)
+    if shorter and shorter in longer:
+        return round(0.60 + 0.40 * (len(shorter) / len(longer)), 3), ["substring_match", "semantic_similarity"]
+    field_bigrams = _character_bigrams(normalized_field)
+    header_bigrams = _character_bigrams(normalized_header)
+    if not field_bigrams or not header_bigrams:
+        return 0.0, []
+    overlap = len(field_bigrams & header_bigrams)
+    dice = 2.0 * overlap / (len(field_bigrams) + len(header_bigrams))
+    if dice < SEMANTIC_CANDIDATE_FLOOR:
+        return 0.0, []
+    return round(dice, 3), ["semantic_similarity"]
+
+
 def default_state_root() -> Path:
     configured = os.environ.get("SHEETPILOT_STATE_ROOT")
     if configured:
@@ -131,21 +172,60 @@ class TaskRuntime:
                 values = [ws.cell(row, column).value for row in range(header_row + 1, min(ws.max_row, header_row + 20) + 1)]
                 non_empty = [value for value in values if value not in (None, "")]
                 inferred = "number" if non_empty and all(isinstance(value, (int, float)) and not isinstance(value, bool) for value in non_empty) else "text"
-                candidate = {"id": candidate_id, "source_id": "source-001", "sheet": requested_sheet, "header_row_start": header_row, "header_row_end": header_row, "column": get_column_letter(column), "header": header, "inferred_type": inferred, "confidence": 1.0, "evidence": ["exact_header_match"]}
+                samples = [value[:64] if isinstance(value, str) and len(value) > 64 else value for value in non_empty[:3]]
+                candidate = {"id": candidate_id, "source_id": "source-001", "sheet": requested_sheet, "header_row_start": header_row, "header_row_end": header_row, "column": get_column_letter(column), "header": header, "inferred_type": inferred, "confidence": 1.0, "evidence": ["exact_header_match"], "sample_values": samples}
                 headers.setdefault(header, []).append(candidate)
             slots, candidates, unresolved = [], [], []
             for index, (field, references) in enumerate(collect_fields(request), 1):
                 matches = headers.get(field, []); slot_id = f"binding-{index:03d}"
                 uses = self._field_uses(request, field); numeric = any(use in {"metric:sum", "metric:average"} for use in uses)
-                compatible = [item for item in matches if not numeric or item["inferred_type"] == "number"]
-                status = "RESOLVED" if len(compatible) == 1 and len(matches) == 1 else ("AMBIGUOUS" if compatible else "UNRESOLVED")
-                resolution = ({"candidate_id": compatible[0]["id"], "sheet": requested_sheet, "header_row": header_row, "column": compatible[0]["column"], "header": compatible[0]["header"]} if status == "RESOLVED" else None)
-                slot = {"id": slot_id, "logical_field": field, "references": references, "requirements": {"accepted_types": ["number"] if numeric else ["text", "number", "boolean", "unknown"], "uses": uses}, "status": status, "selected_candidate_id": resolution["candidate_id"] if resolution else None, "candidate_ids": [item["id"] for item in compatible], "resolution": resolution}
-                slots.append(slot); candidates.extend(compatible)
-                if status != "RESOLVED": unresolved.append(slot)
+                exact_compatible = [item for item in matches if not numeric or item["inferred_type"] == "number"]
+                candidates.extend(exact_compatible)
+                auto_status = "RESOLVED" if len(exact_compatible) == 1 and len(matches) == 1 else ("AMBIGUOUS" if exact_compatible else "UNRESOLVED")
+                if auto_status == "RESOLVED":
+                    resolution = {"candidate_id": exact_compatible[0]["id"], "sheet": requested_sheet, "header_row": header_row, "column": exact_compatible[0]["column"], "header": exact_compatible[0]["header"]}
+                    slot = {"id": slot_id, "logical_field": field, "references": references, "requirements": {"accepted_types": ["number"] if numeric else ["text", "number", "boolean", "unknown"], "uses": uses}, "status": "RESOLVED", "selected_candidate_id": resolution["candidate_id"], "candidate_ids": [item["id"] for item in exact_compatible], "resolution": resolution}
+                    slots.append(slot); continue
+                if auto_status == "AMBIGUOUS":
+                    # Multiple columns share the exact header. Semantic ranking may dedup
+                    # them by header name and collapse the genuine ambiguity, so surface
+                    # every exact match and stop here rather than running the fuzzy path.
+                    slot = {"id": slot_id, "logical_field": field, "references": references, "requirements": {"accepted_types": ["number"] if numeric else ["text", "number", "boolean", "unknown"], "uses": uses}, "status": "AMBIGUOUS", "selected_candidate_id": None, "candidate_ids": [item["id"] for item in exact_compatible], "resolution": None}
+                    slots.append(slot); unresolved.append(slot); continue
+                # No unique exact match. Surface semantic candidates with confidence and
+                # sample values so the agent can confirm the true header without reading
+                # the file. Semantic matches never auto-bind (docs/current/16 §6).
+                ranked = self._semantic_candidates(field, headers, numeric=numeric)
+                candidates.extend(ranked)
+                status = "AMBIGUOUS" if ranked else "UNRESOLVED"
+                slot = {"id": slot_id, "logical_field": field, "references": references, "requirements": {"accepted_types": ["number"] if numeric else ["text", "number", "boolean", "unknown"], "uses": uses}, "status": status, "selected_candidate_id": None, "candidate_ids": [item["id"] for item in ranked], "resolution": None}
+                slots.append(slot); unresolved.append(slot)
             return {"source": {"id": "source-001", "sheet": requested_sheet, "header_row": header_row}, "slots": slots, "candidates": candidates, "unresolved": unresolved}
         finally:
             workbook.close()
+
+    def _semantic_candidates(self, field: str, headers: dict[str, list[dict[str, Any]]], *, numeric: bool) -> list[dict[str, Any]]:
+        """Return candidate columns whose header is a semantic (fuzzy) match for a field.
+
+        Uses a deterministic, CJK-aware header similarity (exact -> substring ->
+        character-bigram Dice). Each candidate carries a confidence and sample values; the
+        runtime never auto-binds from these — it only surfaces them for the Agent to confirm.
+        """
+        scored: list[dict[str, Any]] = []
+        for header, candidates_for_header in headers.items():
+            confidence, evidence = _score_header(field, header)
+            if confidence <= 0.0:
+                continue
+            for cand in candidates_for_header:
+                if numeric and cand["inferred_type"] != "number":
+                    continue
+                scored.append({**cand, "confidence": confidence, "evidence": evidence})
+        ranked: list[dict[str, Any]] = []; seen: set[str] = set()
+        for item in sorted(scored, key=lambda c: (-c["confidence"], c["column"])):
+            if item["header"] in seen: continue
+            seen.add(item["header"]); ranked.append(item)
+            if len(ranked) == _TOP_K: break
+        return ranked
 
     def _execute(self, task_dir: Path, task: dict[str, Any], revision: dict[str, Any]) -> dict[str, Any]:
         attempt_id = "attempt-001"; attempt_dir = task_dir / "attempts" / attempt_id; attempt_dir.mkdir(parents=True)
@@ -211,11 +291,13 @@ class TaskRuntime:
 
     def _binding_response(self, task_id: str, acceptance_hash: str, binding: dict[str, Any]) -> dict[str, Any]:
         unresolved = [item for item in binding["unresolved"] if item.get("id")]
-        allowed = [{"op": "add", "path": f"/bindings/{item['id']}", "constraints": {"candidate_ids": item["candidate_ids"]}} for item in unresolved]
+        resolvable = [item for item in unresolved if item["candidate_ids"]]
+        action = "PROVIDE_BINDING" if unresolved and len(resolvable) == len(unresolved) else "HUMAN_ACTION_REQUIRED"
+        allowed = [{"op": "add", "path": f"/bindings/{item['id']}", "constraints": {"candidate_ids": item["candidate_ids"]}} for item in resolvable]
         diagnostics = [{"code": "FIELD_BINDING_AMBIGUOUS" if item["candidate_ids"] else "FIELD_BINDING_NOT_FOUND", "path": item["references"][0], "message": f"业务字段“{item['logical_field']}”无法唯一精确绑定。", "expected": {"kind": "single_binding"}, "actual": {"kind": "candidates", "count": len(item["candidate_ids"])}} for item in unresolved]
         if not binding["source"]:
             diagnostics = [{"code": "SOURCE_BINDING_REQUIRED", "path": "/source/sheet", "message": "来源 Sheet 无法唯一确定。", "expected": {"kind": "existing_sheet"}, "actual": {"kind": "unresolved"}}]
-        return {"schema_version": "1.0", "status": "NEEDS_BINDING", "task_id": task_id, "request_revision": 1, "attempt_id": None, "acceptance_hash": acceptance_hash, "binding_slots": unresolved, "binding_candidates": binding["candidates"], "diagnostics": diagnostics, "recovery": {"action": "PROVIDE_BINDING" if allowed else "HUMAN_ACTION_REQUIRED", "retryable": bool(allowed), "base_revision": 1, "allowed_amendments": allowed, "suggested_patch": []}}
+        return {"schema_version": "1.0", "status": "NEEDS_BINDING", "task_id": task_id, "request_revision": 1, "attempt_id": None, "acceptance_hash": acceptance_hash, "binding_slots": unresolved, "binding_candidates": binding["candidates"], "diagnostics": diagnostics, "recovery": {"action": action, "retryable": action == "PROVIDE_BINDING", "base_revision": 1, "allowed_amendments": allowed, "suggested_patch": []}}
 
     def _amend(self, amendment: dict[str, Any]) -> dict[str, Any]:
         return self._error("REQUEST_INVALID", "CAPABILITY_UNSUPPORTED", "field_binding", "第一批实现尚未开放 Binding Amendment 执行。", amendment.get("task_id"), amendment.get("base_revision"), None, False, "HUMAN_ACTION_REQUIRED")

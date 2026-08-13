@@ -131,6 +131,8 @@ Runtime 只有在以下条件全部满足时自动绑定字段：
 - Header Candidate 不唯一。
 - 找不到候选列。
 
+语义相似匹配（非精确）会被输出到 `binding_candidates`，每个候选带 `confidence`、`evidence` 和 `sample_values`，供 Agent 确认真实表头后重新提交精确名称；Runtime 不会据此静默自动绑定。`confidence` 仅用于排序与解释，不授权自动绑定。
+
 “没有候选”使用 `HUMAN_ACTION_REQUIRED`，不允许 Agent 通过手写列字母绕过 Inspector。
 
 ## 7. NEEDS_BINDING 响应

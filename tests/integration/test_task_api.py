@@ -75,6 +75,52 @@ class TaskApiTest(unittest.TestCase):
         task_dir = self.root / "state" / "tasks" / result["task_id"]
         self.assertFalse((task_dir / "attempts").exists())
 
+    def test_semantic_fuzzy_field_surfaces_candidate_without_auto_bind(self):
+        source = self.root / "net_sales.xlsx"
+        workbook = Workbook(); sheet = workbook.active; sheet.title = "交易流水"
+        sheet.append(["净销售额"]); sheet.append([100]); sheet.append([200]); sheet.append([300])
+        workbook.save(source); workbook.close()
+        request = copy.deepcopy(MINIMAL_EXAMPLE)
+        request["input_file"] = str(source); request["output_file"] = str(self.root / "net-result.xlsx")
+        request["source"] = {"sheet": "交易流水", "header_row": 1}
+        request["filters"] = []
+        request["dimensions"] = [{"id": "net", "field": "净销售收入", "output_name": "净销售收入"}]
+        request["metrics"] = [{"id": "total", "function": "sum", "field": "净销售收入", "output_name": "合计"}]
+        request["output"] = {"sheet": "汇总", "anchor": "A1", "sort": []}
+        request["acceptance"]["required_filters"] = []
+        request["acceptance"]["required_dimensions"] = ["net"]
+        request["acceptance"]["required_metrics"] = ["total"]
+        request["acceptance"]["required_sort"] = []
+        result = self.runtime.run(request)
+        self.assertEqual(result["status"], "NEEDS_BINDING")
+        self.assertEqual(result["binding_slots"][0]["status"], "AMBIGUOUS")
+        net_candidate = next(c for c in result["binding_candidates"] if c["header"] == "净销售额")
+        self.assertLess(net_candidate["confidence"], 1.0)
+        self.assertEqual(net_candidate["sample_values"], [100, 200, 300])
+        self.assertEqual(result["recovery"]["action"], "PROVIDE_BINDING")
+
+    def test_unrelated_field_yields_no_candidate_and_human_action(self):
+        source = self.root / "unrelated.xlsx"
+        workbook = Workbook(); sheet = workbook.active; sheet.title = "交易流水"
+        sheet.append(["区域"]); sheet.append(["华东"])
+        workbook.save(source); workbook.close()
+        request = copy.deepcopy(MINIMAL_EXAMPLE)
+        request["input_file"] = str(source); request["output_file"] = str(self.root / "unrelated-result.xlsx")
+        request["source"] = {"sheet": "交易流水", "header_row": 1}
+        request["filters"] = []
+        request["dimensions"] = [{"id": "region", "field": "净利润", "output_name": "净利润"}]
+        request["metrics"] = [{"id": "rows", "function": "count", "mode": "rows", "output_name": "行数"}]
+        request["output"] = {"sheet": "汇总", "anchor": "A1", "sort": []}
+        request["acceptance"]["required_filters"] = []
+        request["acceptance"]["required_dimensions"] = ["region"]
+        request["acceptance"]["required_metrics"] = ["rows"]
+        request["acceptance"]["required_sort"] = []
+        result = self.runtime.run(request)
+        self.assertEqual(result["status"], "NEEDS_BINDING")
+        self.assertEqual(result["binding_slots"][0]["status"], "UNRESOLVED")
+        self.assertEqual(result["binding_candidates"], [])
+        self.assertEqual(result["recovery"]["action"], "HUMAN_ACTION_REQUIRED")
+
     def test_compiler_is_byte_deterministic_and_hides_display_names(self):
         request = self.request(); binding = self.runtime._bind(request, "input-hash")
         snapshot = {"source": binding["source"], "slots": binding["slots"]}

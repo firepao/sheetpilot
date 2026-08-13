@@ -47,7 +47,7 @@ New-Item -ItemType Directory -LiteralPath $resultDir | Out-Null
 4. 调用 `task-run --request`。不要提交 Runtime `run-dir`、Task ID、Attempt ID、列字母、内部步骤或 Validator。
 5. 根据结构化响应继续：
    - `RUNTIME_PASS`：调用 `task-status` 核对当前交付状态。
-   - `NEEDS_BINDING`：只选择响应给出的 Candidate ID；若当前 Runtime 未开放修订或要求人工处理，停止并报告。
+   - `NEEDS_BINDING`：只选择响应给出的 Candidate ID；若当前 Runtime 未开放修订或要求人工处理，停止并报告。Candidate 可能包含语义（模糊）匹配，带 `confidence` 与 `sample_values`；Runtime 只对精确表头自动绑定，模糊候选仍需依据其 `header` 与 `sample_values` 确认业务口径后，重新提交精确表头名称或显式选择其 Candidate ID。
    - 错误响应：只执行 `recovery.action` 允许的动作，只修改 `allowed_amendments` 路径。
 6. 仅当 `task-status` 同时满足以下条件时交付：
    - `state = RUNTIME_PASS`

@@ -46,7 +46,9 @@ In `tests/agent_contract/evaluation/evaluator.py`: `ALLOWED_COMMANDS = {"task-ty
 
 ## Contract validators
 
-`src/sheetpilot/task_api/contract.py` is the source of truth for the request schema and validation: `FILTER_OPERATORS = {eq,ne,gt,gte,lt,lte,in}`, metric functions `{sum, average, count}` with `count.rows`/`count.non_empty` modes, `field_binding: unique_exact_header_match`, output `create_new_sheet_and_new_file`. `MINIMAL_EXAMPLE` there is the canonical shape to copy when constructing requests. `compiler.py` turns a validated request + binding snapshot into a deterministic `internal-plan` (byte-identical for identical inputs/version — used as evidence via `plan_hash`).
+`src/sheetpilot/task_api/contract.py` is the source of truth for the request schema and validation: `FILTER_OPERATORS = {eq,ne,gt,gte,lt,lte,in}`, metric functions `{sum, average, count}` with `count.rows`/`count.non_empty` modes, `field_binding: unique_exact_header_match_with_semantic_candidates`, output `create_new_sheet_and_new_file`. `MINIMAL_EXAMPLE` there is the canonical shape to copy when constructing requests. `compiler.py` turns a validated request + binding snapshot into a deterministic `internal-plan` (byte-identical for identical inputs/version — used as evidence via `plan_hash`).
+
+Field binding in `runtime.py` auto-binds **only** a unique exact (normalized) header match; otherwise it surfaces `BindingCandidate`s — exact and semantic/fuzzy (`_score_header`: exact → substring → character-bigram Dice) — each with `confidence`, `evidence`, and `sample_values`, and returns `NEEDS_BINDING`. A slot with no candidate returns `HUMAN_ACTION_REQUIRED`. The runtime never silently binds a fuzzy match (see `docs/current/16` §6).
 
 ## Coded conventions
 
