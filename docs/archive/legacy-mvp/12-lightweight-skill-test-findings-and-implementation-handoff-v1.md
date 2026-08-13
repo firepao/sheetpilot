@@ -450,7 +450,7 @@ VALIDATION_FAILED
 完整验收场景继续使用：
 
 ```text
-输入：tests/data/U3_builtin_dirty_orders_report.xlsx
+输入：tests/fixtures/legacy-mvp/U3_builtin_dirty_orders_report.xlsx
 过滤：清洗状态=有效 且 是否退货=否
 输出：按城市汇总销售收入、订单数量、平均订单金额，并按销售收入降序
 ```
@@ -471,4 +471,5 @@ VALIDATION_FAILED
 8. 真实输出文件重新打开后验证通过，输入文件哈希保持不变。
 9. Runtime 自动生成真实能力执行记录，Agent 不自行编造能力使用情况。
 10. Skill 官方校验和项目完整单元测试全部通过。
+
 

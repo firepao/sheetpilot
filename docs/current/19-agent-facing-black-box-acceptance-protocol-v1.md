@@ -286,7 +286,7 @@ Runtime PASS 与 Oracle PASS 必须同时成立。两者不一致时分类为 Ru
 Harness 在 Agent run 完全结束后，把不可变结果移入：
 
 ```text
-tests/agent_contract/results/<scenario-id>__<YYYYMMDD-HHMMSS>__<run-id>/
+tests/agent_contract/results/<scenario-id>__<skill-version>__<YYYYMMDDTHHMMSS+0800>__<run-id>/
 ```
 
 例如：

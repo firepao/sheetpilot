@@ -1,0 +1,4 @@
+interface:
+  display_name: "SheetPilot Run Scorer"
+  short_description: "独立评价 SheetPilot Agent 任务并归档评分"
+  default_prompt: "评价这次 SheetPilot Agent 运行并将结果归档到 Excel。"

@@ -1,4 +1,4 @@
 interface:
   display_name: "SheetPilot Excel Agent"
-  short_description: "通过轻量运行时执行并验证可审计的 Excel 任务"
-  default_prompt: "Use $sheetpilot-excel-agent to inspect, execute, and independently validate this Excel task."
+  short_description: "通过 Task API 执行并交付可审计的 Excel 汇总"
+  default_prompt: "Use $sheetpilot-excel-agent to complete this Excel task through task-types, task-run, and task-status."

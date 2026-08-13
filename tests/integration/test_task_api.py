@@ -94,5 +94,29 @@ class TaskApiTest(unittest.TestCase):
         self.assertEqual(status["artifact_integrity"], "MODIFIED")
         self.assertFalse(status["delivery_valid"])
 
+    def test_existing_target_sheet_fails_without_publishing(self):
+        request=self.request(); request["output"]["sheet"]="清洗明细"
+        request["output_file"]=str(self.root/"conflict.xlsx")
+        result=self.runtime.run(request)
+        self.assertEqual(result["status"],"EXECUTION_FAILED")
+        self.assertEqual(result["error"]["code"],"OUTPUT_CONFLICT")
+        self.assertFalse(Path(request["output_file"]).exists())
+
+    def test_unsized_worksheet_is_bound_and_executed(self):
+        request = copy.deepcopy(MINIMAL_EXAMPLE)
+        request["input_file"] = str(Path(__file__).resolve().parents[1] / "agent_contract" / "data" / "01_simple_department_sales.xlsx")
+        request["output_file"] = str(self.root / "unsized-result.xlsx")
+        request["source"] = {"sheet": "销售明细", "header_row": 1}
+        request["filters"] = []
+        request["dimensions"] = [{"id": "department", "field": "部门", "output_name": "部门"}]
+        request["metrics"] = [{"id": "total_sales", "function": "sum", "field": "销售额", "output_name": "销售总额"}]
+        request["output"] = {"sheet": "部门销售汇总", "anchor": "A1", "sort": [{"by": "total_sales", "direction": "desc"}]}
+        request["acceptance"]["required_filters"] = []
+        request["acceptance"]["required_dimensions"] = ["department"]
+        request["acceptance"]["required_metrics"] = ["total_sales"]
+        request["acceptance"]["required_sort"] = [{"by": "total_sales", "direction": "desc"}]
+        result = self.runtime.run(request)
+        self.assertEqual(result["status"], "RUNTIME_PASS")
+
 
 if __name__ == "__main__": unittest.main()

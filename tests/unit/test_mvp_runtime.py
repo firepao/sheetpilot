@@ -59,7 +59,7 @@ class MvpRuntimeTest(unittest.TestCase):
             self.assertEqual(caught.exception.code,ErrorCode.VALIDATION_FAILED)
 
     def test_real_dirty_orders_file_end_to_end(self):
-        source=Path(__file__).parent/"data"/"U3_builtin_dirty_orders_report.xlsx"
+        source=Path(__file__).resolve().parents[1]/"fixtures"/"legacy-mvp"/"U3_builtin_dirty_orders_report.xlsx"
         with tempfile.TemporaryDirectory() as temporary:
             root=Path(temporary); output=root/"result.xlsx"; run_dir=root/"run"
             plan={"schema_version":"1.0","input_file":str(source),"output_file":str(output),"steps":[{"id":"source","op":"read_table","sheet":"清洗明细","columns":{"城市":"D","销售额":"G","是否退货":"J","清洗状态":"L"}},{"id":"summary","op":"summarize_by_dimension","input":"source","where":{"all":[{"field":"清洗状态","op":"eq","value":"有效"},{"field":"是否退货","op":"eq","value":"否"}]},"group_by":["城市"],"metrics":[{"field":"销售额","function":"sum","as":"销售收入"},{"function":"count","mode":"rows","as":"订单数量"},{"field":"销售额","function":"average","as":"平均订单金额"}],"sort":[{"field":"销售收入","direction":"desc"}]},{"id":"sheet","op":"create_sheet","sheet":"城市经营汇总"},{"id":"write","op":"write_table","input":"summary","sheet":"城市经营汇总"}],"requirements":{"required_sheets":["城市经营汇总"],"required_columns":{"城市经营汇总":["城市","销售收入","订单数量","平均订单金额"]},"checks":[{"type":"aggregate_reconciliation","source_sheet":"清洗明细","source_field":"销售额","target_sheet":"城市经营汇总","target_field":"销售收入","where":{"all":[{"field":"清洗状态","value":"有效"},{"field":"是否退货","value":"否"}]}},{"type":"sort_order","sheet":"城市经营汇总","field":"销售收入","direction":"desc"}]}}

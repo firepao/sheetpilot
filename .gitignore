@@ -15,3 +15,14 @@ tests/data/*.webp
 tests/data/*.html
 vivimi-v2-upgrade/
 vivimi-v2-upgrade-validation-v1.json
+
+# Reorganized local-only artifacts
+archive/experiments/
+archive/local-runs/
+archive/duplicates/
+archive/legacy-test-artifacts/origin/
+archive/legacy-test-artifacts/result/
+tests/agent_contract/results/
+tests/agent_contract/reviews/
+tests/agent_contract/*.xlsx
+tests/agent_cases/

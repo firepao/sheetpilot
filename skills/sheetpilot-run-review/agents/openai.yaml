@@ -1,0 +1,4 @@
+interface:
+  display_name: "SheetPilot Run Review"
+  short_description: "解析 SheetPilot Agent Replay 并准备评分证据"
+  default_prompt: "解析这次 SheetPilot Agent 运行并准备评分材料。"

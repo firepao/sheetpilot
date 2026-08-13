@@ -27,7 +27,7 @@ def _write_json(path: Path, value: dict) -> None: path.write_text(json.dumps(val
 
 
 def _validate_schema(value: dict, name: str) -> None:
-    schema = _read_json(ROOT / "schemas" / name)
+    schema = _read_json(ROOT / "archive" / "legacy-runtime" / "schemas" / name)
     errors = []
     if not isinstance(value, dict): errors.append("根节点必须是对象")
     else:

@@ -21,6 +21,9 @@ from .contract import acceptance_snapshot, invalid_response, stable_hash, task_t
 
 
 def default_state_root() -> Path:
+    configured = os.environ.get("SHEETPILOT_STATE_ROOT")
+    if configured:
+        return Path(configured).expanduser()
     if os.name == "nt":
         base = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
     else:
@@ -97,7 +100,12 @@ class TaskRuntime:
         acceptance = acceptance_snapshot(request); acceptance_hash = stable_hash(acceptance)
         task = {"task_id": task_id, "created_at": _now(), "input_file": str(source), "input_sha256": input_hash, "output_file": str(output), "submission_hash": submission_hash, "acceptance_hash": acceptance_hash}
         _write_json(task_dir / "task.json", task); _write_json(task_dir / "acceptance-snapshot.json", acceptance)
-        binding = self._bind(request, input_hash)
+        try:
+            binding = self._bind(request, input_hash)
+        except Exception as exc:
+            response = self._error("EXECUTION_FAILED", "INTERNAL_ERROR", "workbook_inspection", str(exc), task_id, 1, None, False, "HUMAN_ACTION_REQUIRED")
+            _write_json(task_dir / "current-state.json", {"state": "FAILED", "terminal": True, "request_revision": 1, "latest_attempt": None, "delivery_valid": False, "error": response["error"]})
+            return response
         revision = {"request_revision": 1, "request": request, "bindings": binding, "request_revision_hash": stable_hash(request)}
         _write_json(task_dir / "revisions" / "revision-001.json", revision)
         if binding["unresolved"]:
@@ -113,6 +121,8 @@ class TaskRuntime:
             if not requested_sheet or requested_sheet not in workbook.sheetnames:
                 return {"source": None, "slots": [], "candidates": [], "unresolved": [{"kind": "source", "logical_field": None}]}
             ws = workbook[requested_sheet]; header_row = request["source"].get("header_row", 1)
+            if ws.max_column is None or ws.max_row is None:
+                ws.calculate_dimension(force=True)
             headers: dict[str, list[dict[str, Any]]] = {}
             for column in range(1, ws.max_column + 1):
                 raw = ws.cell(header_row, column).value
@@ -230,6 +240,6 @@ class TaskRuntime:
         for path in self.tasks_root.glob("task-*/task.json"):
             try: task = json.loads(path.read_text(encoding="utf-8"))
             except (OSError, json.JSONDecodeError): continue
-            if task.get("submission_hash") == submission_hash and task.get("input_sha256") == input_hash and task.get("output_file") == output_file:
+            if task.get("submission_hash") == submission_hash and task.get("input_sha256") == input_hash and task.get("output_file") == output_file and (path.parent / "current-state.json").is_file():
                 return task["task_id"]
         return None
