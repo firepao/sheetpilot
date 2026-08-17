@@ -175,8 +175,8 @@ Fixture 包含两个金额候选列，例如“销售额”和“含税销售额
 
 验收：
 
-- Runtime 返回 `NEEDS_BINDING`，不静默自动选择语义相似列。
-- Agent 根据 Candidate header、类型和有限样本选择正确 Candidate ID。
+- Runtime 返回 `NEEDS_BINDING` 与 `field_inventory`，不静默自动选择任何列。
+- Agent 对照字段清单语义判断后只提交 `candidate_id`。
 - Agent 不提交 Sheet、header row 或列字母。
 - Acceptance hash 在 Binding Revision 前后不变。
 

@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any
 
 from openpyxl import load_workbook
-from openpyxl.utils import get_column_letter
 from openpyxl.utils.cell import coordinate_to_tuple
 
 from ..engines import OpenPyxlEngine
@@ -18,47 +17,7 @@ from ..workbook.tables import TableData, aggregate, filter_rows, read_table, sel
 from ..workspace import sha256_file
 from .compiler import collect_fields, compile_plan
 from .contract import acceptance_snapshot, invalid_response, stable_hash, task_type_manifest, validate_request
-
-
-SEMANTIC_CANDIDATE_FLOOR = 0.35
-_TOP_K = 3
-
-
-def _normalize_header(text: str) -> str:
-    # Collapse full-width ASCII (U+FF01..U+FF5E) to half-width, then trim
-    # whitespace and lower-case. CJK glyphs are unaffected by these steps.
-    return "".join(chr(ord(ch) - 0xFEE0) if 0xFF01 <= ord(ch) <= 0xFF5E else ch for ch in text).strip().lower()
-
-
-def _character_bigrams(text: str) -> set[str]:
-    return {text[index:index + 2] for index in range(len(text) - 1)}
-
-
-def _score_header(field: str, header: str) -> tuple[float, list[str]]:
-    """Deterministic similarity between a business word and a physical header.
-
-    Returns (confidence, evidence). 1.0 means a unique exact match candidate
-    (after normalization); lower scores are semantic candidates that must NOT
-    auto-bind (see docs/current/16 §6) but may be surfaced for the Agent.
-    """
-    normalized_field = _normalize_header(field)
-    normalized_header = _normalize_header(header)
-    if not normalized_field or not normalized_header:
-        return 0.0, []
-    if normalized_field == normalized_header:
-        return 1.0, ["exact_header_match"]
-    shorter, longer = sorted((normalized_field, normalized_header), key=len)
-    if shorter and shorter in longer:
-        return round(0.60 + 0.40 * (len(shorter) / len(longer)), 3), ["substring_match", "semantic_similarity"]
-    field_bigrams = _character_bigrams(normalized_field)
-    header_bigrams = _character_bigrams(normalized_header)
-    if not field_bigrams or not header_bigrams:
-        return 0.0, []
-    overlap = len(field_bigrams & header_bigrams)
-    dice = 2.0 * overlap / (len(field_bigrams) + len(header_bigrams))
-    if dice < SEMANTIC_CANDIDATE_FLOOR:
-        return 0.0, []
-    return round(dice, 3), ["semantic_similarity"]
+from .inventory import build_inventory, cap_entries, read_headers
 
 
 def default_state_root() -> Path:
@@ -88,8 +47,37 @@ class TaskRuntime:
         self.state_root = (state_root or default_state_root()).resolve()
         self.tasks_root = self.state_root / "tasks"
 
-    def task_types(self) -> dict[str, Any]:
-        return task_type_manifest()
+    def _query_error(self, code: str, message: str, action: str = "AMEND_REQUEST", allowed: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+        retryable = action == "AMEND_REQUEST"
+        return {"schema_version": "1.0", "status": "REQUEST_INVALID", "task_id": None, "request_revision": None, "attempt_id": None,
+                "error": {"code": code, "phase": "workbook_inspection", "message": message, "retryable": retryable,
+                          "diagnostics": [{"code": code, "path": None, "message": message}],
+                          "recovery": {"action": action, "retryable": retryable, "base_revision": None, "allowed_amendments": allowed or [], "suggested_patch": []}}}
+
+    def task_types(self, input_file: str | None = None, sheet: str | None = None, header_row: int | None = None) -> dict[str, Any]:
+        manifest = task_type_manifest()
+        if not input_file:
+            return manifest
+        source = Path(input_file).expanduser().resolve()
+        if not source.is_file() or source.suffix.lower() not in {".xlsx", ".xlsm"}:
+            return self._query_error("INPUT_NOT_FOUND", "输入文件不存在或不是受支持的工作簿。", "HUMAN_ACTION_REQUIRED")
+        from openpyxl import load_workbook
+        workbook = load_workbook(source, read_only=True, data_only=True)
+        try:
+            visible = [name for name in workbook.sheetnames if workbook[name].sheet_state == "visible"]
+        finally:
+            workbook.close()
+        if header_row is not None and header_row < 1:
+            return self._query_error("INVALID_VALUE", "header_row 必须大于等于 1。", allowed=[{"op": "replace", "path": "/query/header_row", "constraints": {"min": 1}}])
+        if sheet is not None and sheet not in visible:
+            return self._query_error("INVALID_VALUE", "Sheet 不存在或不可见。", allowed=[{"op": "replace", "path": "/query/sheet", "constraints": {"enum": visible}}])
+        input_sha256 = sha256_file(source)
+        profile = build_inventory(source, input_sha256, sheet=sheet, header_row=header_row)
+        if profile["error_code"] == "INVENTORY_TOO_LARGE":
+            return self._query_error("INVENTORY_TOO_LARGE", "字段清单超出上限，请使用 --sheet 收窄查询。", allowed=[{"op": "replace", "path": "/query/sheet", "constraints": {"enum": visible}}, {"op": "replace", "path": "/query/header_row", "constraints": {"min": 1}}])
+        result = copy.deepcopy(manifest)
+        result["input_profile"] = {"input_file": str(source), "input_sha256": input_sha256, **profile}
+        return result
 
     def run(self, request: Any) -> dict[str, Any]:
         if isinstance(request, dict) and "task_id" in request:
@@ -147,85 +135,40 @@ class TaskRuntime:
             response = self._error("EXECUTION_FAILED", "INTERNAL_ERROR", "workbook_inspection", str(exc), task_id, 1, None, False, "HUMAN_ACTION_REQUIRED")
             _write_json(task_dir / "current-state.json", {"state": "FAILED", "terminal": True, "request_revision": 1, "latest_attempt": None, "delivery_valid": False, "error": response["error"]})
             return response
-        revision = {"request_revision": 1, "request": request, "bindings": binding, "request_revision_hash": stable_hash(request)}
+        if binding.get("truncated") and binding.get("unresolved"):
+            response = self._error("EXECUTION_FAILED", "INVENTORY_TOO_LARGE", "workbook_inspection", "字段清单超出上限，无法安全闭合绑定候选；请收窄来源查询。", task_id, 1, None, False, "HUMAN_ACTION_REQUIRED")
+            _write_json(task_dir / "current-state.json", {"state": "FAILED", "terminal": True, "request_revision": 1, "latest_attempt": None, "delivery_valid": False, "error": response["error"]})
+            return response
+        binding_hash, request_revision_hash = self._revision_hashes(request, binding, 1)
+        revision = {"request_revision": 1, "request": request, "bindings": binding, "binding_hash": binding_hash, "request_revision_hash": request_revision_hash}
         _write_json(task_dir / "revisions" / "revision-001.json", revision)
         if binding["unresolved"]:
             state = self._binding_response(task_id, acceptance_hash, binding)
-            _write_json(task_dir / "current-state.json", {key: value for key, value in state.items() if key not in {"schema_version", "status", "binding_slots", "binding_candidates", "diagnostics"}} | {"state": "NEEDS_BINDING", "terminal": False})
+            _write_json(task_dir / "current-state.json", {key: value for key, value in state.items() if key not in {"schema_version", "status", "binding_slots", "field_inventory", "diagnostics"}} | {"state": "NEEDS_BINDING", "terminal": False})
             return state
         return self._execute(task_dir, task, revision)
 
     def _bind(self, request: dict[str, Any], input_hash: str) -> dict[str, Any]:
+        sheet = request["source"].get("sheet"); header_row = request["source"].get("header_row", 1)
         workbook = load_workbook(request["input_file"], read_only=True, data_only=True)
         try:
-            requested_sheet = request["source"].get("sheet")
-            if not requested_sheet or requested_sheet not in workbook.sheetnames:
-                return {"source": None, "slots": [], "candidates": [], "unresolved": [{"kind": "source", "logical_field": None}]}
-            ws = workbook[requested_sheet]; header_row = request["source"].get("header_row", 1)
-            if ws.max_column is None or ws.max_row is None:
-                ws.calculate_dimension(force=True)
-            headers: dict[str, list[dict[str, Any]]] = {}
-            for column in range(1, ws.max_column + 1):
-                raw = ws.cell(header_row, column).value
-                if raw in (None, ""): continue
-                header = str(raw); candidate_id = "candidate-" + stable_hash([input_hash, requested_sheet, header_row, column, header])[:8]
-                values = [ws.cell(row, column).value for row in range(header_row + 1, min(ws.max_row, header_row + 20) + 1)]
-                non_empty = [value for value in values if value not in (None, "")]
-                inferred = "number" if non_empty and all(isinstance(value, (int, float)) and not isinstance(value, bool) for value in non_empty) else "text"
-                samples = [value[:64] if isinstance(value, str) and len(value) > 64 else value for value in non_empty[:3]]
-                candidate = {"id": candidate_id, "source_id": "source-001", "sheet": requested_sheet, "header_row_start": header_row, "header_row_end": header_row, "column": get_column_letter(column), "header": header, "inferred_type": inferred, "confidence": 1.0, "evidence": ["exact_header_match"], "sample_values": samples}
-                headers.setdefault(header, []).append(candidate)
-            slots, candidates, unresolved = [], [], []
+            if not sheet or sheet not in workbook.sheetnames:
+                return {"source": None, "slots": [], "inventory": [], "truncated": False, "unresolved": [{"kind": "source", "logical_field": None}]}
+            full = read_headers(Path(request["input_file"]), input_hash, sheet, header_row)
+            inventory, truncated = cap_entries(full)
+            by_header: dict[str, list[dict[str, Any]]] = {}
+            for item in full: by_header.setdefault(item["header"], []).append(item)
+            slots, unresolved = [], []
             for index, (field, references) in enumerate(collect_fields(request), 1):
-                matches = headers.get(field, []); slot_id = f"binding-{index:03d}"
                 uses = self._field_uses(request, field); numeric = any(use in {"metric:sum", "metric:average"} for use in uses)
-                exact_compatible = [item for item in matches if not numeric or item["inferred_type"] == "number"]
-                candidates.extend(exact_compatible)
-                auto_status = "RESOLVED" if len(exact_compatible) == 1 and len(matches) == 1 else ("AMBIGUOUS" if exact_compatible else "UNRESOLVED")
-                if auto_status == "RESOLVED":
-                    resolution = {"candidate_id": exact_compatible[0]["id"], "sheet": requested_sheet, "header_row": header_row, "column": exact_compatible[0]["column"], "header": exact_compatible[0]["header"]}
-                    slot = {"id": slot_id, "logical_field": field, "references": references, "requirements": {"accepted_types": ["number"] if numeric else ["text", "number", "boolean", "unknown"], "uses": uses}, "status": "RESOLVED", "selected_candidate_id": resolution["candidate_id"], "candidate_ids": [item["id"] for item in exact_compatible], "resolution": resolution}
-                    slots.append(slot); continue
-                if auto_status == "AMBIGUOUS":
-                    # Multiple columns share the exact header. Semantic ranking may dedup
-                    # them by header name and collapse the genuine ambiguity, so surface
-                    # every exact match and stop here rather than running the fuzzy path.
-                    slot = {"id": slot_id, "logical_field": field, "references": references, "requirements": {"accepted_types": ["number"] if numeric else ["text", "number", "boolean", "unknown"], "uses": uses}, "status": "AMBIGUOUS", "selected_candidate_id": None, "candidate_ids": [item["id"] for item in exact_compatible], "resolution": None}
-                    slots.append(slot); unresolved.append(slot); continue
-                # No unique exact match. Surface semantic candidates with confidence and
-                # sample values so the agent can confirm the true header without reading
-                # the file. Semantic matches never auto-bind (docs/current/16 §6).
-                ranked = self._semantic_candidates(field, headers, numeric=numeric)
-                candidates.extend(ranked)
-                status = "AMBIGUOUS" if ranked else "UNRESOLVED"
-                slot = {"id": slot_id, "logical_field": field, "references": references, "requirements": {"accepted_types": ["number"] if numeric else ["text", "number", "boolean", "unknown"], "uses": uses}, "status": status, "selected_candidate_id": None, "candidate_ids": [item["id"] for item in ranked], "resolution": None}
-                slots.append(slot); unresolved.append(slot)
-            return {"source": {"id": "source-001", "sheet": requested_sheet, "header_row": header_row}, "slots": slots, "candidates": candidates, "unresolved": unresolved}
-        finally:
-            workbook.close()
-
-    def _semantic_candidates(self, field: str, headers: dict[str, list[dict[str, Any]]], *, numeric: bool) -> list[dict[str, Any]]:
-        """Return candidate columns whose header is a semantic (fuzzy) match for a field.
-
-        Uses a deterministic, CJK-aware header similarity (exact -> substring ->
-        character-bigram Dice). Each candidate carries a confidence and sample values; the
-        runtime never auto-binds from these — it only surfaces them for the Agent to confirm.
-        """
-        scored: list[dict[str, Any]] = []
-        for header, candidates_for_header in headers.items():
-            confidence, evidence = _score_header(field, header)
-            if confidence <= 0.0:
-                continue
-            for cand in candidates_for_header:
-                if numeric and cand["inferred_type"] != "number":
-                    continue
-                scored.append({**cand, "confidence": confidence, "evidence": evidence})
-        ranked: list[dict[str, Any]] = []; seen: set[str] = set()
-        for item in sorted(scored, key=lambda c: (-c["confidence"], c["column"])):
-            if item["header"] in seen: continue
-            seen.add(item["header"]); ranked.append(item)
-            if len(ranked) == _TOP_K: break
-        return ranked
+                matches = [x for x in by_header.get(field, []) if not numeric or x["inferred_type"] == "number"]
+                status = "RESOLVED" if len(matches) == 1 and len(by_header.get(field, [])) == 1 else ("AMBIGUOUS" if matches else "UNRESOLVED")
+                slot = {"id": f"binding-{index:03d}", "logical_field": field, "references": references, "requirements": {"accepted_types": ["number"] if numeric else ["text", "number", "boolean", "unknown"], "uses": uses}, "status": status, "selected_candidate_id": matches[0]["id"] if status == "RESOLVED" else None, "candidate_ids": [x["id"] for x in full if not numeric or x["inferred_type"] == "number"], "resolution": None}
+                if status == "RESOLVED": slot["resolution"] = {"candidate_id": matches[0]["id"], "sheet": sheet, "header_row": header_row, "column": matches[0]["column"], "header": field}
+                else: unresolved.append(slot)
+                slots.append(slot)
+            return {"source": {"id": "source-001", "sheet": sheet, "header_row": header_row}, "slots": slots, "inventory": inventory, "truncated": truncated, "unresolved": unresolved}
+        finally: workbook.close()
 
     def _execute(self, task_dir: Path, task: dict[str, Any], revision: dict[str, Any]) -> dict[str, Any]:
         attempt_id = "attempt-001"; attempt_dir = task_dir / "attempts" / attempt_id; attempt_dir.mkdir(parents=True)
@@ -297,10 +240,50 @@ class TaskRuntime:
         diagnostics = [{"code": "FIELD_BINDING_AMBIGUOUS" if item["candidate_ids"] else "FIELD_BINDING_NOT_FOUND", "path": item["references"][0], "message": f"业务字段“{item['logical_field']}”无法唯一精确绑定。", "expected": {"kind": "single_binding"}, "actual": {"kind": "candidates", "count": len(item["candidate_ids"])}} for item in unresolved]
         if not binding["source"]:
             diagnostics = [{"code": "SOURCE_BINDING_REQUIRED", "path": "/source/sheet", "message": "来源 Sheet 无法唯一确定。", "expected": {"kind": "existing_sheet"}, "actual": {"kind": "unresolved"}}]
-        return {"schema_version": "1.0", "status": "NEEDS_BINDING", "task_id": task_id, "request_revision": 1, "attempt_id": None, "acceptance_hash": acceptance_hash, "binding_slots": unresolved, "binding_candidates": binding["candidates"], "diagnostics": diagnostics, "recovery": {"action": action, "retryable": action == "PROVIDE_BINDING", "base_revision": 1, "allowed_amendments": allowed, "suggested_patch": []}}
+        return {"schema_version": "1.0", "status": "NEEDS_BINDING", "task_id": task_id, "request_revision": 1, "attempt_id": None, "acceptance_hash": acceptance_hash, "binding_slots": unresolved, "field_inventory": binding["inventory"], "truncated": binding["truncated"], "diagnostics": diagnostics, "recovery": {"action": action, "retryable": action == "PROVIDE_BINDING", "base_revision": 1, "allowed_amendments": allowed, "suggested_patch": []}}
 
     def _amend(self, amendment: dict[str, Any]) -> dict[str, Any]:
-        return self._error("REQUEST_INVALID", "CAPABILITY_UNSUPPORTED", "field_binding", "第一批实现尚未开放 Binding Amendment 执行。", amendment.get("task_id"), amendment.get("base_revision"), None, False, "HUMAN_ACTION_REQUIRED")
+        task_id = amendment.get("task_id"); base = amendment.get("base_revision"); items = amendment.get("amendments")
+        if not isinstance(task_id, str) or not task_id:
+            return self._error("REQUEST_INVALID", "INVALID_VALUE", "field_binding", "修订必须携带 task_id。", None, base, None, False, "NONE")
+        task_dir = self._task_dir(task_id); task_path = task_dir / "task.json"; state_path = task_dir / "current-state.json"
+        if not task_path.is_file() or not state_path.is_file():
+            return self._error("REQUEST_INVALID", "INVALID_REFERENCE", "contract_validation", "Task 不存在。", task_id, base, None, False, "NONE")
+        task = json.loads(task_path.read_text(encoding="utf-8")); state = json.loads(state_path.read_text(encoding="utf-8")); current = state.get("request_revision", 1)
+        if state.get("state") != "NEEDS_BINDING":
+            return self._error("REQUEST_INVALID", "INVALID_COMBINATION", "field_binding", "当前任务不在待绑定状态。", task_id, base, None, False, "HUMAN_ACTION_REQUIRED")
+        if base != current:
+            return self._error("REQUEST_INVALID", "REVISION_CONFLICT", "field_binding", "修订基于过期版本。", task_id, current, None, True, "PROVIDE_BINDING")
+        if not isinstance(items, list) or not items:
+            return self._error("REQUEST_INVALID", "INVALID_VALUE", "field_binding", "amendments 必须是非空数组。", task_id, base, None, False, "NONE")
+        revision = json.loads((task_dir / "revisions" / f"revision-{current:03d}.json").read_text(encoding="utf-8")); binding = copy.deepcopy(revision["bindings"])
+        unresolved = {slot["id"]: slot for slot in binding["unresolved"] if slot.get("id")}; entries = {item["id"]: item for item in binding["inventory"]}; selected = {}
+        for item in items:
+            if not isinstance(item, dict) or item.get("op") not in {"add", "replace"}:
+                return self._error("REQUEST_INVALID", "INVALID_ENUM", "field_binding", "修订只支持 add/replace。", task_id, base, None, False, "NONE")
+            path = item.get("path", "")
+            if not path.startswith("/bindings/"):
+                return self._error("REQUEST_INVALID", "INVALID_REFERENCE", "field_binding", "该路径会改变冻结请求组件，请创建新 Task。", task_id, base, None, False, "CREATE_NEW_TASK")
+            slot = unresolved.get(path.removeprefix("/bindings/")); candidate_id = (item.get("value") or {}).get("candidate_id")
+            if slot is None:
+                return self._error("REQUEST_INVALID", "INVALID_REFERENCE", "field_binding", "修订路径不在允许范围内。", task_id, base, None, False, "PROVIDE_BINDING")
+            if candidate_id not in slot["candidate_ids"] or candidate_id not in entries:
+                return self._error("REQUEST_INVALID", "INVALID_VALUE", "field_binding", "候选不在该 Slot 的允许范围内。", task_id, base, None, False, "PROVIDE_BINDING")
+            selected[slot["id"]] = candidate_id
+        if set(selected) != set(unresolved):
+            return self._error("REQUEST_INVALID", "INVALID_COMBINATION", "field_binding", "一次修订必须解决全部待绑定 Slot。", task_id, base, None, False, "PROVIDE_BINDING")
+        for slot_id, candidate_id in selected.items():
+            slot = unresolved[slot_id]; entry = entries[candidate_id]
+            slot.update({"status": "RESOLVED", "selected_candidate_id": candidate_id, "resolution": {"candidate_id": candidate_id, "sheet": entry["sheet"], "header_row": entry["header_row_start"], "column": entry["column"], "header": entry["header"]}})
+        binding["slots"] = [slot if slot["id"] not in unresolved else unresolved[slot["id"]] for slot in binding["slots"]]; binding["unresolved"] = []
+        next_revision = {"request_revision": current + 1, "request": revision["request"], "bindings": binding}
+        next_revision["binding_hash"], next_revision["request_revision_hash"] = self._revision_hashes(next_revision["request"], binding, current + 1)
+        _write_json(task_dir / "revisions" / f"revision-{current + 1:03d}.json", next_revision)
+        return self._execute(task_dir, task, next_revision)
+
+    def _revision_hashes(self, request: dict[str, Any], binding: dict[str, Any], revision_number: int) -> tuple[str, str]:
+        snapshot = {"source": binding["source"], "bindings": {slot["id"]: slot.get("selected_candidate_id") for slot in binding["slots"] if slot.get("selected_candidate_id")}}
+        return stable_hash(snapshot), stable_hash([revision_number, request, snapshot])
 
     def _attempt_failure(self, task_dir: Path, task: dict[str, Any], attempt_id: str, code: str, phase: str, message: str) -> dict[str, Any]:
         response = self._error("EXECUTION_FAILED" if phase == "execution" else "PUBLICATION_FAILED", code, phase, message, task["task_id"], 1, attempt_id, phase != "publication", "RETRY_ATTEMPT" if phase != "publication" else "HUMAN_ACTION_REQUIRED")

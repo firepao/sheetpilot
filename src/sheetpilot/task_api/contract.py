@@ -56,7 +56,7 @@ def task_type_manifest() -> dict[str, Any]:
                 "filter_operators": sorted(FILTER_OPERATORS),
                 "filter_combination": "all",
                 "metric_functions": ["sum", "average", "count.rows", "count.non_empty"],
-                "field_binding": "unique_exact_header_match_with_semantic_candidates",
+                "field_binding": "exact_header_match_with_field_inventory",
                 "output_policy": "create_new_sheet_and_new_file",
             },
             "request_schema": {

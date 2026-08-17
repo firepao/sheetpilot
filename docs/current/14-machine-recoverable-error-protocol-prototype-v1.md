@@ -202,15 +202,14 @@ internal
     ],
     "suggested_patch": []
   },
-  "binding_candidates": [
+  "field_inventory": [
     {
       "id": "candidate-1",
       "sheet": "清洗明细",
       "header": "销售额",
       "column": "G",
       "header_row": 1,
-      "confidence": 1.0,
-      "evidence": ["exact_header_match"]
+      "sample_values": [128.5, 300]
     },
     {
       "id": "candidate-2",
@@ -218,14 +217,13 @@ internal
       "header": "销售金额",
       "column": "H",
       "header_row": 1,
-      "confidence": 0.82,
-      "evidence": ["semantic_header_match"]
+      "sample_values": [145.21, 339]
     }
   ]
 }
 ```
 
-Candidate ID 是 Runtime 生成的短期引用。Agent 选择 Candidate ID，不重写 Sheet、列字母和 header_row；具体生命周期由 Field Binding Ticket 决定。
+Candidate ID 是 Runtime 生成的短期引用。Agent 选择 Candidate ID，不重写 Sheet、列字母和 header_row；Runtime 不生成语义候选，字段语义由 Agent 对照 field_inventory 判断。
 
 ## 8. 典型错误示例
 
@@ -380,3 +378,7 @@ Skill 不复制错误码、字段枚举或修复规则，只执行以下流程�
 4. 不读取源码解释错误，不清空 Attempt 目录，不删除 Acceptance 条件。
 
 错误协议由 Runtime 保证，Skill 只负责遵循。
+
+## 11. 请求前字段清单查询
+
+`task-types --input [--sheet] [--header-row]` 是纯只读查询，不创建 Task、没有 task_id 或 base_revision。查询错误仍使用本协议 envelope：`INPUT_NOT_FOUND` 停止并报告；不可见 Sheet 通过 `/query/sheet` 的可见 Sheet 枚举修正；非法 header row 通过 `/query/header_row` 的 `min=1` 修正；`INVENTORY_TOO_LARGE` 同时提供两条收窄查询路径。Agent 修改查询参数后重新调用 `task-types`，不涉及 Task 状态。

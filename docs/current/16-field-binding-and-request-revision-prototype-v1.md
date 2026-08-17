@@ -65,7 +65,6 @@ Slot ID 只在 Task 内稳定，不是跨任务领域 ID。Agent 不根据 ID �
   "sheet": "清洗明细",
   "header_row_start": 1,
   "header_row_end": 1,
-  "confidence": 1.0,
   "evidence": ["request_sheet_exact_match", "header_candidate_detected"]
 }
 ```
@@ -79,7 +78,7 @@ Slot ID 只在 Task 内稳定，不是跨任务领域 ID。Agent 不根据 ID �
 
 第一阶段一个 `summarize_table` Task 只能读取一个 Source。
 
-## 5. Binding Candidate
+## 5. Field Inventory Entry
 
 ```json
 {
@@ -93,8 +92,7 @@ Slot ID 只在 Task 内稳定，不是跨任务领域 ID。Agent 不根据 ID �
   "inferred_type": "number",
   "null_ratio": 0.02,
   "sample_values": [128.5, 300, 99.9],
-  "confidence": 1.0,
-  "evidence": ["exact_header_match", "type_compatible"]
+  "neighbor_headers": ["数量", "单价"]
 }
 ```
 
@@ -108,10 +106,10 @@ Candidate ID 与固定输入文件身份绑定。输入 hash 改变后，全部 
 
 候选事实约束：
 
-- `confidence` 只用于排序和解释，不授权自动绑定。
-- `sample_values` 最多 3 个非空值，字符串最多 64 个字符。
+- 候选即字段清单条目；无评分、无 top-K。
+- `sample_values` 最多 3 个非空值并做敏感值掩码，字符串最多 64 个字符。
 - 不返回公式源码、环境变量、外部链接内容或隐藏 Sheet 的样本。
-- Candidate 列表按 exact match、type compatibility、confidence、Sheet/列顺序稳定排序。
+- 字段清单按 Sheet/列顺序稳定排序，上限 64 条 / 64 KB，超限置 `truncated`。
 - Candidate 必须来自 Workbook Profile，Agent 不能提交自定义 Sheet/列组合。
 
 ## 6. 自动绑定边界
@@ -125,15 +123,13 @@ Runtime 只有在以下条件全部满足时自动绑定字段：
 
 以下情况必须返回 `NEEDS_BINDING`：
 
-- 只有语义相似匹配，即使 confidence 很高。
+- 没有唯一精确匹配。
 - 存在多个精确匹配或多个 Source。
 - 唯一精确匹配的类型与指标用途冲突。
 - Header Candidate 不唯一。
-- 找不到候选列。
+- 找不到精确候选列。
 
-语义相似匹配（非精确）会被输出到 `binding_candidates`，每个候选带 `confidence`、`evidence` 和 `sample_values`，供 Agent 确认真实表头后重新提交精确名称；Runtime 不会据此静默自动绑定。`confidence` 仅用于排序与解释，不授权自动绑定。
-
-“没有候选”使用 `HUMAN_ACTION_REQUIRED`，不允许 Agent 通过手写列字母绕过 Inspector。
+无精确匹配时 Runtime 返回 `field_inventory`；语义判断由 Agent 完成，Runtime 不依据任何相似度选择列。`UNRESOLVED` Slot 的 `candidate_ids` 与 `allowed_amendments` 完全一致；已有 Task 只接受 candidate_id 修订，修改原请求 field 一律拒绝并指引 `CREATE_NEW_TASK`。
 
 ## 7. NEEDS_BINDING 响应
 
@@ -165,7 +161,7 @@ Runtime 只有在以下条件全部满足时自动绑定字段：
       ]
     }
   ],
-  "binding_candidates": [],
+  "field_inventory": [],
   "diagnostics": [],
   "recovery": {
     "action": "PROVIDE_BINDING",

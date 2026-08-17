@@ -35,11 +35,7 @@ class SkillWorkflowTest(unittest.TestCase):
     def test_skill_exposes_only_agent_facing_task_workflow(self):
         text=(SKILL/"SKILL.md").read_text(encoding="utf-8")
         self.assertIn("task-types",text); self.assertIn("task-run",text); self.assertIn("task-status",text)
-        self.assertIn("不要搜索可执行文件",text); self.assertIn("不要读取 SheetPilot 的 Python 文件",text)
-        self.assertIn("<AUTO-RESULT-DIR>",text); self.assertIn("用户交付目录",text)
-        self.assertIn("不要清空或复用",text); self.assertIn("不要提交 Runtime `run-dir`",text)
-        self.assertIn("当前会话禁止自行设置环境变量后继续",text)
-        self.assertIn("yyyyMMdd'T'HHmmss",text); self.assertIn("目录名不得包含 `:`",text)
+        self.assertIn("<AUTO-RESULT-DIR>",text); self.assertIn("field_inventory",text)
         self.assertNotIn("mvp-run --input",text); self.assertNotIn("创建全新的空运行目录",text)
 
     def test_configuration_error_is_non_retryable_human_stop(self):

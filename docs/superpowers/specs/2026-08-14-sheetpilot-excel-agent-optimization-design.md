@@ -44,10 +44,10 @@ Route A 为字段绑定增加了确定性语义评分（char-bigram Dice + 置�
 |---|---|---|
 | `status` | `RUNTIME_PASS` | `task-status` 复核：`state=RUNTIME_PASS` + `artifact_integrity=MATCHED` + `delivery_valid=true` 三者齐备才交付 |
 | `status` | `NEEDS_BINDING` | 读顶层 `recovery.action=PROVIDE_BINDING`：对照 `field_inventory` 做语义判断 → 只从 `allowed_amendments.constraints.candidate_ids` 中选 → `task-run` 提交 amendment。**已有 Task 只提交 candidate_id，不得修改原 Request 的 field**（改字段语义须 `CREATE_NEW_TASK` 重建） |
-| `status` | `REQUEST_INVALID` / `CAPABILITY_UNSUPPORTED` / `EXECUTION_FAILED` / `VALIDATION_FAILED` / `PUBLICATION_FAILED` / `INPUT_CHANGED` | 读 `error.recovery.action`：`AMEND_REQUEST` → 只按 `allowed_amendments` 修改后重提；`RETRY_ATTEMPT` → 原样重试；`CREATE_NEW_TASK` → 停止并报告（重建 Task 时可写精确表头）；`HUMAN_ACTION_REQUIRED` / `NONE` → 停止并报告 |
-| `status` | `INTERNAL_ERROR` | 立即停止，只向用户报告 |
+| `status` | `REQUEST_INVALID` / `CAPABILITY_UNSUPPORTED` / `EXECUTION_FAILED` / `VALIDATION_FAILED` / `PUBLICATION_FAILED` / `INPUT_CHANGED` | 读 `error.recovery.action`：`AMEND_REQUEST` → 只按 `allowed_amendments` 修改后重提；`RETRY_ATTEMPT` → 停止并报告；`CREATE_NEW_TASK` → 停止并报告；`HUMAN_ACTION_REQUIRED` / `NONE` → 停止并报告 |
+| `error.code` | `INTERNAL_ERROR` | 立即停止，只向用户报告 |
 
-**停止门**（统一表述，覆盖 status / action 两种来源）：`status ∈ {INTERNAL_ERROR, CONFIGURATION_REQUIRED}` 出现，或任意响应的 `recovery.action ∈ {HUMAN_ACTION_REQUIRED, NONE}`（错误响应取 `error.recovery.action`，`NEEDS_BINDING` 取顶层 `recovery.action`）出现 → 立即停止，只向用户报告。`INPUT_NOT_FOUND`、`OUTPUT_CONFLICT` 等是 `error.code`，按所在 status 行的 `error.recovery.action` 决定行为，不单独成行。
+**停止门**：`status = CONFIGURATION_REQUIRED` 或任意响应 `error.code = INTERNAL_ERROR` 出现，或任意响应的 `recovery.action ∈ {HUMAN_ACTION_REQUIRED, NONE}` 出现 → 立即停止，只向用户报告。
 
 4. **报告契约**（成功）：`task_id`、`attempt_id`、`request_revision`、最终输出路径、`runtime_status`、`artifact_integrity`、`delivery_valid`、`acceptance_hash`、`internal_plan_hash`，以及 `semantic_assessment` —— **保持现有对象结构**：
 

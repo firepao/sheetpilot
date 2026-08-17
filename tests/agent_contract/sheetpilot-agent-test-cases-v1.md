@@ -258,15 +258,32 @@ powershell -ExecutionPolicy Bypass -File "D:\bitexcel\SheetPilot\scripts\install
 测试场景：H2
 输出：D:\bitexcel\SheetPilot\tests\agent_contract\results\<AUTO-RESULT-DIR>\ambiguous_sales.xlsx
 
-使用“销售明细”，只统计状态为“有效”的记录，按城市汇总销售额，写入新工作表“城市销售汇总”。
+使用“销售明细”，按未税口径统计销售额（两列“销售额”左列为未税，右列为含税，含税 = 未税 × 1.13），按城市汇总并写入新工作表“城市销售汇总”。
 ```
 
 ### 预期行为
 
-- 两列都叫“销售额”，Runtime 必须返回 `NEEDS_BINDING`。
-- Agent 不得自行选择 B 列或 C 列，不得读取源码或直接查看列字母后绕过绑定协议。
-- 当前 Runtime 尚未开放 Binding Amendment 时，Agent 应停止并报告需要用户/Runtime 后续处理。
-- 预期：正确停止，不生成交付文件。
+- 两列都叫“销售额”，Runtime 必须返回 `NEEDS_BINDING` 与 `field_inventory`。
+- Agent 对照样本验证 1.13 口径关系后只提交 `candidate_id` amendment；Acceptance hash 不变。
+- 最终输出应为未税列：北京 150、上海 500；预期：`RUNTIME_PASS`。
+
+## S8：请求前字段清单查询
+
+### Agent Prompt
+
+```text
+使用 $sheetpilot-excel-agent 处理：
+
+输入：D:\bitexcel\SheetPilot\tests\agent_contract\data\01_simple_department_sales.xlsx
+测试场景：S8
+输出：D:\bitexcel\SheetPilot\tests\agent_contract\results\<AUTO-RESULT-DIR>\department_sales_s8.xlsx
+
+请先使用 task-types --input 查询“销售明细”的字段清单，再按部门汇总销售净额，输出到“部门销售汇总”。
+```
+
+### 预期行为
+
+- Agent 先调用 `task-types --input`，使用真实表头“销售额”构造请求；预期 `RUNTIME_PASS`，调用次数不超过 3 次。
 
 ## H3：目标 Sheet 已存在
 
@@ -358,6 +375,6 @@ powershell -ExecutionPolicy Bypass -File "D:\bitexcel\SheetPilot\scripts\install
 ## 5. 当前版本预期
 
 - S1-S3、M1-M4、H1 应成功。
-- H2、H3、H4、H5 应正确停止或失败。
+- H2 应通过 amendment 成功；H3、H4、H5 应正确停止或失败；S8 应一次通过。
 - 本轮主要验证 Skill 是否从第一步就使用包装入口，不再出现“搜索 sheetpilot 命令 → 查看 scripts → 读取包装脚本”的路径。
 

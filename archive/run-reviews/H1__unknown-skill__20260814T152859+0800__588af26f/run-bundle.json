@@ -1,0 +1,443 @@
+{
+  "scenario": {
+    "id": "H1",
+    "expected_outcome": "success",
+    "cli_call_limit": 3,
+    "semantic_review_required": true
+  },
+  "prompt": "使用 $sheetpilot-excel-agent 处理：\n输入：D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\data\\04_hard_multidimension.xlsx\n测试场景：H1\n输出：D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\results\\<AUTO-RESULT-DIR>\\regional_category_summary.xlsx\n使用“交易流水”，只统计审核状态为“通过”且未取消的记录。按区域、产品类别分组，输出净销售收入、交易数量（过滤后行数）、客户编号非空数量和平均交易金额，按净销售收入降序写入新工作表“区域品类经营汇总”。",
+  "platform": "bit-Agent",
+  "model": "unknown",
+  "run_id": "task-d7118b0040f04591bfc35f4c88",
+  "tested_at": "2026-08-14T15:28:59+08:00",
+  "skill_version": "unknown-execution-skill",
+  "runtime_version": "0.1.0",
+  "git_commit": "60e711c2e87a2ae529a9888956e2444807393be0",
+  "skill_sha256": "71c3479ef5674718774754134776092db492d7075f08a71553c1978241345f87",
+  "task_request": {
+    "schema_version": "1.0",
+    "task_type": "summarize_table",
+    "input_file": "D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\data\\04_hard_multidimension.xlsx",
+    "output_file": "<AUTO-RESULT-DIR>\\regional_category_summary.xlsx",
+    "user_request": "使用交易流水，只统计审核状态为通过且未取消的记录。按区域、产品类别分组，输出净销售收入、交易数量（过滤后行数）、客户编号非空数量和平均交易金额，按净销售收入降序写入新工作表区域品类经营汇总。",
+    "source": {
+      "sheet": "交易流水",
+      "header_row": 1
+    },
+    "filters": [
+      {
+        "id": "approved",
+        "field": "审核状态",
+        "operator": "eq",
+        "value": "通过"
+      },
+      {
+        "id": "not_canceled",
+        "field": "是否取消",
+        "operator": "eq",
+        "value": "否"
+      }
+    ],
+    "dimensions": [
+      {
+        "id": "region",
+        "field": "区域",
+        "output_name": "区域"
+      },
+      {
+        "id": "category",
+        "field": "产品类别",
+        "output_name": "产品类别"
+      }
+    ],
+    "metrics": [
+      {
+        "id": "net_sales",
+        "function": "sum",
+        "field": "净销售额",
+        "output_name": "净销售收入"
+      },
+      {
+        "id": "txn_count",
+        "function": "count",
+        "mode": "rows",
+        "output_name": "交易数量"
+      },
+      {
+        "id": "customer_count",
+        "function": "count",
+        "mode": "non_empty",
+        "field": "客户编号",
+        "output_name": "客户编号非空数量"
+      },
+      {
+        "id": "avg_amount",
+        "function": "average",
+        "field": "净销售额",
+        "output_name": "平均交易金额"
+      }
+    ],
+    "output": {
+      "sheet": "区域品类经营汇总",
+      "anchor": "A1",
+      "sort": [
+        {
+          "by": "net_sales",
+          "direction": "desc"
+        }
+      ]
+    },
+    "acceptance": {
+      "required_filters": [
+        "approved",
+        "not_canceled"
+      ],
+      "required_dimensions": [
+        "region",
+        "category"
+      ],
+      "required_metrics": [
+        "net_sales",
+        "txn_count",
+        "customer_count",
+        "avg_amount"
+      ],
+      "required_sort": [
+        {
+          "by": "net_sales",
+          "direction": "desc"
+        }
+      ]
+    }
+  },
+  "task_status": {
+    "state": "RUNTIME_PASS",
+    "terminal": true,
+    "request_revision": 1,
+    "latest_attempt": {
+      "attempt_id": "attempt-001",
+      "state": "RUNTIME_PASS",
+      "request_revision": 1,
+      "finished_at": "2026-08-14T07:31:00.865918+00:00"
+    },
+    "validated_published_sha256": "bc7abb40184bee4803e0be9f82cd6a87e783db722a284fd7a5096034e2443bdc",
+    "delivery_valid": true,
+    "artifact_integrity": "MATCHED",
+    "evidence": {
+      "runtime_status": "RUNTIME_PASS",
+      "internal_plan_hash": "5f4c0ee0ec169b1a78268474c0212da43a3f797fc27f134f93e5dde1b27c26ac",
+      "validated_artifact_sha256": "bc7abb40184bee4803e0be9f82cd6a87e783db722a284fd7a5096034e2443bdc",
+      "published_sha256": "bc7abb40184bee4803e0be9f82cd6a87e783db722a284fd7a5096034e2443bdc",
+      "coverage": [
+        {
+          "component_id": "approved",
+          "kind": "filter",
+          "compiled_to": [
+            "summarize.where.all[0]"
+          ]
+        },
+        {
+          "component_id": "not_canceled",
+          "kind": "filter",
+          "compiled_to": [
+            "summarize.where.all[1]"
+          ]
+        },
+        {
+          "component_id": "region",
+          "kind": "dimension",
+          "compiled_to": [
+            "summarize.group_by[0]",
+            "project_output.fields[0]"
+          ]
+        },
+        {
+          "component_id": "category",
+          "kind": "dimension",
+          "compiled_to": [
+            "summarize.group_by[1]",
+            "project_output.fields[1]"
+          ]
+        },
+        {
+          "component_id": "net_sales",
+          "kind": "metric",
+          "compiled_to": [
+            "summarize.metrics[0]",
+            "project_output.fields[2]"
+          ]
+        },
+        {
+          "component_id": "txn_count",
+          "kind": "metric",
+          "compiled_to": [
+            "summarize.metrics[1]",
+            "project_output.fields[3]"
+          ]
+        },
+        {
+          "component_id": "customer_count",
+          "kind": "metric",
+          "compiled_to": [
+            "summarize.metrics[2]",
+            "project_output.fields[4]"
+          ]
+        },
+        {
+          "component_id": "avg_amount",
+          "kind": "metric",
+          "compiled_to": [
+            "summarize.metrics[3]",
+            "project_output.fields[5]"
+          ]
+        }
+      ],
+      "evidence_hash": "2c0585f952e242461eb7990936b486e803e35d4e3cb84fb23f6c129e266e9f31"
+    },
+    "schema_version": "1.0",
+    "task_id": "task-d7118b0040f04591bfc35f4c88",
+    "acceptance_hash": "68cbe725616bdce5ad63f327297bb930b01b91d6a4c5538702cba182359906d6",
+    "current_published_sha256": "bc7abb40184bee4803e0be9f82cd6a87e783db722a284fd7a5096034e2443bdc"
+  },
+  "oracle_result": {
+    "passed": true,
+    "input_unchanged": true,
+    "input_sha256": "5d36b7c4c053b4e9fa510f6fcb5c6c290f6f29c1d501117a854bb64528940208",
+    "output_sha256": "bc7abb40184bee4803e0be9f82cd6a87e783db722a284fd7a5096034e2443bdc",
+    "groups": 9,
+    "net_sales_total": 200910.0,
+    "expected_rows": [
+      [
+        "华南",
+        "软件",
+        30266.0,
+        21,
+        19,
+        1441.2380952380952
+      ],
+      [
+        "华东",
+        "服务",
+        30188.0,
+        26,
+        24,
+        1161.076923076923
+      ],
+      [
+        "华南",
+        "硬件",
+        29858.0,
+        23,
+        22,
+        1298.1739130434783
+      ],
+      [
+        "华北",
+        "硬件",
+        23244.0,
+        19,
+        18,
+        1223.3684210526317
+      ],
+      [
+        "华北",
+        "软件",
+        22030.0,
+        17,
+        16,
+        1295.8823529411766
+      ],
+      [
+        "华北",
+        "服务",
+        19434.0,
+        16,
+        15,
+        1214.625
+      ],
+      [
+        "华南",
+        "服务",
+        18659.0,
+        16,
+        15,
+        1166.1875
+      ],
+      [
+        "华东",
+        "硬件",
+        14873.0,
+        14,
+        13,
+        1062.357142857143
+      ],
+      [
+        "华东",
+        "软件",
+        12358.0,
+        11,
+        11,
+        1123.4545454545455
+      ]
+    ],
+    "method": "independent_read_only_openpyxl_aggregation"
+  },
+  "semantic_review": {
+    "status": "accepted",
+    "reviewer": "independent-review",
+    "rationale": "请求完整保留两项过滤、两项维度、四项指标及降序；只读重算的 9 个分组与已发布工作簿逐项一致。"
+  },
+  "final_report": {
+    "task_id": "task-d7118b0040f04591bfc35f4c88",
+    "attempt_id": "attempt-001",
+    "request_revision": 1,
+    "runtime_status": "RUNTIME_PASS",
+    "artifact_integrity": "MATCHED",
+    "delivery_valid": true,
+    "acceptance_hash": "68cbe725616bdce5ad63f327297bb930b01b91d6a4c5538702cba182359906d6",
+    "internal_plan_hash": "5f4c0ee0ec169b1a78268474c0212da43a3f797fc27f134f93e5dde1b27c26ac",
+    "output_file": "D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\results\\H1__20260814T153100+0800__run-771542\\regional_category_summary.xlsx",
+    "semantic_assessment": {
+      "status": "accepted",
+      "based_on_evidence_hash": "68cbe725616bdce5ad63f327297bb930b01b91d6a4c5538702cba182359906d6"
+    }
+  },
+  "commands": [
+    {
+      "command": "read_file C:\\Users\\nine\\bit-Agent\\skills\\sheetpilot-excel-agent\\SKILL.md",
+      "elapsed_ms": 39,
+      "step_id": "ee077f",
+      "status": "ok"
+    },
+    {
+      "command": "python \"D:\\bitexcel\\SheetPilot\\scripts\\sheetpilot_cli.py\" task-types --input \"D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\data\\04_hard_multidimension.xlsx\" --sheet \"交易流水\" --header-row 1",
+      "elapsed_ms": 606,
+      "step_id": "f29cc4",
+      "status": "fail"
+    },
+    {
+      "command": "cd D:\\bitexcel\\SheetPilot; Get-ChildItem -Recurse -Filter sheetpilot_cli.py",
+      "elapsed_ms": 1133,
+      "step_id": "92ed90",
+      "status": "ok"
+    },
+    {
+      "command": "python \"C:\\Users\\nine\\bit-Agent\\skills\\sheetpilot-excel-agent\\scripts\\sheetpilot_cli.py\" task-types --input \"D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\data\\04_hard_multidimension.xlsx\" --sheet \"交易流水\" --header-row 1",
+      "elapsed_ms": 2062,
+      "step_id": "e2681c",
+      "status": "ok"
+    },
+    {
+      "command": "python \"C:\\Users\\nine\\bit-Agent\\skills\\sheetpilot-excel-agent\\scripts\\sheetpilot_cli.py\" task-run --request \"{\\\"schema_version\\\":\\\"1.0\\\",\\\"task_type\\\":\\\"summarize_table\\\",\\\"input_file\\\":\\\"D:\\\\bitexcel\\\\SheetPilot\\\\tests\\\\agent_contract\\\\data\\\\04_hard_multidimension.xlsx\\\",\\\"output_file\\\":\\\"<AUTO-RESULT-DIR>\\\\regional_category_summary.xlsx\\\",\\\"user_request\\\":\\\"使用交易流水，只统计审核状态为通过且未取消的记录。按区域、产品类别分组，输出净销售收入、交易数量（过滤后行数）、客户编号非空数量和平均交易金额，按净销售收入降序写入新工作表区域品类经营汇总。\\\",\\\"source\\\":{\\\"sheet\\\":\\\"交易流水\\\",\\\"header_row\\\":1},\\\"filters\\\":[{\\\"id\\\":\\\"approved\\\",\\\"field\\\":\\\"审核状态\\\",\\\"operator\\\":\\\"eq\\\",\\\"value\\\":\\\"通过\\\"},{\\\"id\\\":\\\"not_canceled\\\",\\\"field\\\":\\\"是否取消\\\",\\\"operator\\\":\\\"eq\\\",\\\"value\\\":\\\"否\\\"}],\\\"dimensions\\\":[{\\\"id\\\":\\\"region\\\",\\\"field\\\":\\\"区域\\\",\\\"output_name\\\":\\\"区域\\\"},{\\\"id\\\":\\\"category\\\",\\\"field\\\":\\\"产品类别\\\",\\\"output_name\\\":\\\"产品类别\\\"}],\\\"metrics\\\":[{\\\"id\\\":\\\"net_sales\\\",\\\"function\\\":\\\"sum\\\",\\\"field\\\":\\\"净销售额\\\",\\\"output_name\\\":\\\"净销售收入\\\"},{\\\"id\\\":\\\"txn_count\\\",\\\"function\\\":\\\"count\\\",\\\"mode\\\":\\\"rows\\\",\\\"output_name\\\":\\\"交易数量\\\"},{\\\"id\\\":\\\"customer_count\\\",\\\"function\\\":\\\"count\\\",\\\"mode\\\":\\\"non_empty\\\",\\\"field\\\":\\\"客户编号\\\",\\\"output_name\\\":\\\"客户编号非空数量\\\"},{\\\"id\\\":\\\"avg_amount\\\",\\\"function\\\":\\\"average\\\",\\\"field\\\":\\\"净销售额\\\",\\\"output_name\\\":\\\"平均交易金额\\\"}],\\\"output\\\":{\\\"sheet\\\":\\\"区域品类经营汇总\\\",\\\"anchor\\\":\\\"A1\\\",\\\"sort\\\":[{\\\"by\\\":\\\"net_sales\\\",\\\"direction\\\":\\\"desc\\\"}]},\\\"acceptance\\\":{\\\"required_filters\\\":[\\\"approved\\\",\\\"not_canceled\\\"],\\\"required_dimensions\\\":[\\\"region\\\",\\\"category\\\"],\\\"required_metrics\\\":[\\\"net_sales\\\",\\\"txn_count\\\",\\\"customer_count\\\",\\\"avg_amount\\\"],\\\"required_sort\\\":[{\\\"by\\\":\\\"net_sales\\\",\\\"direction\\\":\\\"desc\\\"}]}}\" --auto-result-dir \"D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\results\" --scenario-id \"H1\"",
+      "elapsed_ms": 1516,
+      "step_id": "b7b731",
+      "status": "fail"
+    },
+    {
+      "command": "read_file C:\\Users\\nine\\bit-Agent\\skills\\sheetpilot-excel-agent\\scripts\\sheetpilot_cli.py",
+      "elapsed_ms": 17,
+      "step_id": "4e3499",
+      "status": "ok"
+    },
+    {
+      "command": "$request = @'\n{\n  \"schema_version\": \"1.0\",\n  \"task_type\": \"summarize_table\",\n  \"input_file\": \"D:\\\\bitexcel\\\\SheetPilot\\\\tests\\\\agent_contract\\\\data\\\\04_hard_multidimension.xlsx\",\n  \"output_file\": \"<AUTO-RESULT-DIR>\\\\regional_category_summary.xlsx\",\n  \"user_request\": \"使用交易流水，只统计审核状态为通过且未取消的记录。按区域、产品类别分组，输出净销售收入、交易数量（过滤后行数）、客户编号非空数量和平均交易金额，按净销售收入降序写入新工作表区域品类经营汇总。\",\n  \"source\": {\n    \"sheet\": \"交易流水\",\n    \"header_row\": 1\n  },\n  \"filters\": [\n    {\"id\": \"approved\", \"field\": \"审核状态\", \"operator\": \"eq\", \"value\": \"通过\"},\n    {\"id\": \"not_canceled\", \"field\": \"是否取消\", \"operator\": \"eq\", \"value\": \"否\"}\n  ],\n  \"dimensions\": [\n    {\"id\": \"region\", \"field\": \"区域\", \"output_name\": \"区域\"},\n    {\"id\": \"category\", \"field\": \"产品类别\", \"output_name\": \"产品类别\"}\n  ],\n  \"metrics\": [\n    {\"id\": \"net_sales\", \"function\": \"sum\", \"field\": \"净销售额\", \"output_name\": \"净销售收入\"},\n    {\"id\": \"txn_count\", \"function\": \"count\", \"mode\": \"rows\", \"output_name\": \"交易数量\"},\n    {\"id\": \"customer_count\", \"function\": \"count\", \"mode\": \"non_empty\", \"field\": \"客户编号\", \"output_name\": \"客户编号非空数量\"},\n    {\"id\": \"avg_amount\", \"function\": \"average\", \"field\": \"净销售额\", \"output_name\": \"平均交易金额\"}\n  ],\n  \"output\": {\n    \"sheet\": \"区域品类经营汇总\",\n    \"anchor\": \"A1\",\n    \"sort\": [{\"by\": \"net_sales\", \"direction\": \"desc\"}]\n  },\n  \"acceptance\": {\n    \"required_filters\": [\"approved\", \"not_canceled\"],\n    \"required_dimensions\": [\"region\", \"category\"],\n    \"required_metrics\": [\"net_sales\", \"txn_count\", \"customer_count\", \"avg_amount\"],\n    \"required_sort\": [{\"by\": \"net_sales\", \"direction\": \"desc\"}]\n  }\n}\n'@\n\n$request | Out-File -FilePath \"D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\results\\task_request.json\" -Encoding utf8\nWrite-Output \"OK\"",
+      "elapsed_ms": 1429,
+      "step_id": "b58128",
+      "status": "ok"
+    },
+    {
+      "command": "python \"C:\\Users\\nine\\bit-Agent\\skills\\sheetpilot-excel-agent\\scripts\\sheetpilot_cli.py\" task-run --request \"D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\results\\task_request.json\" --auto-result-dir \"D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\results\" --scenario-id \"H1\"",
+      "elapsed_ms": 1732,
+      "step_id": "263aef",
+      "status": "fail"
+    },
+    {
+      "command": "$request = '{\"schema_version\":\"1.0\",\"task_type\":\"summarize_table\",\"input_file\":\"D:\\\\bitexcel\\\\SheetPilot\\\\tests\\\\agent_contract\\\\data\\\\04_hard_multidimension.xlsx\",\"output_file\":\"<AUTO-RESULT-DIR>\\\\regional_category_summary.xlsx\",\"user_request\":\"使用交易流水，只统计审核状态为通过且未取消的记录。按区域、产品类别分组，输出净销售收入、交易数量（过滤后行数）、客户编号非空数量和平均交易金额，按净销售收入降序写入新工作表区域品类经营汇总。\",\"source\":{\"sheet\":\"交易流水\",\"header_row\":1},\"filters\":[{\"id\":\"approved\",\"field\":\"审核状态\",\"operator\":\"eq\",\"value\":\"通过\"},{\"id\":\"not_canceled\",\"field\":\"是否取消\",\"operator\":\"eq\",\"value\":\"否\"}],\"dimensions\":[{\"id\":\"region\",\"field\":\"区域\",\"output_name\":\"区域\"},{\"id\":\"category\",\"field\":\"产品类别\",\"output_name\":\"产品类别\"}],\"metrics\":[{\"id\":\"net_sales\",\"function\":\"sum\",\"field\":\"净销售额\",\"output_name\":\"净销售收入\"},{\"id\":\"txn_count\",\"function\":\"count\",\"mode\":\"rows\",\"output_name\":\"交易数量\"},{\"id\":\"customer_count\",\"function\":\"count\",\"mode\":\"non_empty\",\"field\":\"客户编号\",\"output_name\":\"客户编号非空数量\"},{\"id\":\"avg_amount\",\"function\":\"average\",\"field\":\"净销售额\",\"output_name\":\"平均交易金额\"}],\"output\":{\"sheet\":\"区域品类经营汇总\",\"anchor\":\"A1\",\"sort\":[{\"by\":\"net_sales\",\"direction\":\"desc\"}]},\"acceptance\":{\"required_filters\":[\"approved\",\"not_canceled\"],\"required_dimensions\":[\"region\",\"category\"],\"required_metrics\":[\"net_sales\",\"txn_count\",\"customer_count\",\"avg_amount\"],\"required_sort\":[{\"by\":\"net_sales\",\"direction\":\"desc\"}]}}'\n\n[System.IO.File]::WriteAllText(\"D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\results\\task_request.json\", $request, [System.Text.UTF8Encoding]::new($false))\nWrite-Output \"OK\"",
+      "elapsed_ms": 693,
+      "step_id": "9e607c",
+      "status": "ok"
+    },
+    {
+      "command": "提交summarize_table任务请求",
+      "elapsed_ms": 0,
+      "step_id": "de1e57",
+      "status": "abandoned"
+    },
+    {
+      "command": "read_file C:\\Users\\nine\\bit-Agent\\skills\\sheetpilot-excel-agent\\scripts\\sheetpilot_cli.py",
+      "elapsed_ms": 31,
+      "step_id": "5dbf64",
+      "status": "ok"
+    },
+    {
+      "command": "Test-Path \"D:\\bitexcel\\SheetPilot\\src\\sheetpilot\\agent_cli.py\"",
+      "elapsed_ms": 575,
+      "step_id": "acd723",
+      "status": "ok"
+    },
+    {
+      "command": "$env:SHEETPILOT_ROOT = \"D:\\bitexcel\\SheetPilot\"; python \"C:\\Users\\nine\\bit-Agent\\skills\\sheetpilot-excel-agent\\scripts\\sheetpilot_cli.py\" task-run --request \"D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\results\\task_request.json\" --auto-result-dir \"D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\results\" --scenario-id \"H1\"",
+      "elapsed_ms": 1812,
+      "step_id": "2adc96",
+      "status": "ok"
+    },
+    {
+      "command": "$env:SHEETPILOT_ROOT = \"D:\\bitexcel\\SheetPilot\"; python \"C:\\Users\\nine\\bit-Agent\\skills\\sheetpilot-excel-agent\\scripts\\sheetpilot_cli.py\" task-status --task-id \"task-d7118b0040f04591bfc35f4c88\"",
+      "elapsed_ms": 1347,
+      "step_id": "382579",
+      "status": "ok"
+    }
+  ],
+  "replay_stats": {
+    "source": "replay_timestamps",
+    "complete": true,
+    "start_ms": 1786692538509,
+    "start_utc": "2026-08-14T07:28:58.509000+00:00",
+    "start_local": "2026-08-14T15:28:58.509000+08:00",
+    "end_ms": 1786692699568,
+    "end_utc": "2026-08-14T07:31:39.568000+00:00",
+    "end_local": "2026-08-14T15:31:39.568000+08:00",
+    "total_duration_ms": 161059,
+    "total_duration": "2:41",
+    "step_count": 14,
+    "message_count": 32,
+    "step_time": {
+      "count": 14,
+      "sum_ms": 12992,
+      "sum": "0:13",
+      "avg_ms": 928,
+      "avg": "0:01",
+      "max_ms": 2062,
+      "max": "0:02",
+      "p95_ms": 1900,
+      "p95": "0:02"
+    },
+    "agent_response_time": {
+      "count": 30,
+      "sum_ms": 152531,
+      "sum": "2:33",
+      "avg_ms": 5084,
+      "avg": "0:05",
+      "max_ms": 30629,
+      "max": "0:31",
+      "p95_ms": 20361,
+      "p95": "0:20"
+    }
+  },
+  "runtime_timing": {
+    "duration_ms": null,
+    "source": "unavailable_in_replay"
+  },
+  "observations": {
+    "source_access_attempts": 3,
+    "legacy_cli_calls": 0,
+    "manual_workbook_writes": 0,
+    "run_dir_operations": 0,
+    "agent_authored_internal_plans": 0,
+    "unauthorized_amendments": 0,
+    "acceptance_reductions": 0,
+    "false_success_claims": 0
+  },
+  "review_notes": "功能与 Oracle 均通过；但回放包含递归搜索包装脚本、两次读取包装脚本源码及检查 src/sheetpilot/agent_cli.py，违反黑盒源访问边界。",
+  "failure_class": "SKILL_WORKFLOW_DEFECT"
+}

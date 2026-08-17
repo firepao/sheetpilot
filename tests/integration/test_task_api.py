@@ -75,7 +75,7 @@ class TaskApiTest(unittest.TestCase):
         task_dir = self.root / "state" / "tasks" / result["task_id"]
         self.assertFalse((task_dir / "attempts").exists())
 
-    def test_semantic_fuzzy_field_surfaces_candidate_without_auto_bind(self):
+    def test_fuzzy_field_needs_binding_with_inventory(self):
         source = self.root / "net_sales.xlsx"
         workbook = Workbook(); sheet = workbook.active; sheet.title = "交易流水"
         sheet.append(["净销售额"]); sheet.append([100]); sheet.append([200]); sheet.append([300])
@@ -93,9 +93,9 @@ class TaskApiTest(unittest.TestCase):
         request["acceptance"]["required_sort"] = []
         result = self.runtime.run(request)
         self.assertEqual(result["status"], "NEEDS_BINDING")
-        self.assertEqual(result["binding_slots"][0]["status"], "AMBIGUOUS")
-        net_candidate = next(c for c in result["binding_candidates"] if c["header"] == "净销售额")
-        self.assertLess(net_candidate["confidence"], 1.0)
+        self.assertEqual(result["binding_slots"][0]["status"], "UNRESOLVED")
+        net_candidate = next(c for c in result["field_inventory"] if c["header"] == "净销售额")
+        self.assertNotIn("confidence", net_candidate)
         self.assertEqual(net_candidate["sample_values"], [100, 200, 300])
         self.assertEqual(result["recovery"]["action"], "PROVIDE_BINDING")
 
@@ -118,8 +118,8 @@ class TaskApiTest(unittest.TestCase):
         result = self.runtime.run(request)
         self.assertEqual(result["status"], "NEEDS_BINDING")
         self.assertEqual(result["binding_slots"][0]["status"], "UNRESOLVED")
-        self.assertEqual(result["binding_candidates"], [])
-        self.assertEqual(result["recovery"]["action"], "HUMAN_ACTION_REQUIRED")
+        self.assertEqual(result["field_inventory"][0]["header"], "区域")
+        self.assertEqual(result["recovery"]["action"], "PROVIDE_BINDING")
 
     def test_compiler_is_byte_deterministic_and_hides_display_names(self):
         request = self.request(); binding = self.runtime._bind(request, "input-hash")
@@ -163,6 +163,17 @@ class TaskApiTest(unittest.TestCase):
         request["acceptance"]["required_sort"] = [{"by": "total_sales", "direction": "desc"}]
         result = self.runtime.run(request)
         self.assertEqual(result["status"], "RUNTIME_PASS")
+
+    def test_binding_amendment_executes_by_candidate_id(self):
+        source = self.root / "amend.xlsx"
+        workbook = Workbook(); sheet = workbook.active; sheet.title = "数据"
+        sheet.append(["净销售额"]); sheet.append([100]); sheet.append([200]); workbook.save(source); workbook.close()
+        request = copy.deepcopy(MINIMAL_EXAMPLE); request.update({"input_file": str(source), "output_file": str(self.root / "amend-result.xlsx"), "source": {"sheet": "数据", "header_row": 1}, "filters": [], "dimensions": [{"id": "net", "field": "净销售收入", "output_name": "净销售收入"}], "metrics": [{"id": "total", "function": "sum", "field": "净销售收入", "output_name": "合计"}], "output": {"sheet": "汇总", "anchor": "A1", "sort": []}})
+        request["acceptance"].update({"required_filters": [], "required_dimensions": ["net"], "required_metrics": ["total"], "required_sort": []})
+        pending = self.runtime.run(request); self.assertEqual(pending["status"], "NEEDS_BINDING")
+        slot = pending["binding_slots"][0]; candidate = next(x["id"] for x in pending["field_inventory"] if x["header"] == "净销售额")
+        final = self.runtime.run({"task_id": pending["task_id"], "base_revision": 1, "amendments": [{"op": "add", "path": f"/bindings/{slot['id']}", "value": {"candidate_id": candidate}}]})
+        self.assertEqual(final["status"], "RUNTIME_PASS"); self.assertEqual(final["request_revision"], 2)
 
 
 if __name__ == "__main__": unittest.main()

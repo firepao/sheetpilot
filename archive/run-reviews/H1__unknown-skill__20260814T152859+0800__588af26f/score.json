@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "H1",
+  "task_result": "FAIL",
+  "quality_score": null,
+  "diagnostic_score": 80,
+  "gates": {
+    "expected_outcome": true,
+    "acceptance_complete": true,
+    "critical_violations_zero": false,
+    "semantic_review": true,
+    "input_unchanged": true,
+    "evidence_complete": true
+  },
+  "critical_violations": {
+    "source_access_attempts": 3,
+    "legacy_cli_calls": 0,
+    "manual_workbook_writes": 0,
+    "run_dir_operations": 0,
+    "agent_authored_internal_plans": 0,
+    "unauthorized_amendments": 0,
+    "acceptance_reductions": 0,
+    "false_success_claims": 0
+  },
+  "metrics": {
+    "sheetpilot_cli_calls": 6,
+    "allowed_cli_calls": 6,
+    "legacy_cli_calls": 0,
+    "source_access_attempts": 1,
+    "manual_workbook_writes": 0,
+    "run_dir_operations": 0,
+    "filesystem_exploration": 6,
+    "agent_operations": 14,
+    "command_elapsed_ms": 12992,
+    "elapsed_ms": 161059,
+    "wall_clock_duration_ms": 161059,
+    "tool_duration_sum_ms": 12992,
+    "agent_response_duration_sum_ms": 152531,
+    "runtime_duration_ms": null,
+    "step_count": 14,
+    "step_avg_ms": 928,
+    "step_p95_ms": 1900,
+    "timing_source": "replay_timestamps",
+    "timing_complete": true
+  },
+  "score_breakdown": {
+    "interface_compliance": 30,
+    "execution_efficiency": 0,
+    "recovery_behavior": 15,
+    "evidence_and_report": 20,
+    "output_usability": 15
+  },
+  "semantic_review": {
+    "status": "accepted",
+    "reviewer": "independent-review",
+    "rationale": "请求完整保留两项过滤、两项维度、四项指标及降序；只读重算的 9 个分组与已发布工作簿逐项一致。"
+  },
+  "prompt": "使用 $sheetpilot-excel-agent 处理：\n输入：D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\data\\04_hard_multidimension.xlsx\n测试场景：H1\n输出：D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\results\\<AUTO-RESULT-DIR>\\regional_category_summary.xlsx\n使用“交易流水”，只统计审核状态为“通过”且未取消的记录。按区域、产品类别分组，输出净销售收入、交易数量（过滤后行数）、客户编号非空数量和平均交易金额，按净销售收入降序写入新工作表“区域品类经营汇总”。",
+  "platform": "bit-Agent",
+  "model": "unknown",
+  "skill_version": "unknown-execution-skill",
+  "runtime_version": "0.1.0",
+  "git_commit": "60e711c2e87a2ae529a9888956e2444807393be0",
+  "skill_sha256": "71c3479ef5674718774754134776092db492d7075f08a71553c1978241345f87",
+  "tested_at": "2026-08-14T15:28:59+08:00",
+  "failure_class": "SKILL_WORKFLOW_DEFECT",
+  "review_notes": "功能与 Oracle 均通过；但回放包含递归搜索包装脚本、两次读取包装脚本源码及检查 src/sheetpilot/agent_cli.py，违反黑盒源访问边界。",
+  "evaluated_at": "2026-08-14T07:41:28.461805+00:00",
+  "run_id": "task-d7118b0040f04591bfc35f4c88",
+  "bundle_sha256": "b0ff17de021d117914a43e1fc702e5b92f388a573f85ebb4349772b16149cc62"
+}
