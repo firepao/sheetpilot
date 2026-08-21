@@ -15,7 +15,7 @@ MINIMAL_EXAMPLE = {
     "task_type": "summarize_table",
     "input_file": "D:/data/orders.xlsx",
     "output_file": "D:/result/city-summary.xlsx",
-    "user_request": "仅统计有效且未退货订单，按城市汇总销售收入、订单数量和平均订单金额。",
+    "user_request": "仅统计有效且未退货订单，按城市汇总销售收入、订单数量、客户编号非空数量和平均订单金额。",
     "source": {"sheet": "清洗明细", "header_row": 1},
     "filters": [
         {"id": "valid_rows", "field": "清洗状态", "operator": "eq", "value": "有效"},
@@ -25,13 +25,14 @@ MINIMAL_EXAMPLE = {
     "metrics": [
         {"id": "sales_revenue", "function": "sum", "field": "销售额", "output_name": "销售收入"},
         {"id": "order_count", "function": "count", "mode": "rows", "output_name": "订单数量"},
+        {"id": "customer_count", "function": "count", "mode": "non_empty", "field": "客户编号", "output_name": "客户编号非空数量"},
         {"id": "average_order_amount", "function": "average", "field": "销售额", "output_name": "平均订单金额"},
     ],
     "output": {"sheet": "城市经营汇总", "anchor": "A1", "sort": [{"by": "sales_revenue", "direction": "desc"}]},
     "acceptance": {
         "required_filters": ["valid_rows", "not_returned"],
         "required_dimensions": ["city"],
-        "required_metrics": ["sales_revenue", "order_count", "average_order_amount"],
+        "required_metrics": ["sales_revenue", "order_count", "customer_count", "average_order_amount"],
         "required_sort": [{"by": "sales_revenue", "direction": "desc"}],
     },
 }

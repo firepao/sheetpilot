@@ -19,8 +19,8 @@ class AgentEvaluationTest(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(); self.root = Path(self.temporary.name)
         self.source = self.root / "orders.xlsx"; workbook = Workbook(); sheet = workbook.active; sheet.title = "清洗明细"
-        sheet.append(["城市", "订单号", "销售额", "是否退货", "清洗状态"])
-        sheet.append(["北京", "A", 10, "否", "有效"]); sheet.append(["上海", "B", 30, "否", "有效"]); sheet.append(["北京", "C", 90, "是", "有效"])
+        sheet.append(["城市", "订单号", "销售额", "是否退货", "清洗状态", "客户编号"])
+        sheet.append(["北京", "A", 10, "否", "有效", "C001"]); sheet.append(["上海", "B", 30, "否", "有效", "C002"]); sheet.append(["北京", "C", 90, "是", "有效", None])
         workbook.save(self.source); workbook.close()
         self.request = copy.deepcopy(MINIMAL_EXAMPLE); self.request["input_file"] = str(self.source); self.request["output_file"] = str(self.root / "result.xlsx")
 

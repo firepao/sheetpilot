@@ -69,6 +69,11 @@ python "<skill-root>\scripts\sheetpilot_cli.py" task-status --task-id "<task-id>
 $env:SHEETPILOT_ROOT = "D:\bitexcel\SheetPilot"
 ```
 
+**Python 依赖**：SheetPilot 需要 `openpyxl`。首次运行前或遇到 `ModuleNotFoundError` 时先安装：
+```powershell
+pip install openpyxl
+```
+
 ## 工作流程
 
 ### 1. 获取契约与字段清单（可选）
@@ -126,17 +131,25 @@ $request = @"
   "task_type": "summarize_table",
   "input_file": "D:\\data\\orders.xlsx",
   "output_file": "<AUTO-RESULT-DIR>\\summary.xlsx",
-  "user_request": "按城市汇总销售额",
-  "source": {"sheet": "交易流水", "header_row": 1},
-  "filters": [],
+  "user_request": "仅统计有效且未退货订单，按城市汇总销售收入、订单数量、客户编号非空数量和平均订单金额",
+  "source": {"sheet": "清洗明细", "header_row": 1},
+  "filters": [
+    {"id": "valid_rows", "field": "清洗状态", "operator": "eq", "value": "有效"},
+    {"id": "not_returned", "field": "是否退货", "operator": "eq", "value": "否"}
+  ],
   "dimensions": [{"id": "city", "field": "城市", "output_name": "城市"}],
-  "metrics": [{"id": "total", "function": "sum", "field": "销售额", "output_name": "总销售额"}],
-  "output": {"sheet": "汇总", "anchor": "A1", "sort": []},
+  "metrics": [
+    {"id": "revenue", "function": "sum", "field": "销售额", "output_name": "销售收入"},
+    {"id": "order_count", "function": "count", "mode": "rows", "output_name": "订单数量"},
+    {"id": "customer_count", "function": "count", "mode": "non_empty", "field": "客户编号", "output_name": "客户编号非空数量"},
+    {"id": "avg_amount", "function": "average", "field": "销售额", "output_name": "平均订单金额"}
+  ],
+  "output": {"sheet": "城市经营汇总", "anchor": "A1", "sort": [{"by": "revenue", "direction": "desc"}]},
   "acceptance": {
-    "required_filters": [],
+    "required_filters": ["valid_rows", "not_returned"],
     "required_dimensions": ["city"],
-    "required_metrics": ["total"],
-    "required_sort": []
+    "required_metrics": ["revenue", "order_count", "customer_count", "avg_amount"],
+    "required_sort": [{"by": "revenue", "direction": "desc"}]
   }
 }
 "@
@@ -147,6 +160,15 @@ $request | Out-File -FilePath request.json -Encoding UTF8
 # 3. 提交任务
 python "<skill-root>\scripts\sheetpilot_cli.py" task-run --request request.json --auto-result-dir D:\results
 ```
+
+**count 函数两种模式（关键）**：
+
+| 需求 | 写法 |
+|------|------|
+| 统计过滤后的记录行数 | `{"function": "count", "mode": "rows"}` — 不需要 `field` |
+| 统计某字段非空的行数 | `{"function": "count", "mode": "non_empty", "field": "客户编号"}` — 必须有 `field` |
+
+`task-types` 的 `supported_features` 里显示 `"count.rows"` / `"count.non_empty"` 是**展示名**，实际 API 都写 `"function": "count"`，用 `"mode"` 区分。
 
 **编码要求（关键）**：
 - ✅ **正确**：UTF-8 无 BOM

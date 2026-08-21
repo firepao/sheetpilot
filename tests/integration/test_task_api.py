@@ -19,10 +19,10 @@ class TaskApiTest(unittest.TestCase):
         self.root = Path(self.temporary.name)
         self.source = self.root / "orders.xlsx"
         workbook = Workbook(); sheet = workbook.active; sheet.title = "清洗明细"
-        sheet.append(["城市", "订单号", "销售额", "是否退货", "清洗状态"])
-        sheet.append(["北京", "A", 10, "否", "有效"])
-        sheet.append(["上海", "B", 30, "否", "有效"])
-        sheet.append(["北京", "C", 90, "是", "有效"])
+        sheet.append(["城市", "订单号", "销售额", "是否退货", "清洗状态", "客户编号"])
+        sheet.append(["北京", "A", 10, "否", "有效", "C001"])
+        sheet.append(["上海", "B", 30, "否", "有效", "C002"])
+        sheet.append(["北京", "C", 90, "是", "有效", None])
         workbook.save(self.source); workbook.close()
         self.runtime = TaskRuntime(self.root / "state")
 
@@ -59,7 +59,10 @@ class TaskApiTest(unittest.TestCase):
         self.assertTrue((task_dir / "attempts" / "attempt-001" / "internal-plan.json").is_file())
         workbook = load_workbook(request["output_file"], data_only=True)
         rows = list(workbook["城市经营汇总"].iter_rows(min_row=2, values_only=True)); workbook.close()
-        self.assertEqual(rows, [("上海", 30, 1, 30), ("北京", 10, 1, 10)])
+        # 过滤：清洗状态=有效 AND 是否退货=否 → 北京A(10,C001) 和 上海B(30,C002)
+        # 指标：sales_revenue=sum(销售额), order_count=count.rows, customer_count=count.non_empty(客户编号), avg=average(销售额)
+        # 上海: (30, 1, 1, 30.0), 北京: (10, 1, 1, 10.0) 按销售收入降序
+        self.assertEqual(rows, [("上海", 30, 1, 1, 30.0), ("北京", 10, 1, 1, 10.0)])
         repeated = self.runtime.run(request)
         self.assertEqual(repeated["task_id"], result["task_id"])
         self.assertEqual(len(list((task_dir / "attempts").iterdir())), 1)
