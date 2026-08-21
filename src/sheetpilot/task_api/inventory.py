@@ -33,7 +33,12 @@ def _mask(value: str) -> str:
 def _samples(values: list[Any]) -> list[Any]:
     result = []
     for value in values[:MAX_SAMPLES]:
-        result.append(_mask(value[:MAX_SAMPLE_CHARS]) if isinstance(value, str) else value)
+        if isinstance(value, str):
+            result.append(_mask(value[:MAX_SAMPLE_CHARS]))
+        elif isinstance(value, (int, float)):
+            result.append(value)
+        else:
+            result.append(str(value))
     return result
 
 

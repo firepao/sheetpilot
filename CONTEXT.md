@@ -20,6 +20,22 @@ _Avoid_: Planner, Agent-generated Plan
 Deterministic Task Compiler 生成并由 Runtime 独占使用的低层执行表示。Agent 不提交、修改或依赖 Internal Execution Plan。
 _Avoid_: Task Request, Public Plan
 
+**Composite Operation**:
+Runtime 内部具有明确业务或数据处理语义、并且能够确定性展开为 Atomic Operation 的组合能力。Composite Operation 不作为 Agent 可见的 Task Type，也不是最终执行单位。
+_Avoid_: Task Type, Recipe, Atomic Operation
+
+**Atomic Operation**:
+Runtime 内部最小的稳定执行单位，拥有类型化输入输出、明确前后置条件和副作用，并且不再展开为其他已注册操作。
+_Avoid_: Tool, Agent Capability, openpyxl Method
+
+**Atomic Plan**:
+Composite Plan 完全展开后形成的确定性内部执行表示，只包含已注册 Atomic Operation 和 Runtime 固定生命周期引用。
+_Avoid_: Agent Plan, Task Request, Tool-call Sequence
+
+**Capability Registry**:
+Runtime 内部 Atomic Operation 定义、版本、类型、效果与实现的唯一事实来源。它不承担 Agent 的 Task Type 发现职责。
+_Avoid_: Tool Manifest, Public Capability List
+
 **Acceptance Contract**:
 Task Request 中独立声明且在首次接收后冻结的验收范围。后续执行尝试可以修复执行参数，但不能静默缩减 Acceptance Contract。
 _Avoid_: Validation Hints, Optional Checks
