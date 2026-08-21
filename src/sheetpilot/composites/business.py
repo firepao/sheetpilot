@@ -69,7 +69,14 @@ def calculate_profitability(context, params, results):
 
 
 def summarize_by_dimension(context, params, results):
-    return aggregate(_table(results, params), params["group_by"], params["metrics"])
+    from ..workbook.tables import filter_rows, sort_rows
+    data = _table(results, params)
+    if params.get("where"):
+        data = filter_rows(data, params["where"])
+    data = aggregate(data, params["group_by"], params["metrics"])
+    if params.get("sort"):
+        data = sort_rows(data, params["sort"])
+    return data
 
 
 def summarize_by_period(context, params, results):

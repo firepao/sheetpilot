@@ -97,18 +97,54 @@ def _required(*names: str) -> Validator:
     return validate
 
 
-def _read(context, params, results): return context.read_table(params["sheet"], params.get("header_rows", [1]), params["columns"])
-def _aggregate(context, params, results): return context.aggregate(results[params["input"]], **{k: v for k, v in params.items() if k != "input"})
-def _filter(context, params, results): return context.filter_rows(results[params["input"]], params["where"], params.get("invalid_value_policy", "exclude"))
-def _select(context, params, results): return context.select_columns(results[params["input"]], params["fields"])
-def _sort(context, params, results): return context.sort_rows(results[params["input"]], params["keys"])
-def _derive(context, params, results): return context.derive_column(results[params["input"]], params["as"], params["template"], params["arguments"])
-def _formula(context, params, results): return context.add_formula_column(results[params["input"]], params["header"], params["template"], params["arguments"], params.get("number_format"))
-def _create_sheet(context, params, results): return context.create_sheet(params["sheet"])
-def _write(context, params, results): return context.write_table(params["sheet"], params["anchor"], results[params["input"]])
-def _style(context, params, results): return context.apply_style(results[params["input"]], params["preset"])
-def _freeze(context, params, results): return context.freeze(params["sheet"], params["cell"])
-def _chart(context, params, results): return context.create_chart(results[params["input"]], params["chart_type"], params["anchor"], params.get("title", ""), params.get("category_fields"), params.get("series_fields"))
+# Handler 统一签名：handler(ctx, params, results) -> Any
+# ctx 为 ExecutionContext，提供 read_table/filter_rows/aggregate 等方法；
+# results 为上游步骤 id → 输出的映射，供 params["input"] 引用。
+
+def _read(ctx, params, results):
+    # header_row (int, Task API path) が header_rows (list, legacy MVP path) の両方を受け付ける
+    header_row = params.get("header_row") or max(params.get("header_rows", [1]))
+    return ctx.read_table(params["sheet"], header_row, params["columns"])
+
+def _aggregate(ctx, params, results):
+    extra = {k: v for k, v in params.items() if k not in {"input"}}
+    return ctx.aggregate(results[params["input"]], **extra)
+
+def _filter(ctx, params, results):
+    return ctx.filter_rows(results[params["input"]], params["where"], params.get("invalid_value_policy", "exclude"))
+
+def _select(ctx, params, results):
+    return ctx.select_columns(results[params["input"]], params["fields"])
+
+def _sort(ctx, params, results):
+    return ctx.sort_rows(results[params["input"]], params["keys"])
+
+def _derive(ctx, params, results):
+    return ctx.derive_column(results[params["input"]], params["as"], params["template"], params["arguments"])
+
+def _formula(ctx, params, results):
+    return ctx.add_formula_column(
+        results[params["input"]], params["header"], params["template"],
+        params["arguments"], params.get("number_format"),
+    )
+
+def _create_sheet(ctx, params, results):
+    return ctx.create_sheet(params["sheet"])
+
+def _write(ctx, params, results):
+    return ctx.write_table(params["sheet"], params["anchor"], results[params["input"]])
+
+def _style(ctx, params, results):
+    return ctx.apply_style(results[params["input"]], params["preset"])
+
+def _freeze(ctx, params, results):
+    return ctx.freeze(params["sheet"], params["cell"])
+
+def _chart(ctx, params, results):
+    return ctx.create_chart(
+        results[params["input"]], params["chart_type"], params["anchor"],
+        params.get("title", ""), params.get("category_fields"), params.get("series_fields"),
+    )
 
 
 def definition(name, input_kind, output_kind, risk, validations, effects, validator, handler, *, kind="CAPABILITY", covers=()):

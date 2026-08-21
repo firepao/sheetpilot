@@ -55,7 +55,7 @@ def compile_plan(task_id: str, revision: int, request: dict[str, Any], acceptanc
     fields = ([{"source": dimension_symbols[item["id"]], "as": item["output_name"]} for item in request["dimensions"]]
               + [{"source": metric_symbols[item["id"]], "as": item["output_name"]} for item in request["metrics"]])
     steps.extend([
-        {"id": "project_output", "op": "project_columns", "input": "summarize", "fields": fields},
+        {"id": "project_output", "op": "select_columns", "input": "summarize", "fields": fields},
         {"id": "create_output_sheet", "op": "create_sheet", "sheet": request["output"]["sheet"]},
         {"id": "write_output", "op": "write_table", "input": "project_output", "sheet": request["output"]["sheet"], "anchor": request["output"].get("anchor", "A1")},
     ])

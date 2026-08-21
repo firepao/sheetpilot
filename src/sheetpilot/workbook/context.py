@@ -16,7 +16,8 @@ class WorkbookContext:
         self.created_sheets: set[str] = set()
 
     def read_table(self, sheet, header_rows, columns):
-        data = load_table(self.engine, sheet, max(header_rows), columns)
+        row = max(header_rows) if isinstance(header_rows, (list, tuple)) else header_rows
+        data = load_table(self.engine, sheet, row, columns)
         self.recorder.record("read", sheet=sheet, rows=len(data.rows), fields=list(columns))
         return data
 

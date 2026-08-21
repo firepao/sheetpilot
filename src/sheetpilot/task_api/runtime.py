@@ -12,8 +12,10 @@ from typing import Any
 from openpyxl import load_workbook
 from openpyxl.utils.cell import coordinate_to_tuple
 
+from ..atomic.context import ExecutionContext
+from ..capabilities.registry import DEFAULT_REGISTRY
 from ..engines import OpenPyxlEngine
-from ..workbook.tables import TableData, aggregate, filter_rows, read_table, select_columns, sort_rows
+from ..workbook.tables import TableData
 from ..workspace import sha256_file
 from .compiler import collect_fields, compile_plan
 from .contract import acceptance_snapshot, invalid_response, stable_hash, task_type_manifest, validate_request
@@ -182,20 +184,20 @@ class TaskRuntime:
         try:
             for step in plan["steps"]:
                 op = step["op"]
-                if op == "read_table": results[step["id"]] = read_table(engine, step["sheet"], step["header_row"], step["columns"])
-                elif op == "summarize_by_dimension":
-                    table = results[step["input"]]
-                    if "where" in step: table = filter_rows(table, step["where"])
-                    table = aggregate(table, step["group_by"], step["metrics"])
-                    if "sort" in step: table = sort_rows(table, step["sort"])
-                    results[step["id"]] = table
-                elif op == "project_columns":
-                    results[step["id"]] = select_columns(results[step["input"]], step["fields"])
-                elif op == "create_sheet":
+                ctx = ExecutionContext(engine, results)
+                # create_sheet 需要冲突检查，在执行前单独处理
+                if op == "create_sheet":
                     if step["sheet"] in engine.sheet_names():
                         return self._attempt_failure(task_dir, task, attempt_id, "OUTPUT_CONFLICT", "execution", "目标工作表已存在。")
                     engine.create_sheet(step["sheet"])
-                elif op == "write_table": self._write_table(engine, results[step["input"]], step["sheet"], step["anchor"])
+                    continue
+                # write_table 结果写入工作簿，handler 返回 None，不存 results
+                if op == "write_table":
+                    self._write_table(engine, results[step["input"]], step["sheet"], step["anchor"])
+                    continue
+                # 所有其他 op 通过 Registry 统一执行
+                capability = DEFAULT_REGISTRY.require(op)
+                results[step["id"]] = capability.handler(ctx, step, results)
             temporary = attempt_dir / "temporary-output.xlsx"; engine.save(temporary)
         except Exception as exc:
             return self._attempt_failure(task_dir, task, attempt_id, "EXECUTION_FAILED", "execution", str(exc))
