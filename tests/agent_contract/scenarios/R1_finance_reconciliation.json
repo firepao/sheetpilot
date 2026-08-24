@@ -1,0 +1,16 @@
+{
+  "id": "R1",
+  "prompt": "帮我用 $sheetpilot-excel-agent 分析这个科目余额表：\n\n输入：tests/agent_contract/data/R1_finance_ledger.xlsx\n测试场景：R1\n输出：tests/agent_contract/results/<AUTO-RESULT-DIR>/asset_summary.xlsx\n\n筛选资产类科目，按一级科目汇总借方、贷方余额，输出到\"资产科目汇总\"。",
+  "data_file": "R1_finance_ledger.xlsx",
+  "expected_outcome": "success",
+  "ideal_rounds": 4,
+  "ideal_cli_calls": 3,
+  "requires_clarification": false,
+  "oracle_params": {
+    "tolerance": 0.01,
+    "expected_groups": 5,
+    "expected_total_debit": 1250000.00,
+    "expected_total_credit": 850000.00,
+    "note": "数据特征：600行科目明细，借贷不平衡的有8条（测试数据质量），空值率12%"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "id": "R4",
+  "prompt": "用 $sheetpilot-excel-agent 分析客户价值：\n\n输入：tests/agent_contract/data/R4_customer_rfm.xlsx\n测试场景：R4\n输出：tests/agent_contract/results/<AUTO-RESULT-DIR>/high_value_customers.xlsx\n\n按客户统计以下指标：\n- R: 最近一次购买距今天数（从订单日期计算到今天）\n- F: 购买次数（仅统计订单状态=已完成的订单）\n- M: 累计金额（仅统计订单状态=已完成的订单金额总和）\n\n筛选出高价值客户（F≥3 且 M≥5000），输出到\"高价值客户\"工作表。",
+  "data_file": "R4_customer_rfm.xlsx",
+  "expected_outcome": "success",
+  "ideal_rounds": 5,
+  "ideal_cli_calls": 3,
+  "requires_clarification": false,
+  "oracle_params": {
+    "tolerance": 1,
+    "note": "数据特征：~6000行订单，500客户，30%客户仅1单（不符合F≥3条件），需时间计算+客户聚合+二次过滤",
+    "verification_note": "需手工验证：高价值客户数量、某客户的R/F/M值是否正确"
+  }
+}

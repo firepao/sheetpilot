@@ -1,0 +1,15 @@
+{
+  "id": "R2",
+  "prompt": "用 $sheetpilot-excel-agent 分析库存情况：\n\n输入：tests/agent_contract/data/R2_inventory_sku.xlsx\n测试场景：R2\n输出：tests/agent_contract/results/<AUTO-RESULT-DIR>/stockout_analysis.xlsx\n\n找出缺货的在售商品，按类目统计缺货SKU数量，输出到\"缺货分析\"。缺货是指：库存数量 < 安全库存，且销售状态为\"在售\"。",
+  "data_file": "R2_inventory_sku.xlsx",
+  "expected_outcome": "success",
+  "ideal_rounds": 4,
+  "ideal_cli_calls": 3,
+  "requires_clarification": false,
+  "oracle_params": {
+    "tolerance": 1e-6,
+    "expected_groups": 8,
+    "expected_total_stockout": 45,
+    "note": "数据特征：1500行SKU，安全库存字段15%空值（空值表示无安全库存要求），销售状态包括在售/下架/清仓"
+  }
+}

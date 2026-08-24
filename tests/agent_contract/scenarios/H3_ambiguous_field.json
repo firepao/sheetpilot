@@ -1,0 +1,16 @@
+{
+  "id": "H3",
+  "prompt": "用 $sheetpilot-excel-agent 统计各区域的销售情况：\n\n输入：tests/agent_contract/data/H3_sales_multi_amount.xlsx\n测试场景：H3\n输出：tests/agent_contract/results/<AUTO-RESULT-DIR>/regional_sales.xlsx\n\n按区域汇总销售，输出到\"区域销售汇总\"。",
+  "data_file": "H3_sales_multi_amount.xlsx",
+  "expected_outcome": "success",
+  "ideal_rounds": 5,
+  "ideal_cli_calls": 4,
+  "requires_clarification": false,
+  "oracle_params": {
+    "tolerance": 0.01,
+    "correct_field": "净销售收入",
+    "binding_required": true,
+    "expected_groups": 4,
+    "note": "数据包含三列：销售额、销售金额(含税=销售额×1.13)、净销售收入(销售额-退货)，Agent需通过样本值判断选择净销售收入"
+  }
+}

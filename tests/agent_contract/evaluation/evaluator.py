@@ -79,6 +79,92 @@ def _acceptance_complete(request: dict[str, Any]) -> bool:
     )
 
 
+def evaluate_interaction_efficiency(bundle: dict[str, Any], audit: dict[str, Any]) -> dict[str, Any]:
+    """评估Agent交互轮次和CLI调用效率（新增维度）"""
+    scenario = bundle.get("scenario", {})
+    ideal_rounds = scenario.get("ideal_rounds")
+    ideal_cli_calls = scenario.get("ideal_cli_calls")
+
+    if ideal_rounds is None or ideal_cli_calls is None:
+        return {"applicable": False}
+
+    actual_rounds = len(bundle.get("commands", []))
+    actual_cli_calls = audit["allowed_cli_calls"]
+
+    round_penalty = abs(actual_rounds - ideal_rounds) * 15  # 偏离1轮扣15分
+    cli_penalty = abs(actual_cli_calls - ideal_cli_calls) * 20  # 偏离1次扣20分
+
+    return {
+        "applicable": True,
+        "round_efficiency_score": max(0, 100 - round_penalty),
+        "cli_efficiency_score": max(0, 100 - cli_penalty),
+        "actual_rounds": actual_rounds,
+        "ideal_rounds": ideal_rounds,
+        "actual_cli_calls": actual_cli_calls,
+        "ideal_cli_calls": ideal_cli_calls,
+    }
+
+
+def evaluate_field_binding_quality(bundle: dict[str, Any]) -> dict[str, Any]:
+    """评估模糊字段选择的准确性（新增维度）"""
+    status = bundle.get("task_status", {})
+    scenario = bundle.get("scenario", {})
+
+    expected_bindings = scenario.get("expected_bindings", {})
+    if not expected_bindings:
+        return {"applicable": False}
+
+    actual_bindings = status.get("resolved_bindings", {})
+
+    correct = sum(1 for slot_id, expected_cid in expected_bindings.items()
+                  if actual_bindings.get(slot_id) == expected_cid)
+    total = len(expected_bindings)
+    accuracy = (correct / total * 100) if total > 0 else 0
+
+    return {
+        "applicable": True,
+        "binding_accuracy": accuracy,
+        "correct_bindings": correct,
+        "total_bindings": total,
+        "mismatched_slots": [k for k, v in expected_bindings.items() if actual_bindings.get(k) != v],
+    }
+
+
+def evaluate_clarification_coverage(bundle: dict[str, Any]) -> dict[str, Any]:
+    """评估Agent对模糊需求的澄清完整性（新增维度）"""
+    scenario = bundle.get("scenario", {})
+
+    if not scenario.get("requires_clarification", False):
+        return {"applicable": False}
+
+    required_clarifications = scenario.get("required_clarifications", [])
+    if not required_clarifications:
+        return {"applicable": False}
+
+    # 从commands中提取Agent的问题（启发式：包含"？"或"?"且不是CLI命令）
+    commands = bundle.get("commands", [])
+    questions = [
+        cmd if isinstance(cmd, str) else cmd.get("command", "")
+        for cmd in commands
+        if ("？" in str(cmd) or "?" in str(cmd)) and "task-" not in str(cmd).lower()
+    ]
+
+    covered = []
+    for req in required_clarifications:
+        if any(req in str(q).lower() for q in questions):
+            covered.append(req)
+
+    coverage = (len(covered) / len(required_clarifications) * 100) if required_clarifications else 100
+
+    return {
+        "applicable": True,
+        "clarification_coverage": coverage,
+        "covered_aspects": covered,
+        "missing_aspects": [r for r in required_clarifications if r not in covered],
+        "total_questions_asked": len(questions),
+    }
+
+
 def evaluate_run(bundle: dict[str, Any]) -> dict[str, Any]:
     """Evaluate one immutable Agent run bundle using deterministic gates and scoring."""
     scenario = bundle.get("scenario", {})
@@ -126,6 +212,12 @@ def evaluate_run(bundle: dict[str, Any]) -> dict[str, Any]:
     output_score = 15 if (oracle.get("passed") is True if expected == "success" else not scenario.get("output_exists", False)) else 0
     breakdown = {"interface_compliance": interface, "execution_efficiency": efficiency, "recovery_behavior": recovery, "evidence_and_report": report_score, "output_usability": output_score}
     diagnostic_score = sum(breakdown.values())
+
+    # 新增评估维度（V2扩展）
+    interaction_eval = evaluate_interaction_efficiency(bundle, audit)
+    binding_eval = evaluate_field_binding_quality(bundle)
+    clarification_eval = evaluate_clarification_coverage(bundle)
+
     return {
         "schema_version": "1.0",
         "scenario_id": scenario.get("id"),
@@ -137,4 +229,7 @@ def evaluate_run(bundle: dict[str, Any]) -> dict[str, Any]:
         "metrics": metrics,
         "score_breakdown": breakdown,
         "semantic_review": semantic,
+        "interaction_efficiency": interaction_eval,
+        "field_binding_quality": binding_eval,
+        "clarification_coverage": clarification_eval,
     }
