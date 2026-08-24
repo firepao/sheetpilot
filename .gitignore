@@ -26,3 +26,5 @@ tests/agent_contract/results/
 tests/agent_contract/reviews/
 tests/agent_contract/*.xlsx
 tests/agent_cases/
+.tmp/
+.tmp/
