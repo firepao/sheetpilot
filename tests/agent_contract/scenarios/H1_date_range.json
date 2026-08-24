@@ -1,0 +1,58 @@
+{
+  "id": "H1",
+  "name": "date_range_filter",
+  "level": "hard",
+  "description": "日期范围过滤场景，测试日期类型过滤和时间段筛选能力",
+  "data_file": "tests/agent_contract/data/H1_date_range.xlsx",
+  "source": {
+    "sheet": "订单流水",
+    "header_row": 1
+  },
+  "user_prompt": "统计2024年第一季度（1月1日至3月31日）各产品的销售情况，要求：筛选订单日期在2024-01-01至2024-03-31之间，按产品名称分组，计算销售总额和订单数量，按销售总额降序排列",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [
+      {"id": "start_date", "field": "订单日期", "operator": "gte", "value": "2024-01-01"},
+      {"id": "end_date", "field": "订单日期", "operator": "lte", "value": "2024-03-31"}
+    ],
+    "dimensions": [
+      {"id": "product", "field": "产品名称", "output_name": "产品名称"}
+    ],
+    "metrics": [
+      {"id": "total_sales", "function": "sum", "field": "销售额", "output_name": "销售总额"},
+      {"id": "order_count", "function": "count", "mode": "rows", "output_name": "订单数量"}
+    ],
+    "sort": [
+      {"by": "total_sales", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_query",
+    "filters": "(订单日期 >= '2024-01-01') & (订单日期 <= '2024-03-31')",
+    "group_by": ["产品名称"],
+    "aggregations": {
+      "销售额": "sum",
+      "订单数量": "size"
+    },
+    "sort_by": [{"field": "销售总额", "ascending": false}],
+    "expected_row_count": 8,
+    "expected_total": 450000,
+    "sample_rows": [
+      {"产品名称": "产品A", "销售总额": 125000, "订单数量": 150},
+      {"产品名称": "产品B", "销售总额": 98000, "订单数量": 120},
+      {"产品名称": "产品C", "销售总额": 85000, "订单数量": 105}
+    ]
+  },
+  "difficulty_factors": {
+    "data_quality": "clean",
+    "field_binding": "exact_match",
+    "business_logic": "date_range_filter",
+    "data_volume": "medium"
+  },
+  "tags": ["hard", "date_filter", "range_filter", "time_series"]
+}

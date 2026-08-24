@@ -1,0 +1,60 @@
+{
+  "id": "M7",
+  "name": "education_exam_analysis",
+  "level": "medium",
+  "description": "教育考试分析场景，包含学生成绩、科目和班级数据",
+  "data_file": "tests/agent_contract/data/M7_education.xlsx",
+  "source": {
+    "sheet": "考试成绩",
+    "header_row": 1
+  },
+  "user_prompt": "分析各班级各科目的考试成绩，要求：筛选考试类型=期末考试且成绩≥60分的记录，按班级和科目分组，计算平均分、最高分总和和及格人数，按平均分降序排列",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [
+      {"id": "final_exam", "field": "考试类型", "operator": "eq", "value": "期末考试"},
+      {"id": "passed", "field": "成绩", "operator": "gte", "value": 60}
+    ],
+    "dimensions": [
+      {"id": "class", "field": "班级", "output_name": "班级"},
+      {"id": "subject", "field": "科目", "output_name": "科目"}
+    ],
+    "metrics": [
+      {"id": "avg_score", "function": "average", "field": "成绩", "output_name": "平均分"},
+      {"id": "total_high_score", "function": "sum", "field": "高分标记", "output_name": "优秀人数"},
+      {"id": "pass_count", "function": "count", "mode": "rows", "output_name": "及格人数"}
+    ],
+    "sort": [
+      {"by": "avg_score", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_query",
+    "filters": "(考试类型 == '期末考试') & (成绩 >= 60)",
+    "group_by": ["班级", "科目"],
+    "aggregations": {
+      "成绩": "mean",
+      "高分标记": "sum",
+      "及格人数": "size"
+    },
+    "sort_by": [{"field": "平均分", "ascending": false}],
+    "expected_row_count": 24,
+    "sample_rows": [
+      {"班级": "高三1班", "科目": "数学", "平均分": 88.5, "优秀人数": 28, "及格人数": 42},
+      {"班级": "高三2班", "科目": "英语", "平均分": 86.2, "优秀人数": 25, "及格人数": 40},
+      {"班级": "高三1班", "科目": "物理", "平均分": 84.8, "优秀人数": 22, "及格人数": 38}
+    ]
+  },
+  "difficulty_factors": {
+    "data_quality": "clean",
+    "field_binding": "exact_match",
+    "business_logic": "education_analysis",
+    "data_volume": "medium"
+  },
+  "tags": ["medium", "education", "exam_analysis", "performance"]
+}

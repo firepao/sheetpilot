@@ -1,0 +1,57 @@
+{
+  "id": "M3",
+  "name": "weighted_average_calculation",
+  "level": "medium",
+  "description": "加权平均场景，需要计算加权指标（如加权平均价格），测试复杂聚合能力",
+  "data_file": "tests/agent_contract/data/M3_weighted_average.xlsx",
+  "source": {
+    "sheet": "采购记录",
+    "header_row": 1
+  },
+  "user_prompt": "统计各供应商的采购情况，要求：按供应商分组，计算采购总金额、采购总数量、加权平均单价（总金额/总数量），按采购总金额降序排列",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [],
+    "dimensions": [
+      {"id": "supplier", "field": "供应商", "output_name": "供应商"}
+    ],
+    "metrics": [
+      {"id": "total_amount", "function": "sum", "field": "采购金额", "output_name": "采购总金额"},
+      {"id": "total_quantity", "function": "sum", "field": "采购数量", "output_name": "采购总数量"}
+    ],
+    "sort": [
+      {"by": "total_amount", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_groupby",
+    "group_by": ["供应商"],
+    "aggregations": {
+      "采购金额": "sum",
+      "采购数量": "sum"
+    },
+    "derived_metrics": {
+      "加权平均单价": "采购总金额 / 采购总数量"
+    },
+    "sort_by": [{"field": "采购总金额", "ascending": false}],
+    "expected_row_count": 8,
+    "expected_total": 1200000,
+    "sample_rows": [
+      {"供应商": "A公司", "采购总金额": 350000, "采购总数量": 7000, "加权平均单价": 50.0},
+      {"供应商": "B公司", "采购总金额": 280000, "采购总数量": 5600, "加权平均单价": 50.0}
+    ],
+    "note": "加权平均单价需要在Runtime外部计算（sum(金额)/sum(数量)），测试Agent是否能识别并告知用户"
+  },
+  "difficulty_factors": {
+    "data_quality": "moderate_dirty",
+    "field_binding": "exact_match",
+    "business_logic": "weighted_average",
+    "data_volume": "medium"
+  },
+  "tags": ["medium", "weighted_average", "derived_metric", "capability_boundary"]
+}

@@ -1,0 +1,50 @@
+{
+  "id": "H4",
+  "name": "multi_condition_complex_filter",
+  "level": "hard",
+  "description": "复杂多条件过滤场景，涉及AND/OR逻辑组合，测试Agent对复杂业务规则的理解",
+  "data_file": "tests/agent_contract/data/H4_complex_filter.xlsx",
+  "source": {
+    "sheet": "客户订单",
+    "header_row": 1
+  },
+  "user_prompt": "统计高价值客户的订单情况，要求：筛选条件为（订单金额≥5000 或 客户等级=VIP）且 订单状态=已完成，按客户名称分组，计算订单总额和订单数量，按订单总额降序排列",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 2,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto",
+    "expected_clarifications": [
+      "当前契约仅支持AND组合，不支持OR逻辑，需要Agent澄清并提出替代方案或拒绝"
+    ]
+  },
+  "task_request_template": {
+    "filters": [
+      {"id": "completed", "field": "订单状态", "operator": "eq", "value": "已完成"}
+    ],
+    "dimensions": [
+      {"id": "customer", "field": "客户名称", "output_name": "客户名称"}
+    ],
+    "metrics": [
+      {"id": "total_amount", "function": "sum", "field": "订单金额", "output_name": "订单总额"},
+      {"id": "order_count", "function": "count", "mode": "rows", "output_name": "订单数量"}
+    ],
+    "sort": [
+      {"by": "total_amount", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "capability_boundary",
+    "note": "当前契约不支持OR逻辑，期望Agent识别能力边界并：(1) 告知用户当前不支持OR，(2) 提出两次执行方案（分别筛选后合并）",
+    "expected_behavior": "CAPABILITY_UNSUPPORTED 或提出workaround",
+    "fallback_approach": "分两次执行：(amount>=5000 AND status=completed) + (level=VIP AND status=completed) 后手工合并",
+    "sample_rows": []
+  },
+  "difficulty_factors": {
+    "data_quality": "clean",
+    "field_binding": "exact_match",
+    "business_logic": "or_logic_unsupported",
+    "data_volume": "medium"
+  },
+  "tags": ["hard", "or_logic", "capability_boundary", "complex_filter"]
+}

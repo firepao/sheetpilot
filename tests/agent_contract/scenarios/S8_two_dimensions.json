@@ -1,0 +1,54 @@
+{
+  "id": "S8",
+  "name": "two_dimensions_basic",
+  "level": "simple",
+  "description": "基础双维度场景：两个维度分组",
+  "data_file": "tests/agent_contract/data/S8_two_dimensions.xlsx",
+  "source": {
+    "sheet": "销售数据",
+    "header_row": 1
+  },
+  "user_prompt": "统计各区域各产品的销售额",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [],
+    "dimensions": [
+      {"id": "region", "field": "区域", "output_name": "区域"},
+      {"id": "product", "field": "产品名称", "output_name": "产品名称"}
+    ],
+    "metrics": [
+      {"id": "total_sales", "function": "sum", "field": "销售额", "output_name": "销售额"}
+    ],
+    "sort": [
+      {"by": "total_sales", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_query",
+    "filters": "",
+    "group_by": ["区域", "产品名称"],
+    "aggregations": {
+      "销售额": "sum"
+    },
+    "sort_by": [{"field": "销售额", "ascending": false}],
+    "expected_row_count": 20,
+    "expected_total": 450000,
+    "sample_rows": [
+      {"区域": "华东", "产品名称": "产品A", "销售额": 58000},
+      {"区域": "华北", "产品名称": "产品B", "销售额": 52000},
+      {"区域": "华南", "产品名称": "产品A", "销售额": 48000}
+    ]
+  },
+  "difficulty_factors": {
+    "data_quality": "clean",
+    "field_binding": "exact_match",
+    "business_logic": "two_dimensions",
+    "data_volume": "small"
+  },
+  "tags": ["simple", "two_dimensions", "basic_grouping"]
+}

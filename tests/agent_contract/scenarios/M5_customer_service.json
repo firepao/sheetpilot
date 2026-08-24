@@ -1,0 +1,60 @@
+{
+  "id": "M5",
+  "name": "customer_service_ticket",
+  "level": "medium",
+  "description": "客服工单分析场景，包含工单类型、处理时长和满意度数据",
+  "data_file": "tests/agent_contract/data/M5_customer_service.xlsx",
+  "source": {
+    "sheet": "工单记录",
+    "header_row": 1
+  },
+  "user_prompt": "分析各客服组的工单处理情况，要求：筛选工单状态=已完结，按客服组和工单类型分组，计算工单数量、平均处理时长（分钟）和满意工单数（满意度≥4的工单），按工单数量降序排列",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [
+      {"id": "closed", "field": "工单状态", "operator": "eq", "value": "已完结"}
+    ],
+    "dimensions": [
+      {"id": "team", "field": "客服组", "output_name": "客服组"},
+      {"id": "type", "field": "工单类型", "output_name": "工单类型"}
+    ],
+    "metrics": [
+      {"id": "ticket_count", "function": "count", "mode": "rows", "output_name": "工单数量"},
+      {"id": "avg_duration", "function": "average", "field": "处理时长", "output_name": "平均处理时长"},
+      {"id": "satisfied_count", "function": "sum", "field": "满意标记", "output_name": "满意工单数"}
+    ],
+    "sort": [
+      {"by": "ticket_count", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_query",
+    "filters": "工单状态 == '已完结'",
+    "group_by": ["客服组", "工单类型"],
+    "aggregations": {
+      "工单数量": "size",
+      "处理时长": "mean",
+      "满意标记": "sum"
+    },
+    "sort_by": [{"field": "工单数量", "ascending": false}],
+    "expected_row_count": 20,
+    "expected_total": 6800,
+    "sample_rows": [
+      {"客服组": "售后组A", "工单类型": "退款申请", "工单数量": 850, "平均处理时长": 42.5, "满意工单数": 720},
+      {"客服组": "售后组B", "工单类型": "退换货", "工单数量": 720, "平均处理时长": 55.8, "满意工单数": 610},
+      {"客服组": "咨询组A", "工单类型": "产品咨询", "工单数量": 680, "平均处理时长": 18.2, "满意工单数": 620}
+    ]
+  },
+  "difficulty_factors": {
+    "data_quality": "moderate_dirty",
+    "field_binding": "exact_match",
+    "business_logic": "service_quality",
+    "data_volume": "medium"
+  },
+  "tags": ["medium", "customer_service", "ticket_analysis", "satisfaction"]
+}

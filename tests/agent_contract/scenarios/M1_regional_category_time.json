@@ -1,0 +1,58 @@
+{
+  "id": "M1",
+  "name": "regional_category_time_analysis",
+  "level": "medium",
+  "description": "三维度分组（区域+类别+季度），中等数据量，测试多维度聚合能力",
+  "data_file": "tests/agent_contract/data/M1_regional_category_time.xlsx",
+  "source": {
+    "sheet": "销售数据",
+    "header_row": 1
+  },
+  "user_prompt": "统计各区域、各产品类别在2024年各季度的销售情况，要求：筛选2024年数据，按区域、产品类别、季度分组，计算销售总额和订单数量，按区域和销售总额降序排列",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [
+      {"id": "year_2024", "field": "年份", "operator": "eq", "value": 2024}
+    ],
+    "dimensions": [
+      {"id": "region", "field": "区域", "output_name": "区域"},
+      {"id": "category", "field": "产品类别", "output_name": "产品类别"},
+      {"id": "quarter", "field": "季度", "output_name": "季度"}
+    ],
+    "metrics": [
+      {"id": "total_sales", "function": "sum", "field": "销售额", "output_name": "销售总额"},
+      {"id": "order_count", "function": "count", "mode": "rows", "output_name": "订单数量"}
+    ],
+    "sort": [
+      {"by": "region", "direction": "asc"},
+      {"by": "total_sales", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_groupby",
+    "group_by": ["区域", "产品类别", "季度"],
+    "aggregations": {
+      "销售额": "sum",
+      "订单数量": "count"
+    },
+    "sort_by": [{"field": "区域", "ascending": true}, {"field": "销售总额", "ascending": false}],
+    "expected_row_count": 48,
+    "expected_total": 2400000,
+    "sample_rows": [
+      {"区域": "华北", "产品类别": "电子产品", "季度": "Q1", "销售总额": 180000, "订单数量": 120},
+      {"区域": "华北", "产品类别": "电子产品", "季度": "Q2", "销售总额": 165000, "订单数量": 110}
+    ]
+  },
+  "difficulty_factors": {
+    "data_quality": "moderate_dirty",
+    "field_binding": "exact_match",
+    "business_logic": "multi_dimension",
+    "data_volume": "medium"
+  },
+  "tags": ["medium", "multi_dimension", "time_series", "regional"]
+}

@@ -1,0 +1,52 @@
+{
+  "id": "S5",
+  "name": "average_basic",
+  "level": "simple",
+  "description": "基础平均值场景：average函数",
+  "data_file": "tests/agent_contract/data/S5_average.xlsx",
+  "source": {
+    "sheet": "成绩数据",
+    "header_row": 1
+  },
+  "user_prompt": "计算各班级的平均分",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [],
+    "dimensions": [
+      {"id": "class", "field": "班级", "output_name": "班级"}
+    ],
+    "metrics": [
+      {"id": "avg_score", "function": "average", "field": "成绩", "output_name": "平均分"}
+    ],
+    "sort": [
+      {"by": "avg_score", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_query",
+    "filters": "",
+    "group_by": ["班级"],
+    "aggregations": {
+      "成绩": "mean"
+    },
+    "sort_by": [{"field": "平均分", "ascending": false}],
+    "expected_row_count": 6,
+    "sample_rows": [
+      {"班级": "高三1班", "平均分": 85.5},
+      {"班级": "高三2班", "平均分": 83.2},
+      {"班级": "高三3班", "平均分": 81.8}
+    ]
+  },
+  "difficulty_factors": {
+    "data_quality": "clean",
+    "field_binding": "exact_match",
+    "business_logic": "average",
+    "data_volume": "small"
+  },
+  "tags": ["simple", "average", "basic_aggregation"]
+}

@@ -1,0 +1,59 @@
+{
+  "id": "M7",
+  "name": "store_performance_ranking",
+  "level": "medium",
+  "description": "门店绩效排名场景，多指标综合评估，测试多维度排序能力",
+  "data_file": "tests/agent_contract/data/M7_store_performance.xlsx",
+  "source": {
+    "sheet": "门店数据",
+    "header_row": 1
+  },
+  "user_prompt": "统计各门店的经营情况，要求：按门店名称分组，计算销售总额、订单数量、客单价（销售总额/订单数量）、好评数量，按销售总额降序排列",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [],
+    "dimensions": [
+      {"id": "store", "field": "门店名称", "output_name": "门店名称"}
+    ],
+    "metrics": [
+      {"id": "total_sales", "function": "sum", "field": "销售额", "output_name": "销售总额"},
+      {"id": "order_count", "function": "count", "mode": "rows", "output_name": "订单数量"},
+      {"id": "review_count", "function": "count", "mode": "non_empty", "field": "好评", "output_name": "好评数量"}
+    ],
+    "sort": [
+      {"by": "total_sales", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_groupby",
+    "group_by": ["门店名称"],
+    "aggregations": {
+      "销售额": "sum",
+      "订单数量": "count",
+      "好评": "count"
+    },
+    "derived_metrics": {
+      "客单价": "销售总额 / 订单数量"
+    },
+    "sort_by": [{"field": "销售总额", "ascending": false}],
+    "expected_row_count": 15,
+    "expected_total": 4500000,
+    "sample_rows": [
+      {"门店名称": "旗舰店", "销售总额": 680000, "订单数量": 1200, "客单价": 566.67, "好评数量": 980},
+      {"门店名称": "北京店", "销售总额": 520000, "订单数量": 950, "客单价": 547.37, "好评数量": 780}
+    ],
+    "note": "客单价需要Runtime外部计算（sum/count），测试Agent是否能识别派生指标"
+  },
+  "difficulty_factors": {
+    "data_quality": "moderate_dirty",
+    "field_binding": "exact_match",
+    "business_logic": "performance_ranking",
+    "data_volume": "medium"
+  },
+  "tags": ["medium", "store_ranking", "derived_metric", "performance"]
+}

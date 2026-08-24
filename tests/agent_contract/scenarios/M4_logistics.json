@@ -1,0 +1,59 @@
+{
+  "id": "M4",
+  "name": "logistics_delivery_analysis",
+  "level": "medium",
+  "description": "物流配送分析场景，包含配送时效和异常数据",
+  "data_file": "tests/agent_contract/data/M4_logistics.xlsx",
+  "source": {
+    "sheet": "配送记录",
+    "header_row": 1
+  },
+  "user_prompt": "分析各配送区域的配送表现，要求：筛选配送状态=已签收的订单，按配送区域分组，计算订单总数、平均配送时长（小时）和准时送达数量，按订单总数降序排列",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [
+      {"id": "delivered", "field": "配送状态", "operator": "eq", "value": "已签收"}
+    ],
+    "dimensions": [
+      {"id": "area", "field": "配送区域", "output_name": "配送区域"}
+    ],
+    "metrics": [
+      {"id": "order_count", "function": "count", "mode": "rows", "output_name": "订单总数"},
+      {"id": "avg_duration", "function": "average", "field": "配送时长", "output_name": "平均配送时长"},
+      {"id": "on_time_count", "function": "sum", "field": "准时标记", "output_name": "准时送达数量"}
+    ],
+    "sort": [
+      {"by": "order_count", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_query",
+    "filters": "配送状态 == '已签收'",
+    "group_by": ["配送区域"],
+    "aggregations": {
+      "订单总数": "size",
+      "配送时长": "mean",
+      "准时标记": "sum"
+    },
+    "sort_by": [{"field": "订单总数", "ascending": false}],
+    "expected_row_count": 12,
+    "expected_total": 8500,
+    "sample_rows": [
+      {"配送区域": "华东", "订单总数": 1850, "平均配送时长": 26.5, "准时送达数量": 1680},
+      {"配送区域": "华北", "订单总数": 1620, "平均配送时长": 28.2, "准时送达数量": 1450},
+      {"配送区域": "华南", "订单总数": 1480, "平均配送时长": 30.1, "准时送达数量": 1320}
+    ]
+  },
+  "difficulty_factors": {
+    "data_quality": "moderate_dirty",
+    "field_binding": "exact_match",
+    "business_logic": "delivery_performance",
+    "data_volume": "medium"
+  },
+  "tags": ["medium", "logistics", "delivery", "performance_analysis"]
+}

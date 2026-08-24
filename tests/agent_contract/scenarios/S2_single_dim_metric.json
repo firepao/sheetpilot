@@ -1,0 +1,51 @@
+{
+  "id": "S2",
+  "name": "single_dimension_single_metric",
+  "level": "simple",
+  "description": "最简单场景：单维度单指标无过滤",
+  "data_file": "tests/agent_contract/data/S2_single_dim_metric.xlsx",
+  "source": {
+    "sheet": "销售数据",
+    "header_row": 1
+  },
+  "user_prompt": "统计各产品的销售总额",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [],
+    "dimensions": [
+      {"id": "product", "field": "产品名称", "output_name": "产品名称"}
+    ],
+    "metrics": [
+      {"id": "total_sales", "function": "sum", "field": "销售额", "output_name": "销售总额"}
+    ],
+    "sort": []
+  },
+  "oracle_params": {
+    "method": "pandas_query",
+    "filters": "",
+    "group_by": ["产品名称"],
+    "aggregations": {
+      "销售额": "sum"
+    },
+    "sort_by": [],
+    "expected_row_count": 5,
+    "expected_total": 125000,
+    "sample_rows": [
+      {"产品名称": "产品A", "销售总额": 35000},
+      {"产品名称": "产品B", "销售总额": 28000},
+      {"产品名称": "产品C", "销售总额": 22000}
+    ]
+  },
+  "difficulty_factors": {
+    "data_quality": "clean",
+    "field_binding": "exact_match",
+    "business_logic": "basic_sum",
+    "data_volume": "small"
+  },
+  "tags": ["simple", "single_dimension", "single_metric", "no_filter"]
+}

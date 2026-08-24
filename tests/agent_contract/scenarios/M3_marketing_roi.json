@@ -1,0 +1,60 @@
+{
+  "id": "M3",
+  "name": "marketing_campaign_roi",
+  "level": "medium",
+  "description": "营销活动ROI分析场景，包含投放成本和转化数据",
+  "data_file": "tests/agent_contract/data/M3_marketing_roi.xlsx",
+  "source": {
+    "sheet": "营销数据",
+    "header_row": 1
+  },
+  "user_prompt": "分析各渠道各活动的投放效果，要求：筛选状态=已结束的活动，按渠道和活动名称分组，计算总投放成本、转化订单数和平均转化成本，按总投放成本降序排列",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [
+      {"id": "completed", "field": "状态", "operator": "eq", "value": "已结束"}
+    ],
+    "dimensions": [
+      {"id": "channel", "field": "渠道", "output_name": "渠道"},
+      {"id": "campaign", "field": "活动名称", "output_name": "活动名称"}
+    ],
+    "metrics": [
+      {"id": "total_cost", "function": "sum", "field": "投放成本", "output_name": "总投放成本"},
+      {"id": "conversion_count", "function": "sum", "field": "转化订单数", "output_name": "转化订单数"},
+      {"id": "avg_cost_per_conversion", "function": "average", "field": "单次转化成本", "output_name": "平均转化成本"}
+    ],
+    "sort": [
+      {"by": "total_cost", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_query",
+    "filters": "状态 == '已结束'",
+    "group_by": ["渠道", "活动名称"],
+    "aggregations": {
+      "投放成本": "sum",
+      "转化订单数": "sum",
+      "单次转化成本": "mean"
+    },
+    "sort_by": [{"field": "总投放成本", "ascending": false}],
+    "expected_row_count": 18,
+    "expected_total_cost": 850000,
+    "sample_rows": [
+      {"渠道": "抖音", "活动名称": "618大促", "总投放成本": 180000, "转化订单数": 3200, "平均转化成本": 56.25},
+      {"渠道": "微信", "活动名称": "会员日", "总投放成本": 150000, "转化订单数": 2800, "平均转化成本": 53.57},
+      {"渠道": "小红书", "活动名称": "新品首发", "总投放成本": 120000, "转化订单数": 2100, "平均转化成本": 57.14}
+    ]
+  },
+  "difficulty_factors": {
+    "data_quality": "clean",
+    "field_binding": "exact_match",
+    "business_logic": "roi_analysis",
+    "data_volume": "medium"
+  },
+  "tags": ["medium", "marketing", "roi", "campaign_analysis"]
+}

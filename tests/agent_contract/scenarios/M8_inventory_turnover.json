@@ -1,0 +1,58 @@
+{
+  "id": "M8",
+  "name": "inventory_turnover_analysis",
+  "level": "medium",
+  "description": "库存周转分析场景，计算库存周转率和周转天数，测试复杂业务指标计算能力",
+  "data_file": "tests/agent_contract/data/M8_inventory_turnover.xlsx",
+  "source": {
+    "sheet": "库存数据",
+    "header_row": 1
+  },
+  "user_prompt": "统计各仓库的库存周转情况，要求：按仓库名称分组，计算出库总数量、平均库存数量，按出库总数量降序排列",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [],
+    "dimensions": [
+      {"id": "warehouse", "field": "仓库名称", "output_name": "仓库名称"}
+    ],
+    "metrics": [
+      {"id": "total_outbound", "function": "sum", "field": "出库数量", "output_name": "出库总数量"},
+      {"id": "avg_inventory", "function": "average", "field": "库存数量", "output_name": "平均库存数量"}
+    ],
+    "sort": [
+      {"by": "total_outbound", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_groupby",
+    "group_by": ["仓库名称"],
+    "aggregations": {
+      "出库数量": "sum",
+      "库存数量": "mean"
+    },
+    "derived_metrics": {
+      "库存周转率": "出库总数量 / 平均库存数量",
+      "周转天数": "365 / 库存周转率"
+    },
+    "sort_by": [{"field": "出库总数量", "ascending": false}],
+    "expected_row_count": 8,
+    "expected_total": 120000,
+    "sample_rows": [
+      {"仓库名称": "华东仓", "出库总数量": 28000, "平均库存数量": 3500, "库存周转率": 8.0, "周转天数": 45.63},
+      {"仓库名称": "华北仓", "出库总数量": 24000, "平均库存数量": 3200, "库存周转率": 7.5, "周转天数": 48.67}
+    ],
+    "note": "周转率和周转天数需要Runtime外部计算，测试Agent是否能识别并说明"
+  },
+  "difficulty_factors": {
+    "data_quality": "moderate_dirty",
+    "field_binding": "exact_match",
+    "business_logic": "turnover_calculation",
+    "data_volume": "medium"
+  },
+  "tags": ["medium", "inventory", "turnover_rate", "supply_chain"]
+}

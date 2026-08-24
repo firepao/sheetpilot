@@ -1,0 +1,53 @@
+{
+  "id": "S3",
+  "name": "count_rows_basic",
+  "level": "simple",
+  "description": "基础计数场景：count.rows模式",
+  "data_file": "tests/agent_contract/data/S3_count_rows.xlsx",
+  "source": {
+    "sheet": "订单数据",
+    "header_row": 1
+  },
+  "user_prompt": "统计各城市的订单数量",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [],
+    "dimensions": [
+      {"id": "city", "field": "城市", "output_name": "城市"}
+    ],
+    "metrics": [
+      {"id": "order_count", "function": "count", "mode": "rows", "output_name": "订单数量"}
+    ],
+    "sort": [
+      {"by": "order_count", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_query",
+    "filters": "",
+    "group_by": ["城市"],
+    "aggregations": {
+      "订单数量": "size"
+    },
+    "sort_by": [{"field": "订单数量", "ascending": false}],
+    "expected_row_count": 8,
+    "expected_total": 320,
+    "sample_rows": [
+      {"城市": "北京", "订单数量": 85},
+      {"城市": "上海", "订单数量": 72},
+      {"城市": "深圳", "订单数量": 58}
+    ]
+  },
+  "difficulty_factors": {
+    "data_quality": "clean",
+    "field_binding": "exact_match",
+    "business_logic": "count_rows",
+    "data_volume": "small"
+  },
+  "tags": ["simple", "count_rows", "basic_grouping"]
+}

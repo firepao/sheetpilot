@@ -1,0 +1,55 @@
+{
+  "id": "S4",
+  "name": "simple_filter_sum",
+  "level": "simple",
+  "description": "简单过滤+求和场景，测试单条件过滤和sum功能",
+  "data_file": "tests/agent_contract/data/S4_simple_filter_sum.xlsx",
+  "source": {
+    "sheet": "销售记录",
+    "header_row": 1
+  },
+  "user_prompt": "统计已完成订单的销售额，要求：筛选订单状态=已完成，按产品名称分组，计算销售总额，按销售总额降序排列",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [
+      {"id": "completed", "field": "订单状态", "operator": "eq", "value": "已完成"}
+    ],
+    "dimensions": [
+      {"id": "product", "field": "产品名称", "output_name": "产品名称"}
+    ],
+    "metrics": [
+      {"id": "total_sales", "function": "sum", "field": "销售额", "output_name": "销售总额"}
+    ],
+    "sort": [
+      {"by": "total_sales", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_query",
+    "filters": "订单状态 == '已完成'",
+    "group_by": ["产品名称"],
+    "aggregations": {
+      "销售额": "sum"
+    },
+    "sort_by": [{"field": "销售总额", "ascending": false}],
+    "expected_row_count": 5,
+    "expected_total": 95000,
+    "sample_rows": [
+      {"产品名称": "产品A", "销售总额": 35000},
+      {"产品名称": "产品B", "销售总额": 28000},
+      {"产品名称": "产品C", "销售总额": 18000}
+    ]
+  },
+  "difficulty_factors": {
+    "data_quality": "clean",
+    "field_binding": "exact_match",
+    "business_logic": "filter_sum",
+    "data_volume": "small"
+  },
+  "tags": ["simple", "filter", "sum", "basic"]
+}

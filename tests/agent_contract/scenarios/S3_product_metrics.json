@@ -1,0 +1,55 @@
+{
+  "id": "S3",
+  "name": "product_metrics_summary",
+  "level": "simple",
+  "description": "多指标场景，单维度分组，计算sum+count+average三种聚合函数",
+  "data_file": "tests/agent_contract/data/S3_product_metrics.xlsx",
+  "source": {
+    "sheet": "订单明细",
+    "header_row": 1
+  },
+  "user_prompt": "统计各产品的销售情况，要求：按产品名称分组，计算销售总额、订单数量、平均订单金额，按销售总额降序排列",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [],
+    "dimensions": [
+      {"id": "product", "field": "产品名称", "output_name": "产品名称"}
+    ],
+    "metrics": [
+      {"id": "total_sales", "function": "sum", "field": "销售额", "output_name": "销售总额"},
+      {"id": "order_count", "function": "count", "mode": "rows", "output_name": "订单数量"},
+      {"id": "avg_amount", "function": "average", "field": "销售额", "output_name": "平均订单金额"}
+    ],
+    "sort": [
+      {"by": "total_sales", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_groupby",
+    "group_by": ["产品名称"],
+    "aggregations": {
+      "销售额": ["sum", "mean"],
+      "订单数量": "count"
+    },
+    "sort_by": [{"field": "销售总额", "ascending": false}],
+    "expected_row_count": 8,
+    "expected_total": 360000,
+    "sample_rows": [
+      {"产品名称": "笔记本电脑", "销售总额": 125000, "订单数量": 25, "平均订单金额": 5000.0},
+      {"产品名称": "智能手机", "销售总额": 98000, "订单数量": 49, "平均订单金额": 2000.0},
+      {"产品名称": "平板电脑", "销售总额": 72000, "订单数量": 30, "平均订单金额": 2400.0}
+    ]
+  },
+  "difficulty_factors": {
+    "data_quality": "clean",
+    "field_binding": "exact_match",
+    "business_logic": "straightforward",
+    "data_volume": "small"
+  },
+  "tags": ["simple", "multi_metric", "sum_count_avg", "baseline"]
+}

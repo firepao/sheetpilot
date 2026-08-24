@@ -1,0 +1,54 @@
+{
+  "id": "S6",
+  "name": "simple_two_metrics",
+  "level": "simple",
+  "description": "简单双指标场景，测试同时计算sum和count",
+  "data_file": "tests/agent_contract/data/S6_two_metrics.xlsx",
+  "source": {
+    "sheet": "订单数据",
+    "header_row": 1
+  },
+  "user_prompt": "统计各地区的订单情况，要求：按地区分组，计算订单总额和订单数量，按订单总额降序排列",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [],
+    "dimensions": [
+      {"id": "region", "field": "地区", "output_name": "地区"}
+    ],
+    "metrics": [
+      {"id": "total_amount", "function": "sum", "field": "订单金额", "output_name": "订单总额"},
+      {"id": "order_count", "function": "count", "mode": "rows", "output_name": "订单数量"}
+    ],
+    "sort": [
+      {"by": "total_amount", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_groupby",
+    "group_by": ["地区"],
+    "aggregations": {
+      "订单金额": "sum",
+      "订单数量": "size"
+    },
+    "sort_by": [{"field": "订单总额", "ascending": false}],
+    "expected_row_count": 6,
+    "expected_total": 180000,
+    "sample_rows": [
+      {"地区": "华东", "订单总额": 52000, "订单数量": 65},
+      {"地区": "华北", "订单总额": 48000, "订单数量": 58},
+      {"地区": "华南", "订单总额": 38000, "订单数量": 48}
+    ]
+  },
+  "difficulty_factors": {
+    "data_quality": "clean",
+    "field_binding": "exact_match",
+    "business_logic": "multi_metric",
+    "data_volume": "small"
+  },
+  "tags": ["simple", "multi_metric", "sum_count", "basic"]
+}

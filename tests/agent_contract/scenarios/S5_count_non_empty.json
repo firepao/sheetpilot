@@ -1,0 +1,53 @@
+{
+  "id": "S5",
+  "name": "simple_count_non_empty",
+  "level": "simple",
+  "description": "简单非空计数场景，测试count.non_empty基础功能",
+  "data_file": "tests/agent_contract/data/S5_count_non_empty.xlsx",
+  "source": {
+    "sheet": "员工信息",
+    "header_row": 1
+  },
+  "user_prompt": "统计各部门填写了邮箱的员工数量，要求：按部门分组，计算填写邮箱的员工数量，按数量降序排列",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [],
+    "dimensions": [
+      {"id": "dept", "field": "部门", "output_name": "部门"}
+    ],
+    "metrics": [
+      {"id": "email_count", "function": "count", "mode": "non_empty", "field": "邮箱", "output_name": "填写邮箱的员工数"}
+    ],
+    "sort": [
+      {"by": "email_count", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_groupby",
+    "group_by": ["部门"],
+    "aggregations": {
+      "邮箱": "count"
+    },
+    "sort_by": [{"field": "填写邮箱的员工数", "ascending": false}],
+    "expected_row_count": 5,
+    "expected_total": 135,
+    "sample_rows": [
+      {"部门": "研发部", "填写邮箱的员工数": 42},
+      {"部门": "市场部", "填写邮箱的员工数": 35},
+      {"部门": "销售部", "填写邮箱的员工数": 28}
+    ],
+    "note": "数据中部分员工邮箱为空，测试count.non_empty正确过滤空值"
+  },
+  "difficulty_factors": {
+    "data_quality": "has_nulls",
+    "field_binding": "exact_match",
+    "business_logic": "count_non_empty",
+    "data_volume": "small"
+  },
+  "tags": ["simple", "count_non_empty", "null_handling", "basic"]
+}

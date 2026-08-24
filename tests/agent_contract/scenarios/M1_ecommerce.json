@@ -1,0 +1,63 @@
+{
+  "id": "M1",
+  "name": "ecommerce_category_analysis",
+  "level": "medium",
+  "description": "电商品类分析场景，3个过滤条件+2个维度+4个指标",
+  "data_file": "tests/agent_contract/data/M1_ecommerce.xlsx",
+  "source": {
+    "sheet": "交易数据",
+    "header_row": 1
+  },
+  "user_prompt": "分析2024年已支付且未退款订单的品类表现，要求：筛选年份=2024、支付状态=已支付、退款状态=否，按一级类目和二级类目分组，计算订单金额总和、订单数量、客户数（去重）和平均订单金额，按订单金额降序排列",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [
+      {"id": "year_2024", "field": "年份", "operator": "eq", "value": 2024},
+      {"id": "paid", "field": "支付状态", "operator": "eq", "value": "已支付"},
+      {"id": "no_refund", "field": "退款状态", "operator": "eq", "value": "否"}
+    ],
+    "dimensions": [
+      {"id": "cat1", "field": "一级类目", "output_name": "一级类目"},
+      {"id": "cat2", "field": "二级类目", "output_name": "二级类目"}
+    ],
+    "metrics": [
+      {"id": "total_amount", "function": "sum", "field": "订单金额", "output_name": "订单金额总和"},
+      {"id": "order_count", "function": "count", "mode": "rows", "output_name": "订单数量"},
+      {"id": "customer_count", "function": "count", "mode": "non_empty", "field": "客户ID", "output_name": "客户数"},
+      {"id": "avg_amount", "function": "average", "field": "订单金额", "output_name": "平均订单金额"}
+    ],
+    "sort": [
+      {"by": "total_amount", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_query",
+    "filters": "(年份 == 2024) & (支付状态 == '已支付') & (退款状态 == '否')",
+    "group_by": ["一级类目", "二级类目"],
+    "aggregations": {
+      "订单金额": ["sum", "mean"],
+      "订单数量": "size",
+      "客户ID": "count"
+    },
+    "sort_by": [{"field": "订单金额总和", "ascending": false}],
+    "expected_row_count": 25,
+    "expected_total": 1850000,
+    "sample_rows": [
+      {"一级类目": "服饰", "二级类目": "女装", "订单金额总和": 420000, "订单数量": 850, "客户数": 680, "平均订单金额": 494.12},
+      {"一级类目": "数码", "二级类目": "手机", "订单金额总和": 380000, "订单数量": 420, "客户数": 390, "平均订单金额": 904.76},
+      {"一级类目": "家居", "二级类目": "家具", "订单金额总和": 310000, "订单数量": 520, "客户数": 450, "平均订单金额": 596.15}
+    ]
+  },
+  "difficulty_factors": {
+    "data_quality": "moderate_dirty",
+    "field_binding": "exact_match",
+    "business_logic": "multi_filter_multi_dimension",
+    "data_volume": "medium"
+  },
+  "tags": ["medium", "ecommerce", "category_analysis", "multi_filter"]
+}

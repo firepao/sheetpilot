@@ -1,0 +1,58 @@
+{
+  "id": "M6",
+  "name": "product_return_rate_analysis",
+  "level": "medium",
+  "description": "产品退货率分析场景，计算退货率（退货数/总订单数），测试比例计算能力",
+  "data_file": "tests/agent_contract/data/M6_return_rate.xlsx",
+  "source": {
+    "sheet": "订单记录",
+    "header_row": 1
+  },
+  "user_prompt": "统计各产品的退货情况，要求：按产品名称分组，计算总订单数、退货订单数（订单状态=已退货），按总订单数降序排列",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 2,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto",
+    "expected_clarifications": [
+      "退货率需要两次聚合计算（总订单数和退货订单数），当前契约只能分别计算，需Agent告知用户手工计算退货率"
+    ]
+  },
+  "task_request_template": {
+    "filters": [],
+    "dimensions": [
+      {"id": "product", "field": "产品名称", "output_name": "产品名称"}
+    ],
+    "metrics": [
+      {"id": "total_orders", "function": "count", "mode": "rows", "output_name": "总订单数"}
+    ],
+    "sort": [
+      {"by": "total_orders", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "two_pass_calculation",
+    "note": "需要两次执行：(1)按产品统计总订单数，(2)筛选已退货后统计退货订单数，然后手工计算退货率",
+    "pass_1": {
+      "group_by": ["产品名称"],
+      "aggregations": {"订单数": "count"}
+    },
+    "pass_2": {
+      "filters": "订单状态 == '已退货'",
+      "group_by": ["产品名称"],
+      "aggregations": {"退货订单数": "count"}
+    },
+    "expected_row_count": 10,
+    "sample_rows": [
+      {"产品名称": "智能手机", "总订单数": 450, "退货订单数": 27, "退货率": 6.0},
+      {"产品名称": "笔记本电脑", "总订单数": 280, "退货订单数": 8, "退货率": 2.86}
+    ]
+  },
+  "difficulty_factors": {
+    "data_quality": "moderate_dirty",
+    "field_binding": "exact_match",
+    "business_logic": "ratio_calculation",
+    "data_volume": "medium"
+  },
+  "tags": ["medium", "return_rate", "ratio_calculation", "capability_boundary"]
+}

@@ -1,0 +1,55 @@
+{
+  "id": "S9",
+  "name": "two_metrics_basic",
+  "level": "simple",
+  "description": "基础双指标场景：sum和count组合",
+  "data_file": "tests/agent_contract/data/S9_two_metrics.xlsx",
+  "source": {
+    "sheet": "订单数据",
+    "header_row": 1
+  },
+  "user_prompt": "统计各产品的销售额和订单数量",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto"
+  },
+  "task_request_template": {
+    "filters": [],
+    "dimensions": [
+      {"id": "product", "field": "产品名称", "output_name": "产品名称"}
+    ],
+    "metrics": [
+      {"id": "total_sales", "function": "sum", "field": "销售额", "output_name": "销售额"},
+      {"id": "order_count", "function": "count", "mode": "rows", "output_name": "订单数量"}
+    ],
+    "sort": [
+      {"by": "total_sales", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_query",
+    "filters": "",
+    "group_by": ["产品名称"],
+    "aggregations": {
+      "销售额": "sum",
+      "订单数量": "size"
+    },
+    "sort_by": [{"field": "销售额", "ascending": false}],
+    "expected_row_count": 6,
+    "expected_total": 320000,
+    "sample_rows": [
+      {"产品名称": "产品A", "销售额": 85000, "订单数量": 125},
+      {"产品名称": "产品B", "销售额": 72000, "订单数量": 98},
+      {"产品名称": "产品C", "销售额": 58000, "订单数量": 85}
+    ]
+  },
+  "difficulty_factors": {
+    "data_quality": "clean",
+    "field_binding": "exact_match",
+    "business_logic": "two_metrics",
+    "data_volume": "small"
+  },
+  "tags": ["simple", "two_metrics", "sum_and_count"]
+}

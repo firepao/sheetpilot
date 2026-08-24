@@ -1,0 +1,58 @@
+{
+  "id": "H1",
+  "name": "numeric_text_ambiguity",
+  "level": "hard",
+  "description": "数值文本歧义场景，同一列存在数值和文本混合（123、'123'、'123元'）",
+  "data_file": "tests/agent_contract/data/H1_numeric_text.xlsx",
+  "source": {
+    "sheet": "销售记录",
+    "header_row": 1
+  },
+  "user_prompt": "统计各产品的销售情况，要求：按产品名称分组，计算销售额总和和订单数量，按销售额总和降序排列",
+  "expected_outcome": "success",
+  "ideal_interaction": {
+    "rounds": 1,
+    "cli_calls": ["task-types", "task-run", "task-status"],
+    "expected_bindings": "auto",
+    "notes": "Runtime需要正确处理文本型数值和单位后缀"
+  },
+  "task_request_template": {
+    "filters": [],
+    "dimensions": [
+      {"id": "product", "field": "产品名称", "output_name": "产品名称"}
+    ],
+    "metrics": [
+      {"id": "total_sales", "function": "sum", "field": "销售额", "output_name": "销售额总和"},
+      {"id": "order_count", "function": "count", "mode": "rows", "output_name": "订单数量"}
+    ],
+    "sort": [
+      {"by": "total_sales", "direction": "desc"}
+    ]
+  },
+  "oracle_params": {
+    "method": "pandas_coerce_numeric",
+    "numeric_field": "销售额",
+    "strip_suffix": "元",
+    "group_by": ["产品名称"],
+    "aggregations": {
+      "销售额": "sum",
+      "订单数量": "size"
+    },
+    "sort_by": [{"field": "销售额总和", "ascending": false}],
+    "expected_row_count": 15,
+    "expected_total": 850000,
+    "sample_rows": [
+      {"产品名称": "笔记本电脑", "销售额总和": 185000, "订单数量": 220},
+      {"产品名称": "智能手机", "销售额总和": 165000, "订单数量": 280},
+      {"产品名称": "平板电脑", "销售额总和": 125000, "订单数量": 195}
+    ],
+    "value_formats": ["123", "'123'", "'123元'", "123.45", "'123.45元'"]
+  },
+  "difficulty_factors": {
+    "data_quality": "type_inconsistent",
+    "field_binding": "exact_match",
+    "business_logic": "numeric_coercion",
+    "data_volume": "medium"
+  },
+  "tags": ["hard", "type_ambiguity", "numeric_text", "data_cleaning"]
+}
