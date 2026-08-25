@@ -6,7 +6,7 @@
 - **测试重点**: 多个过滤条件的AND组合
 
 ## 数据文件
-- **路径**: `tests/agent_contract/data/S9_multi_filter.xlsx`
+- **路径**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\\S9_multi_filter.xlsx`
 - **工作表**: `产品销售`
 - **数据量**: 约101行
 - **表头行**: 第1行
@@ -25,7 +25,7 @@
 ```
 请统计状态为"正常"且区域为"华东"的产品销售额，按产品分组。
 
-输入文件：tests/agent_contract/data/S9_multi_filter.xlsx
+输入文件：D:\bitexcel\SheetPilot\tests\agent_contract\data\\S9_multi_filter.xlsx
 输出文件：<自动生成>
 ```
 
@@ -33,7 +33,7 @@
 
 ### Step 1: 查询字段清单
 ```bash
-task-types --input tests/agent_contract/data/S9_multi_filter.xlsx
+task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\S9_multi_filter.xlsx
 ```
 
 **预期返回**:
@@ -47,7 +47,7 @@ task-types --input tests/agent_contract/data/S9_multi_filter.xlsx
 {
   "schema_version": "1.0",
   "task_type": "summarize_table",
-  "input_file": "tests/agent_contract/data/S9_multi_filter.xlsx",
+  "input_file": "D:\bitexcel\SheetPilot\tests\agent_contract\data\\S9_multi_filter.xlsx",
   "output_file": "<AUTO-RESULT-DIR>/华东正常产品销售.xlsx",
   "user_request": "请统计状态为"正常"且区域为"华东"的产品销售额，按产品分组。",
   "source": {"sheet": "产品销售", "header_row": 1},

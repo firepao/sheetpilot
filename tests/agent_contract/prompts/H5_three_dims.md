@@ -6,7 +6,7 @@
 - **测试重点**: 3个维度的层级分组（时间维度）
 
 ## 数据文件
-- **路径**: `tests/agent_contract/data/H5_nested_group.xlsx`
+- **路径**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\\H5_nested_group.xlsx`
 - **工作表**: `销售数据`
 - **数据量**: 约288行
 - **表头行**: 第1行
@@ -34,7 +34,7 @@
 ```
 请按年份、季度、月份统计2024年的月度销售额。
 
-输入文件：tests/agent_contract/data/H5_three_dims.xlsx
+输入文件：D:\bitexcel\SheetPilot\tests\agent_contract\data\\H5_three_dims.xlsx
 输出文件：<自动生成>
 ```
 
@@ -53,7 +53,7 @@
 
 ### Step 1: 查询字段清单
 ```bash
-task-types --input tests/agent_contract/data/H5_nested_group.xlsx
+task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\H5_nested_group.xlsx
 ```
 
 **预期返回**:
@@ -67,7 +67,7 @@ task-types --input tests/agent_contract/data/H5_nested_group.xlsx
 {
   "schema_version": "1.0",
   "task_type": "summarize_table",
-  "input_file": "tests/agent_contract/data/H5_nested_group.xlsx",
+  "input_file": "D:\bitexcel\SheetPilot\tests\agent_contract\data\\H5_nested_group.xlsx",
   "output_file": "<AUTO-RESULT-DIR>/月度销售统计.xlsx",
   "user_request": "请按年份、季度、月份统计2024年的月度销售额。",
   "source": {"sheet": "销售数据", "header_row": 1},

@@ -6,7 +6,7 @@
 - **测试重点**: 最简单的分组汇总场景
 
 ## 数据文件
-- **路径**: `tests/agent_contract/data/S2_single_dim_metric.xlsx`
+- **路径**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\\S2_single_dim_metric.xlsx`
 - **工作表**: `销售数据`
 - **数据量**: 约60行
 - **表头行**: 第1行
@@ -22,7 +22,7 @@
 ```
 请帮我统计每个区域的总销售额，按区域分组汇总。
 
-输入文件：tests/agent_contract/data/S2_single_dim_metric.xlsx
+输入文件：D:\bitexcel\SheetPilot\tests\agent_contract\data\\S2_single_dim_metric.xlsx
 输出文件：<自动生成>
 ```
 
@@ -30,7 +30,7 @@
 
 ### Step 1: 查询字段清单
 ```bash
-task-types --input tests/agent_contract/data/S2_single_dim_metric.xlsx
+task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\S2_single_dim_metric.xlsx
 ```
 
 **预期返回**:
@@ -42,7 +42,7 @@ task-types --input tests/agent_contract/data/S2_single_dim_metric.xlsx
 {
   "schema_version": "1.0",
   "task_type": "summarize_table",
-  "input_file": "tests/agent_contract/data/S2_single_dim_metric.xlsx",
+  "input_file": "D:\bitexcel\SheetPilot\tests\agent_contract\data\\S2_single_dim_metric.xlsx",
   "output_file": "<AUTO-RESULT-DIR>/区域销售汇总.xlsx",
   "user_request": "请帮我统计每个区域的总销售额，按区域分组汇总。",
   "source": {"sheet": "销售数据", "header_row": 1},

@@ -6,7 +6,7 @@
 - **测试重点**: count.non_empty（统计非空值数量）的正确使用
 
 ## 数据文件
-- **路径**: `tests/agent_contract/data/S4_count_non_empty.xlsx`
+- **路径**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\\S4_count_non_empty.xlsx`
 - **工作表**: `用户数据`
 - **数据量**: 约437行
 - **表头行**: 第1行
@@ -23,7 +23,7 @@
 ```
 请统计每个注册渠道有多少用户填写了邮箱（邮箱字段非空的用户数）。
 
-输入文件：tests/agent_contract/data/S4_count_non_empty.xlsx
+输入文件：D:\bitexcel\SheetPilot\tests\agent_contract\data\\S4_count_non_empty.xlsx
 输出文件：<自动生成>
 ```
 
@@ -31,7 +31,7 @@
 
 ### Step 1: 查询字段清单
 ```bash
-task-types --input tests/agent_contract/data/S4_count_non_empty.xlsx
+task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\S4_count_non_empty.xlsx
 ```
 
 **预期返回**:
@@ -46,7 +46,7 @@ task-types --input tests/agent_contract/data/S4_count_non_empty.xlsx
 {
   "schema_version": "1.0",
   "task_type": "summarize_table",
-  "input_file": "tests/agent_contract/data/S4_count_non_empty.xlsx",
+  "input_file": "D:\bitexcel\SheetPilot\tests\agent_contract\data\\S4_count_non_empty.xlsx",
   "output_file": "<AUTO-RESULT-DIR>/渠道邮箱统计.xlsx",
   "user_request": "请统计每个注册渠道有多少用户填写了邮箱（邮箱字段非空的用户数）。",
   "source": {"sheet": "用户数据", "header_row": 1},

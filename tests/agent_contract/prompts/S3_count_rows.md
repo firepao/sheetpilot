@@ -6,7 +6,7 @@
 - **测试重点**: count.rows（统计记录数）的正确使用
 
 ## 数据文件
-- **路径**: `tests/agent_contract/data/S3_count_rows.xlsx`
+- **路径**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\\S3_count_rows.xlsx`
 - **工作表**: `订单数据`
 - **数据量**: 约320行
 - **表头行**: 第1行
@@ -22,7 +22,7 @@
 ```
 请统计每个城市的订单数量。
 
-输入文件：tests/agent_contract/data/S3_count_rows.xlsx
+输入文件：D:\bitexcel\SheetPilot\tests\agent_contract\data\\S3_count_rows.xlsx
 输出文件：<自动生成>
 ```
 
@@ -30,7 +30,7 @@
 
 ### Step 1: 查询字段清单
 ```bash
-task-types --input tests/agent_contract/data/S3_count_rows.xlsx
+task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\S3_count_rows.xlsx
 ```
 
 **预期返回**:
@@ -44,7 +44,7 @@ task-types --input tests/agent_contract/data/S3_count_rows.xlsx
 {
   "schema_version": "1.0",
   "task_type": "summarize_table",
-  "input_file": "tests/agent_contract/data/S3_count_rows.xlsx",
+  "input_file": "D:\bitexcel\SheetPilot\tests\agent_contract\data\\S3_count_rows.xlsx",
   "output_file": "<AUTO-RESULT-DIR>/城市订单数量.xlsx",
   "user_request": "请统计每个城市的订单数量。",
   "source": {"sheet": "订单数据", "header_row": 1},

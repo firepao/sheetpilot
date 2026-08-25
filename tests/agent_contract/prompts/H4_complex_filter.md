@@ -6,7 +6,7 @@
 - **测试重点**: 3个过滤条件的组合（AND逻辑）+ 字段选择
 
 ## 数据文件
-- **路径**: `tests/agent_contract/data/H4_complex_filter.xlsx`
+- **路径**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\\H4_complex_filter.xlsx`
 - **工作表**: `客户订单`
 - **数据量**: 约386行
 - **表头行**: 第1行
@@ -26,7 +26,7 @@
 ```
 请统计已支付、已完成、订单金额大于5000元的企业客户订单，按区域分组汇总总金额和订单数量。
 
-输入文件：tests/agent_contract/data/H4_complex_filter.xlsx
+输入文件：D:\bitexcel\SheetPilot\tests\agent_contract\data\\H4_complex_filter.xlsx
 输出文件：<自动生成>
 ```
 
@@ -48,7 +48,7 @@
 
 ### Step 1: 查询字段清单
 ```bash
-task-types --input tests/agent_contract/data/H4_complex_filter.xlsx
+task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\H4_complex_filter.xlsx
 ```
 
 **预期返回**:
@@ -62,7 +62,7 @@ task-types --input tests/agent_contract/data/H4_complex_filter.xlsx
 {
   "schema_version": "1.0",
   "task_type": "summarize_table",
-  "input_file": "tests/agent_contract/data/H4_complex_filter.xlsx",
+  "input_file": "D:\bitexcel\SheetPilot\tests\agent_contract\data\\H4_complex_filter.xlsx",
   "output_file": "<AUTO-RESULT-DIR>/企业大额订单汇总.xlsx",
   "user_request": "请统计已支付、已完成、订单金额大于5000元的企业客户订单，按区域分组汇总总金额和订单数量。",
   "source": {"sheet": "客户订单", "header_row": 1},

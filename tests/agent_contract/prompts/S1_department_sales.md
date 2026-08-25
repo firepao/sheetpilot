@@ -9,7 +9,7 @@
 - 作为S系列的最简路径基准
 
 ## 输入文件
-- **文件路径**: `tests/agent_contract/data/01_simple_department_sales.xlsx`
+- **文件路径**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\\01_simple_department_sales.xlsx`
 - **工作表**: `销售明细`
 - **表头行**: 1
 - **数据特征**: 37行，字段清晰，无脏数据
@@ -19,7 +19,7 @@
 ```
 请分析销售明细表，按部门汇总销售总额，按销售总额降序排列。
 
-输入文件: tests/agent_contract/data/01_simple_department_sales.xlsx
+输入文件: D:\bitexcel\SheetPilot\tests\agent_contract\data\\01_simple_department_sales.xlsx
 输出文件: <由Agent决定>
 ```
 
@@ -27,7 +27,7 @@
 
 1. **查询字段清单**（可选）
    ```bash
-   sheetpilot task-types --input tests/agent_contract/data/01_simple_department_sales.xlsx --sheet 销售明细 --header-row 1
+   sheetpilot task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\01_simple_department_sales.xlsx --sheet 销售明细 --header-row 1
    ```
 
 2. **构造Task Request**

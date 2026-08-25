@@ -7,7 +7,7 @@
 ## M3: 库存周转分析
 
 ### 数据文件
-`tests/agent_contract/data/M3_inventory_turnover.xlsx`
+`D:\bitexcel\SheetPilot\tests\agent_contract\data\\M3_inventory_turnover.xlsx`
 
 ### 用户需求
 ```
@@ -28,7 +28,7 @@
 ## M4: 营销渠道ROI分析
 
 ### 数据文件
-`tests/agent_contract/data/M4_marketing_roi.xlsx`
+`D:\bitexcel\SheetPilot\tests\agent_contract\data\\M4_marketing_roi.xlsx`
 
 ### 用户需求
 ```
@@ -49,7 +49,7 @@
 ## M5: 在线课程统计
 
 ### 数据文件
-`tests/agent_contract/data/M5_course_statistics.xlsx`
+`D:\bitexcel\SheetPilot\tests\agent_contract\data\\M5_course_statistics.xlsx`
 
 ### 用户需求
 ```
@@ -70,7 +70,7 @@
 ## M6: 供应商分析
 
 ### 数据文件
-`tests/agent_contract/data/M6_supplier_analysis.xlsx`
+`D:\bitexcel\SheetPilot\tests\agent_contract\data\\M6_supplier_analysis.xlsx`
 
 ### 用户需求
 ```
@@ -91,7 +91,7 @@
 ## M7: 客诉分析
 
 ### 数据文件
-`tests/agent_contract/data/M7_complaint_analysis.xlsx`
+`D:\bitexcel\SheetPilot\tests\agent_contract\data\\M7_complaint_analysis.xlsx`
 
 ### 用户需求
 ```
@@ -112,7 +112,7 @@
 ## M8: 项目工时统计
 
 ### 数据文件
-`tests/agent_contract/data/M8_project_hours.xlsx`
+`D:\bitexcel\SheetPilot\tests\agent_contract\data\\M8_project_hours.xlsx`
 
 ### 用户需求
 ```

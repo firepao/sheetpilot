@@ -10,7 +10,7 @@
 - 验证RFM分析的简化版（仅F-Frequency消费金额维度）
 
 ## 输入文件
-- **文件路径**: `tests/agent_contract/data/R4_customer_rfm.xlsx`
+- **文件路径**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\\R4_customer_rfm.xlsx`
 - **工作表**: `订单流水`
 - **表头行**: 1
 - **数据特征**: 
@@ -34,7 +34,7 @@
 - 统计各层级的客户数量和总消费金额
 - 按价值层级排序（高→中→低）
 
-输入文件: tests/agent_contract/data/R4_customer_rfm.xlsx
+输入文件: D:\bitexcel\SheetPilot\tests\agent_contract\data\\R4_customer_rfm.xlsx
 输出文件: <由Agent决定>
 ```
 
@@ -42,7 +42,7 @@
 
 1. **查询字段清单**
    ```bash
-   sheetpilot task-types --input tests/agent_contract/data/R4_customer_rfm.xlsx --sheet 订单流水 --header-row 1
+   sheetpilot task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\R4_customer_rfm.xlsx --sheet 订单流水 --header-row 1
    ```
 
 2. **理解需求的两阶段聚合**

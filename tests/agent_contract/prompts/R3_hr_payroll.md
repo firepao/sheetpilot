@@ -10,7 +10,7 @@
 - 验证人力领域业务逻辑
 
 ## 输入文件
-- **文件路径**: `tests/agent_contract/data/R3_hr_payroll.xlsx`
+- **文件路径**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\\R3_hr_payroll.xlsx`
 - **工作表**: `薪资明细`
 - **表头行**: 1
 - **数据特征**: 
@@ -32,7 +32,7 @@
   3. 发薪人次（记录条数）
 - 按总薪资成本降序排列
 
-输入文件: tests/agent_contract/data/R3_hr_payroll.xlsx
+输入文件: D:\bitexcel\SheetPilot\tests\agent_contract\data\\R3_hr_payroll.xlsx
 输出文件: <由Agent决定>
 ```
 
@@ -40,7 +40,7 @@
 
 1. **查询字段清单**
    ```bash
-   sheetpilot task-types --input tests/agent_contract/data/R3_hr_payroll.xlsx --sheet 薪资明细 --header-row 1
+   sheetpilot task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\R3_hr_payroll.xlsx --sheet 薪资明细 --header-row 1
    ```
 
 2. **构造Task Request**
