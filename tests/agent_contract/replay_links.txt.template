@@ -1,0 +1,71 @@
+# Agent Replay Links Template
+#
+# 用法: 每行一个replay链接，以#开头的行会被忽略
+#
+# 示例:
+# https://example.com/api/replay/M3/session-abc123
+# https://example.com/api/replay/M4/session-def456
+#
+# 填写完成后，运行:
+# python tests/agent_contract/batch_download_replays.py replay_links.txt -o replays/
+
+# M系列场景 (Medium)
+# M1: 电商订单分析
+
+# M2: 员工绩效分析
+
+# M3: 库存周转分析
+
+# M4: 营销渠道ROI
+
+# M5: 在线课程统计
+
+# M6: 供应商分析
+
+# M7: 客诉分析
+
+# M8: 项目工时统计
+
+
+# S系列场景 (Simple)
+# S1: 单部门四指标
+
+# S2: 单维度单指标
+
+# S3: count.rows
+
+# S4: count.non_empty
+
+# S5: average
+
+# S6: 单条件过滤
+
+# S7: 双维度
+
+# S8: 多指标
+
+# S9: 多条件过滤
+
+
+# H系列场景 (Hard)
+# H1: 日期格式歧义
+
+# H2: 字段名相似性
+
+# H4: 多条件复杂过滤
+
+# H5: 三维度层级
+
+
+# R系列场景 (Real)
+# R1: 财务对账
+
+# R2: 库存预警
+
+# R3: HR薪资
+
+# R4: 客户RFM
+
+# R5: 广告ROI
+
+# R6: 物流超时
