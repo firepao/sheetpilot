@@ -25,46 +25,80 @@ except ImportError:
 
 
 def extract_scenario_id(replay_data: dict, url: str) -> str:
-    """从replay数据或URL中提取scenario_id"""
+    """从replay数据或URL中提取scenario_id（已消毒，防止路径遍历）"""
+    raw_id = None
+
     # 方法1: 从replay中的scenario字段
     if "scenario" in replay_data:
         scenario = replay_data["scenario"]
         if isinstance(scenario, dict) and "id" in scenario:
-            return scenario["id"]
+            raw_id = scenario["id"]
 
     # 方法2: 从URL路径中提取
-    path_parts = urlparse(url).path.split("/")
-    for part in path_parts:
-        # 匹配 S1, M3, H2, R1 等格式
-        if re.match(r'^[SMHR]\d+$', part):
-            return part
+    if not raw_id:
+        path_parts = urlparse(url).path.split("/")
+        for part in path_parts:
+            # 匹配 S1, M3, H2, R1 等格式
+            if re.match(r'^[SMHR]\d+$', part):
+                raw_id = part
+                break
 
     # 方法3: 从messages中的用户输入推断
-    messages = replay_data.get("messages", [])
-    for msg in messages:
-        content = str(msg.get("content", ""))
-        # 查找场景ID提及
-        match = re.search(r'\b([SMHR]\d+)\b', content)
-        if match:
-            return match.group(1)
+    if not raw_id:
+        messages = replay_data.get("messages", [])
+        for msg in messages:
+            content = str(msg.get("content", ""))
+            # 查找场景ID提及
+            match = re.search(r'\b([SMHR]\d+)\b', content)
+            if match:
+                raw_id = match.group(1)
+                break
 
-    # 方法4: 返回默认值
+    # 安全验证：只允许标准场景ID格式
+    if raw_id and re.match(r'^[SMHR]\d+$', raw_id):
+        return raw_id
+
+    # 如果提取失败或不符合格式，返回安全的默认值
     return "unknown"
 
 
 def download_replay(url: str, output_dir: Path, timeout: int = 30) -> dict:
-    """下载单个replay"""
+    """下载单个replay（带大小限制，防止资源耗尽）"""
     result = {"url": url, "success": False}
+
+    # 最大响应大小：100MB
+    MAX_RESPONSE_SIZE = 100 * 1024 * 1024
 
     try:
         print(f"Downloading: {url}")
-        response = requests.get(url, timeout=timeout)
+        response = requests.get(url, timeout=timeout, stream=True)
         response.raise_for_status()
 
-        # 解析JSON
-        replay_data = response.json()
+        # 检查Content-Length头
+        content_length = response.headers.get('content-length')
+        if content_length and int(content_length) > MAX_RESPONSE_SIZE:
+            result["error"] = f"Response too large: {content_length} bytes (max {MAX_RESPONSE_SIZE})"
+            print(f"  ✗ Error: Response exceeds size limit")
+            return result
 
-        # 提取scenario_id
+        # 分块读取并检查大小
+        content = b''
+        for chunk in response.iter_content(chunk_size=8192):
+            content += chunk
+            if len(content) > MAX_RESPONSE_SIZE:
+                result["error"] = f"Response exceeded {MAX_RESPONSE_SIZE} bytes"
+                print(f"  ✗ Error: Response too large")
+                return result
+
+        # 解析JSON
+        try:
+            replay_data = json.loads(content.decode('utf-8'))
+        except (json.JSONDecodeError, UnicodeDecodeError) as e:
+            result["error"] = f"Invalid JSON or encoding: {e}"
+            print(f"  ✗ Error: Invalid response format")
+            return result
+
+        # 提取scenario_id（已消毒）
         scenario_id = extract_scenario_id(replay_data, url)
 
         # 创建场景目录
@@ -82,7 +116,7 @@ def download_replay(url: str, output_dir: Path, timeout: int = 30) -> dict:
             "success": True,
             "scenario_id": scenario_id,
             "output_path": str(replay_file),
-            "size_bytes": len(response.content),
+            "size_bytes": len(content),
         })
 
         print(f"  ✓ Saved to {replay_file}")
@@ -90,9 +124,6 @@ def download_replay(url: str, output_dir: Path, timeout: int = 30) -> dict:
     except requests.RequestException as e:
         result["error"] = f"Download failed: {e}"
         print(f"  ✗ Error: {e}")
-    except json.JSONDecodeError as e:
-        result["error"] = f"Invalid JSON: {e}"
-        print(f"  ✗ Error: Invalid JSON")
     except Exception as e:
         result["error"] = f"Unexpected error: {e}"
         print(f"  ✗ Error: {e}")
