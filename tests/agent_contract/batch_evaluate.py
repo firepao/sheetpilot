@@ -144,35 +144,11 @@ def build_bundle_from_replay(scenario_dir: Path, scenario_id: str) -> dict:
     task_request = extract_task_request_from_replay(raw_replay)
     task_status = extract_task_status_from_replay(raw_replay)
 
-    # 安全地加载场景定义（防止路径遍历）
+    # 加载场景定义（如果存在）
+    scenario_json = Path(__file__).parent / "scenarios" / f"{scenario_id}.json"
     scenario = {}
-    # 消毒scenario_id：只允许字母数字和连字符
-    safe_scenario_id = re.sub(r'[^\w-]', '_', scenario_id)
-    if re.match(r'^[A-Za-z0-9_-]+$', safe_scenario_id):
-        scenarios_dir = Path(__file__).parent / "scenarios"
-        scenario_json = scenarios_dir / f"{safe_scenario_id}.json"
-
-        # 验证解析后的路径仍在scenarios目录内
-        try:
-            scenario_json_resolved = scenario_json.resolve()
-            scenarios_dir_resolved = scenarios_dir.resolve()
-
-            # Python 3.9+ 使用 is_relative_to
-            if hasattr(scenario_json_resolved, 'is_relative_to'):
-                is_safe = scenario_json_resolved.is_relative_to(scenarios_dir_resolved)
-            else:
-                # Python 3.8 兼容
-                try:
-                    scenario_json_resolved.relative_to(scenarios_dir_resolved)
-                    is_safe = True
-                except ValueError:
-                    is_safe = False
-
-            if is_safe and scenario_json_resolved.exists():
-                scenario = json.loads(scenario_json_resolved.read_text(encoding="utf-8"))
-        except (ValueError, OSError):
-            # 路径解析失败，使用空scenario
-            pass
+    if scenario_json.exists():
+        scenario = json.loads(scenario_json.read_text(encoding="utf-8"))
 
     # 构建bundle
     bundle = {
