@@ -14,6 +14,10 @@ from ..workbook.tables import (
     read_table,
     select_columns,
     sort_rows,
+    deduplicate,
+    fill_missing,
+    value_counts,
+    describe,
 )
 
 
@@ -65,6 +69,18 @@ class ExecutionContext:
     def sort_rows(self, table: TableData, keys: list[dict]) -> TableData:
         return sort_rows(table, keys)
 
+    def deduplicate(self, table: TableData, keys=None, keep="first") -> TableData:
+        return deduplicate(table, keys, keep)
+
+    def fill_missing(self, table: TableData, fields=None, value="") -> TableData:
+        return fill_missing(table, fields, value)
+
+    def value_counts(self, table: TableData, field: str, as_count="数量") -> TableData:
+        return value_counts(table, field, as_count)
+
+    def describe(self, table: TableData, fields=None) -> TableData:
+        return describe(table, fields)
+
     # ------------------------------------------------------------------
     # 工作簿操作（原子）
     # ------------------------------------------------------------------
@@ -77,3 +93,9 @@ class ExecutionContext:
 
     def worksheet(self, name: str) -> Any:
         return self.engine.worksheet(name)
+
+    def read_cell(self, sheet: str, row: int, column: int) -> Any:
+        return self.engine.read_cell(sheet, row, column)
+
+    def write_cell(self, sheet: str, row: int, column: int, value: Any) -> None:
+        self.engine.write_cell(sheet, row, column, value)

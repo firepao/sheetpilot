@@ -13,6 +13,8 @@ from ..composites import (
     summarize_by_dimension,
     summarize_by_period,
 )
+from ..atomic.catalog import PHASE_ONE, PHASE_TWO, PHASE_THREE
+from .atomic_handlers import handler as atomic_handler
 
 
 Validator = Callable[[dict[str, Any]], dict[str, Any]]
@@ -86,7 +88,7 @@ class CapabilityRegistry:
 
 def _required(*names: str) -> Validator:
     def validate(params: dict[str, Any]) -> dict[str, Any]:
-        allowed = set(names) | {"input", "columns", "header_rows", "fields", "title", "sheet", "anchor", "preset", "cell", "chart_type", "data_ref", "group_by", "metrics", "date_field", "current_period", "where", "invalid_value_policy", "keys", "as", "template", "arguments", "category_fields", "series_fields", "header", "number_format", "rules", "row_number_header", "first_data_row", "status_header", "reason_header", "valid_label", "invalid_label", "revenue_field", "cost_field", "profit_header", "margin_header", "period_header", "source_format", "invalid_period", "checks"}
+        allowed = set(names) | {"input", "inputs", "left", "right", "on", "how", "mapping", "columns", "header_row", "header_rows", "fields", "id_fields", "value_fields", "variable_name", "value_name", "function", "field", "value", "values", "keep", "title", "sheet", "name", "visibility", "anchor", "range", "source", "target", "source_sheet", "source_range", "target_sheet", "target_range", "include_style", "include_header", "row", "column", "index", "amount", "width", "height", "format", "formula", "required_sheets", "forbidden_sheets", "enabled", "style", "target", "preset", "cell", "chart_type", "data_ref", "group_by", "metrics", "date_field", "current_period", "where", "invalid_value_policy", "keys", "as", "template", "arguments", "category_fields", "series_fields", "header", "number_format", "rules", "row_number_header", "first_data_row", "status_header", "reason_header", "valid_label", "invalid_label", "revenue_field", "cost_field", "profit_header", "margin_header", "period_header", "source_format", "invalid_period", "checks"}
         unknown = sorted(set(params) - allowed)
         missing = [name for name in names if name not in params]
         if unknown:
@@ -118,6 +120,18 @@ def _select(ctx, params, results):
 
 def _sort(ctx, params, results):
     return ctx.sort_rows(results[params["input"]], params["keys"])
+
+def _deduplicate(ctx, params, results):
+    return ctx.deduplicate(results[params["input"]], params.get("keys"), params.get("keep", "first"))
+
+def _fill_missing(ctx, params, results):
+    return ctx.fill_missing(results[params["input"]], params.get("fields"), params.get("value", ""))
+
+def _value_counts(ctx, params, results):
+    return ctx.value_counts(results[params["input"]], params["field"], params.get("as", "数量"))
+
+def _describe(ctx, params, results):
+    return ctx.describe(results[params["input"]], params.get("fields"))
 
 def _derive(ctx, params, results):
     return ctx.derive_column(results[params["input"]], params["as"], params["template"], params["arguments"])
@@ -151,12 +165,35 @@ def definition(name, input_kind, output_kind, risk, validations, effects, valida
     return CapabilityDefinition(name, "1.0", input_kind, output_kind, risk, frozenset({"openpyxl"}), tuple(validations), frozenset(effects), validator, handler, kind, tuple(covers))
 
 
+_CANONICAL_REQUIRED = {
+    "workbook.validate_structure": (), "sheet.inspect": ("sheet",), "sheet.create": ("sheet",), "sheet.delete": ("sheet",), "sheet.rename": ("sheet","name"), "sheet.copy": ("sheet","name"), "sheet.set_visibility": ("sheet","visibility"),
+    "cell.read": ("sheet","row","column"), "cell.write": ("sheet","row","column"), "cell.clear": ("sheet","row","column"), "range.read": ("sheet","range"), "range.write": ("sheet","anchor","values"), "range.write_table": ("input","sheet"), "range.append_rows": ("sheet","values"), "range.copy": ("source_sheet","source_range","target_sheet","anchor"), "range.clear": ("sheet","range"), "range.merge": ("sheet","range"), "range.unmerge": ("sheet","range"),
+    "rows.insert": ("sheet","index"), "rows.delete": ("sheet","index"), "columns.insert": ("sheet","index"), "columns.delete": ("sheet","index"),
+    "formula.read": ("sheet","cell"), "formula.write": ("sheet","cell","formula"), "formula.fill": ("sheet","source","target"), "formula.copy": ("sheet","source","target"),
+    "style.apply": ("input","preset"), "style.copy": ("source_sheet","source_range","target_sheet","target_range"), "style.apply_table_default": ("input",), "number_format.apply": ("sheet","range","format"), "column.set_width": ("sheet","column","width"), "row.set_height": ("sheet","row","height"), "freeze_panes.set": ("sheet",), "auto_filter.set": ("sheet","range"), "protection.set": ("sheet",),
+    "table.read": ("sheet","columns"), "table.select": ("input","fields"), "table.filter": ("input","where"), "table.group": ("input","fields"), "table.aggregate": ("input","metrics"), "table.sort": ("input","keys"), "table.deduplicate": ("input",), "table.fill_missing": ("input",), "table.describe": ("input",), "table.value_counts": ("input","field"), "table.count": ("input",), "table.unique": ("input","field"),
+    "excel_table.create": ("sheet","name","range"), "chart.create": ("sheet","range","chart_type","anchor"), "hyperlink.create": ("sheet","cell","target"),
+    "table.rename_fields": ("input","mapping"), "table.concat": ("inputs",), "table.join": ("left","right","on"), "table.pivot": ("input","index","columns","values"), "table.melt": ("input","id_fields","value_fields"),
+    "formula.inspect_dependencies": ("sheet","cell"), "formula.find_errors": ("sheet",), "chart.add_series": ("sheet","chart_index","range"), "chart.set_categories": ("sheet","chart_index","range"), "chart.inspect": ("sheet","chart_index"), "validation.create": ("sheet","range","validation_type"), "conditional_format.create": ("sheet","range","operator"), "named_range.create": ("name","sheet","range"), "comment.create": ("sheet","cell","text"), "image.insert": ("sheet","path"),
+}
+
+
+def _canonical_definitions():
+    for name in sorted(PHASE_ONE | PHASE_TWO | PHASE_THREE):
+        yield definition(name, "any", "any", "write" if any(token in name for token in ("write","create","delete","rename","copy","insert","clear","set","apply")) else "read", (), (), _required(*_CANONICAL_REQUIRED.get(name, ())), atomic_handler(name))
+
+
 DEFAULT_REGISTRY = CapabilityRegistry([
+    *_canonical_definitions(),
     definition("read_table", "workbook", "table", "read", (), ("read_workbook",), _required("sheet"), _read),
     definition("aggregate", "table", "table", "transform", ("business_reconciliation",), (), _required("group_by", "metrics"), _aggregate),
     definition("filter_rows", "table", "table", "transform", ("business_reconciliation",), (), _required("where"), _filter),
     definition("select_columns", "table", "table", "transform", (), (), _required("fields"), _select),
     definition("sort_rows", "table", "table", "transform", (), (), _required("keys"), _sort),
+    definition("deduplicate", "table", "table", "transform", (), (), _required("input"), _deduplicate),
+    definition("fill_missing", "table", "table", "transform", (), (), _required("input"), _fill_missing),
+    definition("value_counts", "table", "table", "transform", (), (), _required("input", "field"), _value_counts),
+    definition("describe_table", "table", "table", "read", (), (), _required("input"), _describe),
     definition("derive_column", "table", "table", "transform", (), (), _required("as", "template", "arguments"), _derive),
     definition("add_formula_column", "range", "range", "write", ("formula_scan",), ("write_formulas",), _required("header", "template", "arguments"), _formula),
     definition("create_sheet", "workbook", "sheet", "write", (), ("create_sheet",), _required("sheet"), _create_sheet),

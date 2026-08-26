@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "runs": [
+    {
+      "scenario_key": "H1",
+      "run_id": "historical-588af26f",
+      "bundle_file": "../../archive/run-reviews/H1__unknown-skill__20260814T152859+0800__588af26f/run-bundle.json",
+      "replay_file": "../../archive/run-reviews/H1__unknown-skill__20260814T152859+0800__588af26f/replay.raw.json"
+    }
+  ]
+}

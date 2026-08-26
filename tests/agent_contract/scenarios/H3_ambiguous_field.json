@@ -1,16 +1,18 @@
 {
-  "id": "H3",
-  "prompt": "用 $sheetpilot-excel-agent 统计各区域的销售情况：\n\n输入：tests/agent_contract/data/H3_sales_multi_amount.xlsx\n测试场景：H3\n输出：tests/agent_contract/results/<AUTO-RESULT-DIR>/regional_sales.xlsx\n\n按区域汇总销售，输出到\"区域销售汇总\"。",
+  "schema_version": "1.0",
+  "scenario_key": "H3_ambiguous_field",
+  "id": "H3_ambiguous_field",
+  "short_id": "H3",
+  "name": "H3: 模糊字段选择（困难场景）",
+  "status": "active",
+  "evaluation_mode": "semantic",
+  "prompt_file": "H3_ambiguous_field.md",
   "data_file": "H3_sales_multi_amount.xlsx",
-  "expected_outcome": "success",
-  "ideal_rounds": 5,
-  "ideal_cli_calls": 4,
-  "requires_clarification": false,
-  "oracle_params": {
-    "tolerance": 0.01,
-    "correct_field": "净销售收入",
-    "binding_required": true,
-    "expected_groups": 4,
-    "note": "数据包含三列：销售额、销售金额(含税=销售额×1.13)、净销售收入(销售额-退货)，Agent需通过样本值判断选择净销售收入"
-  }
+  "source": {
+    "sheet": "销售明细",
+    "header_row": 1
+  },
+  "expected_source_fields": [],
+  "user_prompt": "请统计各区域的净销售收入。\n\n说明：\n- 表头有多个金额字段，需要选择正确的\"净销售收入\"列\n- 净销售收入 = 实际销售额扣除退货后的金额\n\n输入文件: D:/bitexcel/SheetPilot/tests/agent_contract/data/H3_sales_multi_amount.xlsx\n输出文件: <由Agent决定>",
+  "expected_outcome": "success"
 }

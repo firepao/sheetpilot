@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "scenario_key": "S8_multi_metrics",
+  "id": "S8_multi_metrics",
+  "short_id": "S8",
+  "name": "S8: 单维度多指标",
+  "status": "active",
+  "evaluation_mode": "semantic",
+  "prompt_file": "S8_multi_metrics.md",
+  "data_file": "S8_multi_metrics.xlsx",
+  "source": {
+    "sheet": "订单数据",
+    "header_row": 1
+  },
+  "expected_source_fields": [
+    "城市",
+    "订单金额"
+  ],
+  "user_prompt": "请统计每个城市的总订单金额、订单数量、平均订单金额。\n\n输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/S8_multi_metrics.xlsx\n输出文件：<自动生成>",
+  "expected_outcome": "success"
+}

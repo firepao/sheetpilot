@@ -20,9 +20,6 @@ def create_workbook(sheet_name: str) -> Workbook:
     wb = Workbook()
     ws = wb.active
     ws.title = sheet_name
-    # 设置表头字体为粗体
-    for cell in ws[1]:
-        cell.font = Font(bold=True)
     return wb
 
 
@@ -33,7 +30,7 @@ def generate_M1_ecommerce():
     ws = wb.active
 
     # 表头
-    ws.append(["订单号", "商品类目", "城市", "订单金额", "订单状态", "支付方式", "客户ID"])
+    ws.append(["订单ID", "产品类别", "城市", "销售额", "订单状态", "支付方式", "客户ID"])
 
     categories = ["数码", "服装", "食品", "家居", "美妆"]
     cities = ["北京", "上海", "深圳", "广州", "杭州", "成都"]
@@ -93,52 +90,23 @@ def generate_M1_ecommerce():
 # ============= M2: 员工绩效考核 =============
 def generate_M2_performance():
     """M2: 员工绩效考核 - 多指标汇总+排序"""
-    wb = create_workbook("绩效数据")
+    wb = create_workbook("员工绩效")
     ws = wb.active
 
     # 表头
-    ws.append(["员工ID", "姓名", "部门", "销售额", "客户数", "投诉次数", "考勤天数"])
+    ws.append(["员工ID", "姓名", "部门", "绩效分数", "等级"])
 
     departments = ["销售一部", "销售二部", "销售三部", "销售四部"]
 
-    dept_targets = {
-        "销售一部": (450000, 180, 8, 22),
-        "销售二部": (380000, 150, 12, 22),
-        "销售三部": (320000, 128, 15, 21),
-        "销售四部": (280000, 110, 18, 21),
-    }
+    dept_targets = {"销售部": 19, "研发部": 19, "财务部": 18, "人力资源部": 18}
 
     emp_id = 10001
-    for dept, (sales_target, customer_target, complaint_total, attendance_avg) in dept_targets.items():
-        emp_count = random.randint(15, 25)
-
-        # 生成员工数据
-        sales_list = []
-        customer_list = []
-        for i in range(emp_count):
-            # 销售额分配
-            if i == emp_count - 1:
-                sales = sales_target - sum(sales_list)
-            else:
-                min_sales = 10000
-                max_sales = min(30000, max(min_sales, (sales_target - sum(sales_list)) // (emp_count - i)))
-                sales = random.randint(min_sales, max_sales)
-            sales_list.append(sales)
-
-            # 客户数分配
-            if i == emp_count - 1:
-                customers = customer_target - sum(customer_list)
-            else:
-                min_cust = 3
-                max_cust = min(15, max(min_cust, (customer_target - sum(customer_list)) // (emp_count - i)))
-                customers = random.randint(min_cust, max_cust)
-            customer_list.append(customers)
-
-            complaints = random.randint(0, 3)
-            attendance = random.randint(20, 22)
-
+    for dept, emp_count in dept_targets.items():
+        for _ in range(emp_count):
+            score = random.randint(60, 100)
+            level = "优秀" if score >= 90 else "良好" if score >= 80 else "合格" if score >= 70 else "待改进"
             name = f"员工{emp_id}"
-            ws.append([emp_id, name, dept, sales, customers, complaints, attendance])
+            ws.append([emp_id, name, dept, score, level])
             emp_id += 1
 
     output_path = Path(__file__).parent / "data" / "M2_employee_performance.xlsx"
@@ -194,7 +162,7 @@ def generate_M4_marketing():
     ws = wb.active
 
     # 表头
-    ws.append(["渠道名称", "投放日期", "投放金额", "曝光量", "点击量", "转化量", "销售额"])
+    ws.append(["渠道名称", "投放日期", "投放金额", "曝光量", "点击量", "转化量", "销售额", "ROI"])
 
     channels = ["百度搜索", "抖音信息流", "微信朋友圈", "知乎广告", "小红书"]
 
@@ -238,7 +206,7 @@ def generate_M4_marketing():
                 conversions = random.randint(150, 300)
                 revenue = conversions * random.randint(320, 500)
 
-            ws.append([channel, date_str, cost, impressions, clicks, conversions, revenue])
+            ws.append([channel, date_str, cost, impressions, clicks, conversions, revenue, round(revenue / cost, 4)])
 
     output_path = Path(__file__).parent / "data" / "M4_marketing_roi.xlsx"
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -445,6 +413,7 @@ def generate_M8_project_hours():
 
 
 if __name__ == "__main__":
+    random.seed(20260825)
     print("开始生成P2阶段测试数据 Part 3 (M系列)...")
     generate_M1_ecommerce()
     generate_M2_performance()

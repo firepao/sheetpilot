@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "scenario_key": "S7_two_dims",
+  "id": "S7_two_dims",
+  "short_id": "S7",
+  "name": "S7: 双维度单指标",
+  "status": "active",
+  "evaluation_mode": "semantic",
+  "prompt_file": "S7_two_dims.md",
+  "data_file": "S7_two_dims.xlsx",
+  "source": {
+    "sheet": "销售数据",
+    "header_row": 1
+  },
+  "expected_source_fields": [
+    "产品类别",
+    "区域",
+    "销售额"
+  ],
+  "user_prompt": "请统计每个区域每个产品类别的销售额。\n\n输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/S7_two_dims.xlsx\n输出文件：<自动生成>",
+  "expected_outcome": "success"
+}

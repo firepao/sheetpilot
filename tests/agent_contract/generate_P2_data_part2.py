@@ -20,9 +20,6 @@ def create_workbook(sheet_name: str) -> Workbook:
     wb = Workbook()
     ws = wb.active
     ws.title = sheet_name
-    # 设置表头字体为粗体
-    for cell in ws[1]:
-        cell.font = Font(bold=True)
     return wb
 
 
@@ -218,64 +215,39 @@ def generate_H1_date_ambiguity():
     print(f"✓ 生成 H1: {output_path} (行数: {ws.max_row - 1}, 12个月)")
 
 
-# ============= H2: 数值格式混合 =============
-def generate_H2_number_format():
-    """H2: 数值格式混合场景 - 纯数字/带单位/千分位"""
+# ============= H2: 字段名相似性 =============
+def generate_H2_field_similarity():
+    """H2: 多个工资字段并存，目标字段为实发工资。"""
     wb = create_workbook("销售记录")
     ws = wb.active
+    ws.append(["员工编号", "部门", "基本工资", "实发工资", "应发工资", "工资", "绩效工资"])
+    departments = ["销售部", "研发部", "财务部"]
+    for index in range(1, 96):
+        department = departments[(index - 1) % len(departments)]
+        position_salary = random.randint(5000, 12000)
+        base_salary = position_salary + random.randint(1000, 4000)
+        performance_salary = random.randint(500, 5000)
+        gross_salary = base_salary + performance_salary
+        net_salary = gross_salary - random.randint(800, 2500)
+        ws.append([
+            f"E{index:04d}", department, base_salary, net_salary,
+            gross_salary, position_salary, performance_salary,
+        ])
 
-    # 表头
-    ws.append(["产品", "销售额", "区域"])
-
-    products = {
-        "产品A": 85000,
-        "产品B": 72000,
-        "产品C": 65000,
-        "产品D": 58000,
-        "产品E": 48000,
-    }
-
-    # 数值格式变体
-    def format_amount(amount: int) -> str | int:
-        choice = random.randint(1, 4)
-        if choice == 1:
-            return amount  # 纯数字
-        elif choice == 2:
-            return f"{amount}元"  # 带单位
-        elif choice == 3:
-            return f"{amount:,}"  # 千分位
-        else:
-            return f"{amount:,}元"  # 千分位+单位
-
-    for product, target in products.items():
-        count = random.randint(10, 18)
-        remaining = target
-        for i in range(count):
-            if i == count - 1:
-                amount = remaining
-            else:
-                min_amt = 2000
-                max_amt = min(6000, max(min_amt, remaining - (count - i - 1) * min_amt))
-                amount = random.randint(min_amt, max_amt)
-                remaining -= amount
-
-            region = random.choice(["华东", "华南", "华北"])
-            ws.append([product, format_amount(amount), region])
-
-    output_path = Path(__file__).parent / "data" / "H2_number_format.xlsx"
+    output_path = Path(__file__).parent / "data" / "H2_field_similarity.xlsx"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     wb.save(output_path)
-    print(f"✓ 生成 H2: {output_path} (行数: {ws.max_row - 1}, 5个产品)")
+    print(f"✓ 生成 H2: {output_path} (行数: {ws.max_row - 1}, 5个工资字段)")
 
 
 # ============= H4: 多条件复杂组合 =============
 def generate_H4_complex_filter():
     """H4: 多条件复杂组合过滤场景"""
-    wb = create_workbook("订单明细")
+    wb = create_workbook("客户订单")
     ws = wb.active
 
     # 表头
-    ws.append(["订单号", "客户等级", "订单金额", "支付方式", "是否开票", "区域"])
+    ws.append(["订单号", "客户类型", "区域", "订单金额", "支付状态", "订单状态"])
 
     # 目标条件：客户等级=VIP AND 订单金额>5000 AND 支付方式=在线支付
     target_by_region = {
@@ -303,24 +275,19 @@ def generate_H4_complex_filter():
                 amount = random.randint(min_amt, max_amt)
                 remaining -= amount
 
-            inv = random.choice(invoice)
-            ws.append([f"O{order_id}", "VIP", amount, "在线支付", inv, region])
+            ws.append([f"O{order_id}", "企业", region, amount, "已支付", "已完成"])
             order_id += 1
 
         # 不符合条件的记录（随机组合）
         noise_count = random.randint(20, 35)
         for _ in range(noise_count):
-            level = random.choice(levels)
-            payment = random.choice(payments)
-            inv = random.choice(invoice)
-
-            # 确保不符合目标条件
-            if level == "VIP" and payment == "在线支付":
-                amount = random.randint(1000, 5000)  # 金额不超过5000
-            else:
-                amount = random.randint(1000, 10000)
-
-            ws.append([f"O{order_id}", level, amount, payment, inv, region])
+            customer_type = random.choice(["企业", "个人"])
+            payment_status = random.choice(["已支付", "未支付", "已退款"])
+            order_status = random.choice(["已完成", "进行中", "已取消"])
+            amount = random.randint(1000, 10000)
+            if customer_type == "企业" and payment_status == "已支付" and order_status == "已完成" and amount > 5000:
+                payment_status = "未支付"
+            ws.append([f"O{order_id}", customer_type, region, amount, payment_status, order_status])
             order_id += 1
 
     output_path = Path(__file__).parent / "data" / "H4_complex_filter.xlsx"
@@ -367,19 +334,20 @@ def generate_H5_nested_group():
                 remaining -= amount
             ws.append([year, quarter, month, amount])
 
-    output_path = Path(__file__).parent / "data" / "H5_nested_group.xlsx"
+    output_path = Path(__file__).parent / "data" / "H5_three_dims.xlsx"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     wb.save(output_path)
     print(f"✓ 生成 H5: {output_path} (行数: {ws.max_row - 1}, 12个月份)")
 
 
 if __name__ == "__main__":
+    random.seed(20260825)
     print("开始生成P2阶段测试数据 Part 2...")
     generate_S7_two_dims()
     generate_S8_multi_metrics()
     generate_S9_multi_filter()
     generate_H1_date_ambiguity()
-    generate_H2_number_format()
+    generate_H2_field_similarity()
     generate_H4_complex_filter()
     generate_H5_nested_group()
     print("\n✓ S7-S9, H1-H2, H4-H5 数据生成完成！")

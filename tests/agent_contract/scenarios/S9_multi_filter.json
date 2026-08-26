@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "scenario_key": "S9_multi_filter",
+  "id": "S9_multi_filter",
+  "short_id": "S9",
+  "name": "S9: 多条件AND过滤",
+  "status": "active",
+  "evaluation_mode": "semantic",
+  "prompt_file": "S9_multi_filter.md",
+  "data_file": "S9_multi_filter.xlsx",
+  "source": {
+    "sheet": "产品销售",
+    "header_row": 1
+  },
+  "expected_source_fields": [
+    "产品名称",
+    "区域",
+    "状态",
+    "销售额"
+  ],
+  "user_prompt": "请统计状态为\"正常\"且区域为\"华东\"的产品销售额，按产品分组。\n\n输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/S9_multi_filter.xlsx\n输出文件：<自动生成>",
+  "expected_outcome": "success"
+}

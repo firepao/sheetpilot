@@ -1,16 +1,18 @@
 {
-  "id": "S1",
-  "prompt": "使用 $sheetpilot-excel-agent 处理：\n\n输入：tests/agent_contract/data/01_simple_department_sales.xlsx\n测试场景：S1\n输出：tests/agent_contract/results/<AUTO-RESULT-DIR>/department_sales.xlsx\n\n根据\"销售明细\"，按部门汇总销售额，输出\"部门\"和\"销售总额\"，按销售总额降序写入新工作表\"部门销售汇总\"。保留原工作表，不修改输入文件。",
+  "schema_version": "1.0",
+  "scenario_key": "S1_department_sales",
+  "id": "S1_department_sales",
+  "short_id": "S1",
+  "name": "S1: 部门销售汇总（简单场景）",
+  "status": "active",
+  "evaluation_mode": "semantic",
+  "prompt_file": "S1_department_sales.md",
   "data_file": "01_simple_department_sales.xlsx",
-  "expected_outcome": "success",
-  "ideal_rounds": 3,
-  "ideal_cli_calls": 3,
-  "requires_clarification": false,
-  "oracle_params": {
-    "tolerance": 1e-6,
-    "expected_groups": 4,
-    "expected_total": 17455,
-    "expected_first": ["华北", 6598],
-    "expected_last": ["华东", 2765]
-  }
+  "source": {
+    "sheet": "销售明细",
+    "header_row": 1
+  },
+  "expected_source_fields": [],
+  "user_prompt": "请分析销售明细表，按部门汇总销售总额，按销售总额降序排列。\n\n输入文件: D:/bitexcel/SheetPilot/tests/agent_contract/data/01_simple_department_sales.xlsx\n输出文件: <由Agent决定>",
+  "expected_outcome": "success"
 }

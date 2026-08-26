@@ -19,9 +19,6 @@ def create_workbook(sheet_name: str) -> Workbook:
     wb = Workbook()
     ws = wb.active
     ws.title = sheet_name
-    # 设置表头字体为粗体
-    for cell in ws[1]:
-        cell.font = Font(bold=True)
     return wb
 
 
@@ -32,16 +29,15 @@ def generate_S2_single_dim_metric():
     ws = wb.active
 
     # 表头
-    ws.append(["产品名称", "销售额"])
+    ws.append(["区域", "销售额"])
 
     # 5个产品，每个产品多条记录
-    products = ["产品A", "产品B", "产品C", "产品D", "产品E"]
+    products = ["华东", "华南", "华北", "华中"]
     expected = {
-        "产品A": 35000,
-        "产品B": 28000,
-        "产品C": 22000,
-        "产品D": 20000,
-        "产品E": 20000
+        "华东": 115000,
+        "华南": 98000,
+        "华北": 82000,
+        "华中": 65000,
     }
 
     for product in products:
@@ -94,17 +90,15 @@ def generate_S3_count_rows():
 # ============= S4: count.non_empty 基础 =============
 def generate_S4_count_non_empty():
     """S4: 基础非空计数场景 - count.non_empty"""
-    wb = create_workbook("客户数据")
+    wb = create_workbook("用户数据")
     ws = wb.active
 
     # 表头
-    ws.append(["客户ID", "省份", "邮箱", "手机号"])
+    ws.append(["用户ID", "注册渠道", "邮箱"])
 
     # 10个省份，邮箱填充率不同
     provinces_data = [
-        ("广东", 68, 100), ("江苏", 52, 75), ("浙江", 45, 65),
-        ("山东", 38, 55), ("河南", 28, 45), ("四川", 22, 35),
-        ("湖北", 15, 25), ("福建", 10, 18), ("湖南", 5, 12), ("安徽", 2, 7)
+        ("官网", 110, 170), ("APP", 95, 147), ("小程序", 80, 120),
     ]
 
     customer_id = 10001
@@ -112,13 +106,11 @@ def generate_S4_count_non_empty():
         # 有邮箱的客户
         for _ in range(email_count):
             email = f"user{customer_id}@example.com"
-            phone = f"138{random.randint(10000000, 99999999)}"
-            ws.append([f"C{customer_id}", province, email, phone])
+            ws.append([f"U{customer_id}", province, email])
             customer_id += 1
         # 无邮箱的客户
         for _ in range(total_count - email_count):
-            phone = f"138{random.randint(10000000, 99999999)}"
-            ws.append([f"C{customer_id}", province, None, phone])
+            ws.append([f"U{customer_id}", province, None])
             customer_id += 1
 
     output_path = Path(__file__).parent / "data" / "S4_count_non_empty.xlsx"
@@ -130,11 +122,11 @@ def generate_S4_count_non_empty():
 # ============= S5: average 基础 =============
 def generate_S5_average():
     """S5: 基础平均值场景 - average函数"""
-    wb = create_workbook("成绩数据")
+    wb = create_workbook("成绩单")
     ws = wb.active
 
     # 表头
-    ws.append(["学号", "姓名", "班级", "成绩"])
+    ws.append(["班级", "学生姓名", "数学成绩"])
 
     # 6个班级，每班30人，平均分不同
     classes_avg = [
@@ -154,7 +146,7 @@ def generate_S5_average():
                 score = int(target_avg * 30 - current_sum)
                 score = max(0, min(100, score))  # 确保在0-100范围内
             scores.append(score)
-            ws.append([student_id, f"学生{student_id}", class_name, score])
+            ws.append([class_name, f"学生{student_id}", score])
             student_id += 1
 
     output_path = Path(__file__).parent / "data" / "S5_average.xlsx"
@@ -166,11 +158,11 @@ def generate_S5_average():
 # ============= S6: 单条件过滤 =============
 def generate_S6_single_filter():
     """S6: 基础单条件过滤场景 - eq操作符"""
-    wb = create_workbook("销售数据")
+    wb = create_workbook("订单数据")
     ws = wb.active
 
     # 表头
-    ws.append(["订单号", "产品名称", "销售额", "支付状态"])
+    ws.append(["订单号", "产品名称", "订单金额", "支付状态"])
 
     # 8个产品，已支付和未支付混合
     products_paid = {
@@ -208,6 +200,7 @@ def generate_S6_single_filter():
 
 
 if __name__ == "__main__":
+    random.seed(20260825)
     print("开始生成P2阶段测试数据...")
     generate_S2_single_dim_metric()
     generate_S3_count_rows()

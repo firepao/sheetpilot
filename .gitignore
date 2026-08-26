@@ -28,3 +28,25 @@ tests/agent_contract/*.xlsx
 tests/agent_cases/
 .tmp/
 .tmp/
+
+# Agent black-box local evidence and generated run outputs
+tests/agent_contract/browser-profile/
+tests/agent_contract/evidence/
+tests/agent_contract/replays/
+tests/agent_contract/results/
+tests/agent_contract/reviews/
+tests/agent_contract/share_links.txt
+replay_links.txt
+tests/agent_contract/data/*.backup
+tests/agent_contract/data/sheetpilot__*/
+tests/agent_contract/data/*_analysis_result.*
+tests/agent_contract/data/calc_stats.py
+tests/agent_contract/data/summary.py
+tests/agent_contract/data/temp_summary.csv
+
+# Local generated analysis exports and desktop shortcuts
+tests/agent_contract/data/*统计结果*.xlsx
+tests/agent_contract/data/*分析结果*.xlsx
+tests/agent_contract/data/*统计*.xlsx
+tests/agent_contract/data/*.txt
+tests/agent_contract/*.lnk

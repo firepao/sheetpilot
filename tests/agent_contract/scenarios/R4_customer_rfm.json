@@ -1,14 +1,18 @@
 {
-  "id": "R4",
-  "prompt": "用 $sheetpilot-excel-agent 分析客户价值：\n\n输入：tests/agent_contract/data/R4_customer_rfm.xlsx\n测试场景：R4\n输出：tests/agent_contract/results/<AUTO-RESULT-DIR>/high_value_customers.xlsx\n\n按客户统计以下指标：\n- R: 最近一次购买距今天数（从订单日期计算到今天）\n- F: 购买次数（仅统计订单状态=已完成的订单）\n- M: 累计金额（仅统计订单状态=已完成的订单金额总和）\n\n筛选出高价值客户（F≥3 且 M≥5000），输出到\"高价值客户\"工作表。",
+  "schema_version": "1.0",
+  "scenario_key": "R4_customer_rfm",
+  "id": "R4_customer_rfm",
+  "short_id": "R4",
+  "name": "R4: 客户RFM价值分析（真实场景）",
+  "status": "active",
+  "evaluation_mode": "semantic",
+  "prompt_file": "R4_customer_rfm.md",
   "data_file": "R4_customer_rfm.xlsx",
-  "expected_outcome": "success",
-  "ideal_rounds": 5,
-  "ideal_cli_calls": 3,
-  "requires_clarification": false,
-  "oracle_params": {
-    "tolerance": 1,
-    "note": "数据特征：~6000行订单，500客户，30%客户仅1单（不符合F≥3条件），需时间计算+客户聚合+二次过滤",
-    "verification_note": "需手工验证：高价值客户数量、某客户的R/F/M值是否正确"
-  }
+  "source": {
+    "sheet": "订单流水",
+    "header_row": 1
+  },
+  "expected_source_fields": [],
+  "user_prompt": "请分析订单流水表，按客户消费金额分组统计客户价值分布。\n\n要求：\n- 只统计已完成订单（排除已取消、退款中订单）\n- 按客户分组计算总消费金额\n- 将客户分为3个价值层级：\n  · 高价值客户：总消费 > 10000\n  · 中价值客户：总消费 3000-10000\n  · 低价值客户：总消费 < 3000\n- 统计各层级的客户数量和总消费金额\n- 按价值层级排序（高→中→低）\n\n输入文件: D:/bitexcel/SheetPilot/tests/agent_contract/data/R4_customer_rfm.xlsx\n输出文件: <由Agent决定>",
+  "expected_outcome": "success"
 }

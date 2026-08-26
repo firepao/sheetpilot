@@ -98,7 +98,7 @@ python -m tests.agent_contract.runner --level R
 
 ## 数据文件位置
 
-- **测试数据**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\\`
+- **测试数据**: `D:/bitexcel/SheetPilot/tests/agent_contract/data/`
 - **场景定义**: `tests/agent_contract/scenarios/`
 - **Prompt文档**: `tests/agent_contract/prompts/`（本目录）
 

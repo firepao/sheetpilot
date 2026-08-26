@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "scenario_key": "E2_EDIT_EXISTING_WORKBOOK_SUMMARY",
+  "id": "E2_EDIT_EXISTING_WORKBOOK_SUMMARY",
+  "short_id": "E2",
+  "name": "E2：SaaS 已有工作簿增量汇总",
+  "status": "active",
+  "evaluation_mode": "semantic",
+  "prompt_file": "E2_EDIT_EXISTING_WORKBOOK_SUMMARY.md",
+  "data_file": "08_complex_saas_renewals.xlsx",
+  "source": {
+    "sheet": "客户月度经营",
+    "header_row": 1
+  },
+  "expected_source_fields": [],
+  "user_prompt": "使用 $sheetpilot-excel-agent 处理：\n\n输入：D:/bitexcel/SheetPilot/tests/agent_contract/data/08_complex_saas_renewals.xlsx\n测试场景：E2_EDIT_EXISTING_WORKBOOK_SUMMARY\n输出：D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\results\\<AUTO-RESULT-DIR>\\saas_renewal_analysis.xlsx\n\n使用“客户月度经营”，只统计续费状态为“已续费”、回款状态为“正常”，且套餐属于“专业版”或“企业版”的记录。\n\n按区域、行业分组，输出实收MRR合计、流失MRR合计、客户月度记录数量、客户编号非空数量和平均NPS，按实收MRR合计降序写入新工作表“区域行业续费汇总”。\n\n保留原工作簿中的客户主数据、续费经营看板、口径说明、公式和图表，不修改输入文件。完成后根据最终 task-status 报告执行状态、Task ID 和输出文件路径。",
+  "expected_outcome": "success"
+}

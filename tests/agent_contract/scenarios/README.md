@@ -1,6 +1,21 @@
 # SheetPilot Agent Contract 测试场景定义
 
-本目录包含所有自动化测试场景的JSON定义文件。
+本目录是 Agent Contract 场景注册表。每个 JSON 文件定义一个场景；只有 `status=active` 的场景属于默认可运行测试集，`status=draft` 的场景是尚缺 fixture 或判定契约的候选场景。
+
+## 场景身份
+
+- `scenario_key` 是全局唯一身份，必须等于 JSON 文件名（不含 `.json`），例如 `M3_marketing_roi`。
+- `id` 与 `scenario_key` 相同，供现有 evaluator 和归档目录使用。
+- `short_id` 只表示难度系列中的显示编号，例如 `M3`。它不唯一，禁止用于查找、目录命名、结果关联或 replay 匹配。
+- `data_file` 是 `tests/agent_contract/data/` 下的文件名，不包含其他目录前缀。
+
+运行或评分前先验证注册表：
+
+```powershell
+python tests\agent_contract\validate_scenarios.py
+```
+
+当前 canonical 注册表包含 26 个正式 Prompt 场景，全部必须为 active。validator 会检查唯一键、Prompt、fixture、Sheet 和表头契约；任何一项不一致都会使注册表验证失败，批量测评必须在验证通过后运行。
 
 ## 场景分类
 
@@ -58,9 +73,13 @@
 
 ```json
 {
-  "id": "场景唯一标识（如S1、R2）",
-  "prompt": "完整的Agent Prompt，包含输入文件路径、场景ID、业务需求描述",
-  "data_file": "数据文件相对路径（相对于tests/agent_contract/data/）",
+  "scenario_key": "全局唯一标识，等于文件名 stem",
+  "id": "与 scenario_key 相同",
+  "short_id": "仅展示用的系列编号，如 S1、R2",
+  "status": "active | draft",
+  "evaluation_mode": "deterministic_request | semantic | correct_stop",
+  "user_prompt": "完整的 Agent Prompt",
+  "data_file": "tests/agent_contract/data 下的文件名",
   "expected_outcome": "success | correct_stop",
   "ideal_rounds": "理想交互轮次（用于效率评分）",
   "ideal_cli_calls": "理想CLI调用次数（用于效率评分）",
@@ -78,7 +97,7 @@
 ## 场景命名规范
 
 ```
-<分类><序号>_<业务描述>.json
+<分类><序号>_<业务描述>.json；完整 stem 就是 scenario_key
 
 示例：
 - S1_department_sales.json          # 简单：部门销售汇总
@@ -113,15 +132,19 @@ python -m tests.agent_contract.runner \
 
 ## 添加新场景
 
-1. 准备数据文件：`tests/agent_contract/data/<场景ID>_<描述>.xlsx`
+1. 准备数据文件：`tests/agent_contract/data/<scenario_key>.xlsx`（业务上需要其他名称时必须在 JSON 中显式引用）
 2. 手工验证Oracle：计算预期结果
-3. 创建场景JSON：按上述Schema填写
-4. 验证场景：
+3. 创建场景 JSON：按上述 Schema 填写；文件名 stem、`scenario_key`、`id` 三者必须相同
+4. 运行注册表验证：
+   ```powershell
+   python tests\agent_contract\validate_scenarios.py
+   ```
+5. 验证场景 Oracle：
    ```bash
    python -m tests.agent_contract.oracle_validator \
      tests/agent_contract/scenarios/<新场景>.json
    ```
-5. 执行测试：
+6. 执行测试：
    ```bash
    python -m tests.agent_contract.runner \
      --scenario tests/agent_contract/scenarios/<新场景>.json
@@ -133,3 +156,4 @@ python -m tests.agent_contract.runner \
 2. **数据稳定性**：数据文件只读，不在测试中修改
 3. **Oracle独立性**：Oracle验证不依赖SheetPilot Runtime实现
 4. **场景隔离**：每个场景使用独立的Agent会话，不共享上下文
+5. **草稿隔离**：缺少数据文件、Prompt 或判定契约的场景保持 `status=draft`，不得进入默认批量结果

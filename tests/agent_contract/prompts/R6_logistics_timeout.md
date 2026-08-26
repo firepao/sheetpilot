@@ -10,7 +10,7 @@
 - 验证物流领域关键指标
 
 ## 输入文件
-- **文件路径**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\\R6_logistics_timeout.xlsx`
+- **文件路径**: `D:/bitexcel/SheetPilot/tests/agent_contract/data/R6_logistics_timeout.xlsx`
 - **工作表**: `配送记录`
 - **表头行**: 1
 - **数据特征**: 
@@ -36,7 +36,7 @@
 
 注意：超时率需要基于该区域全部订单计算，不仅是超时订单。
 
-输入文件: D:\bitexcel\SheetPilot\tests\agent_contract\data\\R6_logistics_timeout.xlsx
+输入文件: D:/bitexcel/SheetPilot/tests/agent_contract/data/R6_logistics_timeout.xlsx
 输出文件: <由Agent决定>
 ```
 
@@ -44,7 +44,7 @@
 
 1. **查询字段清单**
    ```bash
-   sheetpilot task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\R6_logistics_timeout.xlsx --sheet 配送记录 --header-row 1
+   sheetpilot task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/R6_logistics_timeout.xlsx --sheet 配送记录 --header-row 1
    ```
 
 2. **理解需求的跨过滤聚合问题**

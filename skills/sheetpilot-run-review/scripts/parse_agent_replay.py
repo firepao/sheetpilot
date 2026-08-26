@@ -7,9 +7,15 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
+from datetime import timedelta
 
 
-LOCAL_TZ = ZoneInfo("Asia/Shanghai")
+try:
+    LOCAL_TZ = ZoneInfo("Asia/Shanghai")
+except Exception:
+    # Windows Python installations may not ship the IANA tzdata package.
+    # Asia/Shanghai has a fixed UTC+8 offset, which is sufficient here.
+    LOCAL_TZ = timezone(timedelta(hours=8))
 
 
 def _jsonish(value: Any) -> Any:

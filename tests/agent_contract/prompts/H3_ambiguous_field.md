@@ -9,7 +9,7 @@
 - 验证NEEDS_BINDING流程的处理能力
 
 ## 输入文件
-- **文件路径**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\\H3_sales_multi_amount.xlsx`
+- **文件路径**: `D:/bitexcel/SheetPilot/tests/agent_contract/data/H3_sales_multi_amount.xlsx`
 - **工作表**: `销售明细`
 - **表头行**: 1
 - **数据特征**: 200行，3列金额字段
@@ -26,7 +26,7 @@
 - 表头有多个金额字段，需要选择正确的"净销售收入"列
 - 净销售收入 = 实际销售额扣除退货后的金额
 
-输入文件: D:\bitexcel\SheetPilot\tests\agent_contract\data\\H3_sales_multi_amount.xlsx
+输入文件: D:/bitexcel/SheetPilot/tests/agent_contract/data/H3_sales_multi_amount.xlsx
 输出文件: <由Agent决定>
 ```
 
@@ -34,7 +34,7 @@
 
 1. **查询字段清单**
    ```bash
-   sheetpilot task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\H3_sales_multi_amount.xlsx
+   sheetpilot task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/H3_sales_multi_amount.xlsx
    ```
    
    返回包含3个候选字段：

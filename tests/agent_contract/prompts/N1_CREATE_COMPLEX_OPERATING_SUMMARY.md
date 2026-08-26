@@ -3,7 +3,7 @@
 ```text
 使用 $sheetpilot-excel-agent 处理：
 
-输入：D:\bitexcel\SheetPilot\tests\agent_contract\data\07_complex_retail_operations.xlsx
+输入：D:/bitexcel/SheetPilot/tests/agent_contract/data/07_complex_retail_operations.xlsx
 测试场景：N1
 输出：D:\bitexcel\SheetPilot\tests\agent_contract\results\<AUTO-RESULT-DIR>\retail_regional_category_summary.xlsx
 

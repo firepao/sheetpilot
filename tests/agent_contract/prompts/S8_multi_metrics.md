@@ -6,7 +6,7 @@
 - **测试重点**: 多指标组合（sum + count.rows + average）
 
 ## 数据文件
-- **路径**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\\S8_multi_metrics.xlsx`
+- **路径**: `D:/bitexcel/SheetPilot/tests/agent_contract/data/S8_multi_metrics.xlsx`
 - **工作表**: `订单数据`
 - **数据量**: 约165行
 - **表头行**: 第1行
@@ -24,7 +24,7 @@
 ```
 请统计每个城市的总订单金额、订单数量、平均订单金额。
 
-输入文件：D:\bitexcel\SheetPilot\tests\agent_contract\data\\S8_multi_metrics.xlsx
+输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/S8_multi_metrics.xlsx
 输出文件：<自动生成>
 ```
 
@@ -32,7 +32,7 @@
 
 ### Step 1: 查询字段清单
 ```bash
-task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\S8_multi_metrics.xlsx
+task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/S8_multi_metrics.xlsx
 ```
 
 **预期返回**:
@@ -46,7 +46,7 @@ task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\S8_multi_me
 {
   "schema_version": "1.0",
   "task_type": "summarize_table",
-  "input_file": "D:\bitexcel\SheetPilot\tests\agent_contract\data\\S8_multi_metrics.xlsx",
+  "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/S8_multi_metrics.xlsx",
   "output_file": "<AUTO-RESULT-DIR>/城市订单统计.xlsx",
   "user_request": "请统计每个城市的总订单金额、订单数量、平均订单金额。",
   "source": {"sheet": "订单数据", "header_row": 1},

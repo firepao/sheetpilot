@@ -10,7 +10,7 @@
 - 验证电商领域业务逻辑
 
 ## 输入文件
-- **文件路径**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\\R2_inventory_sku.xlsx`
+- **文件路径**: `D:/bitexcel/SheetPilot/tests/agent_contract/data/R2_inventory_sku.xlsx`
 - **工作表**: `SKU库存`
 - **表头行**: 1
 - **数据特征**: 
@@ -31,7 +31,7 @@
 - 统计每个类目的预警SKU数量
 - 按预警数量降序排列
 
-输入文件: D:\bitexcel\SheetPilot\tests\agent_contract\data\\R2_inventory_sku.xlsx
+输入文件: D:/bitexcel/SheetPilot/tests/agent_contract/data/R2_inventory_sku.xlsx
 输出文件: <由Agent决定>
 ```
 
@@ -39,7 +39,7 @@
 
 1. **查询字段清单**
    ```bash
-   sheetpilot task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\R2_inventory_sku.xlsx --sheet SKU库存 --header-row 1
+   sheetpilot task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/R2_inventory_sku.xlsx --sheet SKU库存 --header-row 1
    ```
 
 2. **构造Task Request**

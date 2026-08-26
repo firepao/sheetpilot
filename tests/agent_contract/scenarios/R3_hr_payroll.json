@@ -1,15 +1,18 @@
 {
-  "id": "R3",
-  "prompt": "用 $sheetpilot-excel-agent 计算人力成本：\n\n输入：tests/agent_contract/data/R3_hr_payroll.xlsx\n测试场景：R3\n输出：tests/agent_contract/results/<AUTO-RESULT-DIR>/dept_payroll_summary.xlsx\n\n按部门汇总实发工资总额和平均工资。\n\n计算公式：实发工资 = 基本工资 + 绩效奖金 - 迟到扣款 - 社保个人 - 个税\n注意：迟到扣款为空值表示无迟到，应视为0。",
+  "schema_version": "1.0",
+  "scenario_key": "R3_hr_payroll",
+  "id": "R3_hr_payroll",
+  "short_id": "R3",
+  "name": "R3: 人力薪资成本分析（真实场景）",
+  "status": "active",
+  "evaluation_mode": "semantic",
+  "prompt_file": "R3_hr_payroll.md",
   "data_file": "R3_hr_payroll.xlsx",
-  "expected_outcome": "success",
-  "ideal_rounds": 4,
-  "ideal_cli_calls": 3,
-  "requires_clarification": false,
-  "oracle_params": {
-    "tolerance": 0.01,
-    "expected_groups": 5,
-    "note": "数据特征：804行（67员工×12月），迟到扣款25%概率非空，空值语义测试（NULL vs 0）",
-    "verification_note": "需手工打开Excel验证：技术部实发工资总额、平均工资是否正确处理空值"
-  }
+  "source": {
+    "sheet": "薪资明细",
+    "header_row": 1
+  },
+  "expected_source_fields": [],
+  "user_prompt": "请分析薪资明细表，按部门汇总薪资成本情况。\n\n要求：\n- 按部门分组\n- 计算以下指标：\n  1. 总薪资成本（实发工资总和）\n  2. 平均薪资（实发工资平均值）\n  3. 发薪人次（记录条数）\n- 按总薪资成本降序排列\n\n输入文件: D:/bitexcel/SheetPilot/tests/agent_contract/data/R3_hr_payroll.xlsx\n输出文件: <由Agent决定>",
+  "expected_outcome": "success"
 }

@@ -1,15 +1,18 @@
 {
-  "id": "R6",
-  "prompt": "用 $sheetpilot-excel-agent 分析物流配送时效：\n\n输入：tests/agent_contract/data/R6_logistics_timeout.xlsx\n测试场景：R6\n输出：tests/agent_contract/results/<AUTO-RESULT-DIR>/delivery_timeout_summary.xlsx\n\n按配送类型统计以下指标：\n- 总单量\n- 超时单量（实际签收时间 - 发货时间 > 承诺时效）\n- 超时率 = 超时单量 / 总单量\n- 平均延迟时长（仅统计超时订单的延迟小时数）\n\n时效标准：同城24小时、省内48小时、跨省72小时\n输出到\"配送时效汇总\"工作表。",
+  "schema_version": "1.0",
+  "scenario_key": "R6_logistics_timeout",
+  "id": "R6_logistics_timeout",
+  "short_id": "R6",
+  "name": "R6: 物流配送时效分析（真实场景）",
+  "status": "active",
+  "evaluation_mode": "semantic",
+  "prompt_file": "R6_logistics_timeout.md",
   "data_file": "R6_logistics_timeout.xlsx",
-  "expected_outcome": "success",
-  "ideal_rounds": 5,
-  "ideal_cli_calls": 3,
-  "requires_clarification": false,
-  "oracle_params": {
-    "tolerance": 0.01,
-    "expected_groups": 3,
-    "note": "数据特征：3000行，超时率18%，需时间计算+分段规则+比率计算+条件聚合",
-    "verification_note": "需手工验证：各配送类型超时率是否接近18%，平均延迟时长计算是否正确"
-  }
+  "source": {
+    "sheet": "配送记录",
+    "header_row": 1
+  },
+  "expected_source_fields": [],
+  "user_prompt": "请分析配送记录，统计各区域的超时订单情况。\n\n要求：\n- 只统计超时订单（是否超时='是'）\n- 按配送区域分组\n- 计算各区域的：\n  1. 超时订单数量\n  2. 该区域总订单数量（需要单独统计）\n  3. 超时率（超时订单数 / 总订单数）\n- 按超时率降序排列\n\n注意：超时率需要基于该区域全部订单计算，不仅是超时订单。\n\n输入文件: D:/bitexcel/SheetPilot/tests/agent_contract/data/R6_logistics_timeout.xlsx\n输出文件: <由Agent决定>",
+  "expected_outcome": "success"
 }

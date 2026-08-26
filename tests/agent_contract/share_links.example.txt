@@ -1,0 +1,4 @@
+# Format: scenario_key<TAB>url
+# Or:     scenario_key<TAB>run_id<TAB>url
+# The full scenario key is required; a URL does not identify the test scenario.
+S2_single_dim_metric	https://bitagent.ninetechone.com/web/share/06608c00526f4360801b266252d54ee6?template_version=v3&locale=zh-CN

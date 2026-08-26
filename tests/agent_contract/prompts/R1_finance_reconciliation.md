@@ -10,7 +10,7 @@
 - 验证财务领域语义理解
 
 ## 输入文件
-- **文件路径**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\\R1_finance_ledger.xlsx`
+- **文件路径**: `D:/bitexcel/SheetPilot/tests/agent_contract/data/R1_finance_ledger.xlsx`
 - **工作表**: `科目余额表`
 - **表头行**: 1
 - **数据特征**: 
@@ -30,7 +30,7 @@
 - 空值视为0处理
 - 按借方金额降序排列
 
-输入文件: D:\bitexcel\SheetPilot\tests\agent_contract\data\\R1_finance_ledger.xlsx
+输入文件: D:/bitexcel/SheetPilot/tests/agent_contract/data/R1_finance_ledger.xlsx
 输出文件: <由Agent决定>
 ```
 
@@ -38,7 +38,7 @@
 
 1. **查询字段清单**
    ```bash
-   sheetpilot task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\R1_finance_ledger.xlsx --sheet 科目余额表 --header-row 1
+   sheetpilot task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/R1_finance_ledger.xlsx --sheet 科目余额表 --header-row 1
    ```
 
 2. **构造Task Request**

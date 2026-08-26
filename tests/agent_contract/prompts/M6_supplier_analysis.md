@@ -6,7 +6,7 @@
 - **测试重点**: 供应链场景 + in运算符 + 多指标分析
 
 ## 数据文件
-- **路径**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\M6_supplier_analysis.xlsx`
+- **路径**: `D:/bitexcel/SheetPilot/tests/agent_contract/data/M6_supplier_analysis.xlsx`
 - **工作表**: `采购记录`
 - **数据量**: 约338行
 - **表头行**: 第1行
@@ -29,7 +29,7 @@
 ```
 请统计质检合格率大于等于90%的采购记录，按供应商汇总采购总额、采购次数和平均交货天数。
 
-输入文件：D:\bitexcel\SheetPilot\tests\agent_contract\data\M6_supplier_analysis.xlsx
+输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/M6_supplier_analysis.xlsx
 输出文件：<自动生成>
 ```
 
@@ -53,7 +53,7 @@
 
 ### Step 1: 查询字段清单
 ```bash
-task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\M6_supplier_analysis.xlsx
+task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/M6_supplier_analysis.xlsx
 ```
 
 **预期返回**:
@@ -67,7 +67,7 @@ task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\M6_supplier_
 {
   "schema_version": "1.0",
   "task_type": "summarize_table",
-  "input_file": "D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\data\\M6_supplier_analysis.xlsx",
+  "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/M6_supplier_analysis.xlsx",
   "output_file": "<AUTO-RESULT-DIR>/供应商采购汇总.xlsx",
   "user_request": "请统计质检合格率大于等于90%的采购记录，按供应商汇总采购总额、采购次数和平均交货天数。",
   "source": {"sheet": "采购记录", "header_row": 1},

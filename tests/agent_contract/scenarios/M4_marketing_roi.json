@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "scenario_key": "M4_marketing_roi",
+  "id": "M4_marketing_roi",
+  "short_id": "M4",
+  "name": "M4: 营销渠道ROI分析",
+  "status": "active",
+  "evaluation_mode": "semantic",
+  "prompt_file": "M4_marketing_roi.md",
+  "data_file": "M4_marketing_roi.xlsx",
+  "source": {
+    "sheet": "渠道数据",
+    "header_row": 1
+  },
+  "expected_source_fields": [
+    "ROI",
+    "投放金额",
+    "渠道名称",
+    "销售额"
+  ],
+  "user_prompt": "请统计每个营销渠道30天的投放效果，包括总投放金额、总销售额和平均ROI。\n\n输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/M4_marketing_roi.xlsx\n输出文件：<自动生成>",
+  "expected_outcome": "success"
+}

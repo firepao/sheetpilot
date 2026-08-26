@@ -6,7 +6,7 @@
 - **测试重点**: average（平均值）的正确使用
 
 ## 数据文件
-- **路径**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\\S5_average.xlsx`
+- **路径**: `D:/bitexcel/SheetPilot/tests/agent_contract/data/S5_average.xlsx`
 - **工作表**: `成绩单`
 - **数据量**: 约180行
 - **表头行**: 第1行
@@ -23,7 +23,7 @@
 ```
 请统计每个班级的数学平均分。
 
-输入文件：D:\bitexcel\SheetPilot\tests\agent_contract\data\\S5_average.xlsx
+输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/S5_average.xlsx
 输出文件：<自动生成>
 ```
 
@@ -31,7 +31,7 @@
 
 ### Step 1: 查询字段清单
 ```bash
-task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\S5_average.xlsx
+task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/S5_average.xlsx
 ```
 
 **预期返回**:
@@ -45,7 +45,7 @@ task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\S5_average.
 {
   "schema_version": "1.0",
   "task_type": "summarize_table",
-  "input_file": "D:\bitexcel\SheetPilot\tests\agent_contract\data\\S5_average.xlsx",
+  "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/S5_average.xlsx",
   "output_file": "<AUTO-RESULT-DIR>/班级平均分.xlsx",
   "user_request": "请统计每个班级的数学平均分。",
   "source": {"sheet": "成绩单", "header_row": 1},

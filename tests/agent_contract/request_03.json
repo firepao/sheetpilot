@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "task_type": "summarize_table",
+  "input_file": "D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\data\\03_medium_orders.xlsx",
+  "output_file": "<AUTO-RESULT-DIR>\\city_channel_high_value.xlsx",
+  "user_request": "使用订单明细工作表，只统计销售额大于等于800且未退货的记录。按城市、渠道两级分组，输出销售收入（销售额求和）和订单数量（过滤后行数），按销售收入降序写入新工作表高额订单汇总。",
+  "source": {
+    "sheet": "订单明细",
+    "header_row": 1
+  },
+  "filters": [
+    {
+      "id": "high_value",
+      "field": "销售额",
+      "operator": "gte",
+      "value": 800
+    },
+    {
+      "id": "not_returned",
+      "field": "是否退货",
+      "operator": "eq",
+      "value": "否"
+    }
+  ],
+  "dimensions": [
+    {
+      "id": "city",
+      "field": "城市",
+      "output_name": "城市"
+    },
+    {
+      "id": "channel",
+      "field": "渠道",
+      "output_name": "渠道"
+    }
+  ],
+  "metrics": [
+    {
+      "id": "sales_revenue",
+      "function": "sum",
+      "field": "销售额",
+      "output_name": "销售收入"
+    },
+    {
+      "id": "order_count",
+      "function": "count",
+      "mode": "rows",
+      "output_name": "订单数量"
+    }
+  ],
+  "output": {
+    "sheet": "高额订单汇总",
+    "anchor": "A1",
+    "sort": [
+      {
+        "by": "sales_revenue",
+        "direction": "desc"
+      }
+    ]
+  },
+  "acceptance": {
+    "required_filters": [
+      "high_value",
+      "not_returned"
+    ],
+    "required_dimensions": [
+      "city",
+      "channel"
+    ],
+    "required_metrics": [
+      "sales_revenue",
+      "order_count"
+    ],
+    "required_sort": [
+      {
+        "by": "sales_revenue",
+        "direction": "desc"
+      }
+    ]
+  }
+}

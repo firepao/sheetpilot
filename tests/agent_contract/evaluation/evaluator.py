@@ -11,6 +11,7 @@ CRITICAL_KEYS = (
 )
 ALLOWED_COMMANDS = {"task-types", "task-run", "task-status"}
 LEGACY_COMMANDS = {"mvp-run", "mvp-validate", "plan", "compile", "execute", "recipes", "capabilities"}
+BENCHMARK_POLICY = "benchmark-v1"
 
 
 def _is_source_access(command: str) -> bool:
@@ -165,6 +166,25 @@ def evaluate_clarification_coverage(bundle: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def benchmark_score_v1(
+    bundle: dict[str, Any], gates: dict[str, bool], audit: dict[str, Any],
+    observations: dict[str, int], oracle: dict[str, Any], status: dict[str, Any], report: dict[str, Any],
+) -> dict[str, Any]:
+    """Calculate the frozen 100-point comparison score independently of diagnostic_score."""
+    expected = bundle.get("scenario", {}).get("expected_outcome", "success")
+    state = status.get("state", status.get("status"))
+    runtime_ok = state == "RUNTIME_PASS" and status.get("artifact_integrity") == "MATCHED" and status.get("delivery_valid") is True
+    correctness = (20 if runtime_ok or expected != "success" else 0) + (20 if oracle.get("passed") is True or expected != "success" else 0) + (10 if oracle.get("input_unchanged", True) is True else 0)
+    critical_count = sum(observations.values())
+    safety = (10 if gates.get("acceptance_complete") else 0) + (10 if critical_count == 0 else max(0, 10 - min(10, critical_count * 2)))
+    interface = 8 if audit["legacy_cli_calls"] == 0 and audit["source_access_attempts"] == 0 and audit["manual_workbook_writes"] == 0 else 0
+    efficiency = max(0, 7 - max(0, audit["sheetpilot_cli_calls"] - 3) - min(3, audit["filesystem_exploration"]))
+    evidence = (5 if gates.get("evidence_complete") else 0) + (5 if report.get("runtime_status") or expected != "success" else 0)
+    output = 5 if oracle.get("passed") is True or (expected != "success" and not bundle.get("scenario", {}).get("output_exists", False)) else 0
+    dimensions = {"correctness": correctness, "contract_and_safety": safety, "interface_and_efficiency": interface + efficiency, "evidence_and_report": evidence, "output_usability": output}
+    return {"policy": BENCHMARK_POLICY, "score": sum(dimensions.values()), "dimensions": dimensions}
+
+
 def evaluate_run(bundle: dict[str, Any]) -> dict[str, Any]:
     """Evaluate one immutable Agent run bundle using deterministic gates and scoring."""
     scenario = bundle.get("scenario", {})
@@ -217,6 +237,7 @@ def evaluate_run(bundle: dict[str, Any]) -> dict[str, Any]:
     interaction_eval = evaluate_interaction_efficiency(bundle, audit)
     binding_eval = evaluate_field_binding_quality(bundle)
     clarification_eval = evaluate_clarification_coverage(bundle)
+    benchmark = benchmark_score_v1(bundle, gates, audit, observations, oracle, status, report)
 
     return {
         "schema_version": "1.0",
@@ -232,4 +253,5 @@ def evaluate_run(bundle: dict[str, Any]) -> dict[str, Any]:
         "interaction_efficiency": interaction_eval,
         "field_binding_quality": binding_eval,
         "clarification_coverage": clarification_eval,
+        "benchmark": benchmark,
     }

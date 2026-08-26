@@ -10,7 +10,7 @@
 - 作为最简单场景的基准
 
 ## 输入文件
-- **文件路径**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\\01_simple_department_sales.xlsx`
+- **文件路径**: `D:/bitexcel/SheetPilot/tests/agent_contract/data/01_simple_department_sales.xlsx`
 - **工作表**: `销售明细`
 - **表头行**: 1
 - **数据特征**: 
@@ -29,7 +29,7 @@
 - 计算销售额合计
 - 按销售额降序排列
 
-输入文件: D:\bitexcel\SheetPilot\tests\agent_contract\data\\01_simple_department_sales.xlsx
+输入文件: D:/bitexcel/SheetPilot/tests/agent_contract/data/01_simple_department_sales.xlsx
 输出文件: <由Agent决定>
 ```
 
@@ -37,7 +37,7 @@
 
 1. **查询字段清单（可选）**
    ```bash
-   sheetpilot task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\01_simple_department_sales.xlsx --sheet 销售明细 --header-row 1
+   sheetpilot task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/01_simple_department_sales.xlsx --sheet 销售明细 --header-row 1
    ```
 
 2. **构造Task Request**

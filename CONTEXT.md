@@ -92,6 +92,14 @@ _Avoid_: Output Exists, Previous PASS
 在没有仓库源码、内部 Schema、历史结果或实现提示的全新环境中，由真实 Agent 通过公开 Skill 和 CLI 完成任务的产品接口测试。结果必须同时检查 Agent 行为轨迹、Runtime Evidence 和独立 Oracle。
 _Avoid_: Skill Unit Test, CLI Integration Test
 
+**Scenario Key**:
+Agent-facing Black-box Test 场景在注册表、Replay、证据目录和评分结果中的全局唯一身份。Scenario Key 等于场景 JSON 文件名去掉扩展名后的完整名称，例如 `M3_marketing_roi`。
+_Avoid_: Short Scenario ID, Difficulty Label
+
+**Short Scenario ID**:
+场景所属难度系列中的简短展示编号，例如 `M3`。不同场景可以共享 Short Scenario ID；它不能用于查找、关联、目录命名或评分归档。
+_Avoid_: Scenario Key, Unique ID
+
 **Diagnostic**:
 Runtime 对请求字段或执行事实为何不符合公开契约的结构化描述，包含稳定原因、字段路径、期望和实际值。
 _Avoid_: Error Details, Traceback

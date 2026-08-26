@@ -1,53 +1,21 @@
 {
-  "id": "S4",
-  "name": "count_non_empty_basic",
-  "level": "simple",
-  "description": "基础非空计数场景：count.non_empty模式",
-  "data_file": "tests/agent_contract/data/S4_count_non_empty.xlsx",
+  "schema_version": "1.0",
+  "scenario_key": "S4_count_non_empty",
+  "id": "S4_count_non_empty",
+  "short_id": "S4",
+  "name": "S4: count.non_empty 非空值统计",
+  "status": "active",
+  "evaluation_mode": "semantic",
+  "prompt_file": "S4_count_non_empty.md",
+  "data_file": "S4_count_non_empty.xlsx",
   "source": {
-    "sheet": "客户数据",
+    "sheet": "用户数据",
     "header_row": 1
   },
-  "user_prompt": "统计各省份有邮箱的客户数量",
-  "expected_outcome": "success",
-  "ideal_interaction": {
-    "rounds": 1,
-    "cli_calls": ["task-types", "task-run", "task-status"],
-    "expected_bindings": "auto"
-  },
-  "task_request_template": {
-    "filters": [],
-    "dimensions": [
-      {"id": "province", "field": "省份", "output_name": "省份"}
-    ],
-    "metrics": [
-      {"id": "email_count", "function": "count", "mode": "non_empty", "field": "邮箱", "output_name": "有邮箱客户数"}
-    ],
-    "sort": [
-      {"by": "email_count", "direction": "desc"}
-    ]
-  },
-  "oracle_params": {
-    "method": "pandas_query",
-    "filters": "",
-    "group_by": ["省份"],
-    "aggregations": {
-      "邮箱": "count"
-    },
-    "sort_by": [{"field": "有邮箱客户数", "ascending": false}],
-    "expected_row_count": 10,
-    "expected_total": 285,
-    "sample_rows": [
-      {"省份": "广东", "有邮箱客户数": 68},
-      {"省份": "江苏", "有邮箱客户数": 52},
-      {"省份": "浙江", "有邮箱客户数": 45}
-    ]
-  },
-  "difficulty_factors": {
-    "data_quality": "has_null",
-    "field_binding": "exact_match",
-    "business_logic": "count_non_empty",
-    "data_volume": "small"
-  },
-  "tags": ["simple", "count_non_empty", "null_handling"]
+  "expected_source_fields": [
+    "注册渠道",
+    "邮箱"
+  ],
+  "user_prompt": "请统计每个注册渠道有多少用户填写了邮箱（邮箱字段非空的用户数）。\n\n输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/S4_count_non_empty.xlsx\n输出文件：<自动生成>",
+  "expected_outcome": "success"
 }

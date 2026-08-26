@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "scenario_key": "H5_three_dims",
+  "id": "H5_three_dims",
+  "short_id": "H5",
+  "name": "H5: 三维度层级分组",
+  "status": "active",
+  "evaluation_mode": "semantic",
+  "prompt_file": "H5_three_dims.md",
+  "data_file": "H5_three_dims.xlsx",
+  "source": {
+    "sheet": "销售数据",
+    "header_row": 1
+  },
+  "expected_source_fields": [
+    "季度",
+    "年份",
+    "月份",
+    "销售额"
+  ],
+  "user_prompt": "请按年份、季度、月份统计2024年的月度销售额。\n\n输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/H5_three_dims.xlsx\n输出文件：<自动生成>",
+  "expected_outcome": "success"
+}

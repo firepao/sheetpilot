@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "scenario_key": "M2_employee_performance",
+  "id": "M2_employee_performance",
+  "short_id": "M2",
+  "name": "M2: 员工绩效分析",
+  "status": "active",
+  "evaluation_mode": "semantic",
+  "prompt_file": "M2_employee_performance.md",
+  "data_file": "M2_employee_performance.xlsx",
+  "source": {
+    "sheet": "员工绩效",
+    "header_row": 1
+  },
+  "expected_source_fields": [
+    "等级",
+    "绩效分数",
+    "部门"
+  ],
+  "user_prompt": "请统计绩效等级为\"优秀\"和\"良好\"的员工，按部门汇总人数和平均绩效分数。\n\n输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/M2_employee_performance.xlsx\n输出文件：<自动生成>",
+  "expected_outcome": "success"
+}

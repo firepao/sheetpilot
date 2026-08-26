@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "scenario_key": "M1_ecommerce_orders",
+  "id": "M1_ecommerce_orders",
+  "short_id": "M1",
+  "name": "M1: 电商订单分析（双维度双指标）",
+  "status": "active",
+  "evaluation_mode": "semantic",
+  "prompt_file": "M1_ecommerce_orders.md",
+  "data_file": "M1_ecommerce_orders.xlsx",
+  "source": {
+    "sheet": "订单明细",
+    "header_row": 1
+  },
+  "expected_source_fields": [
+    "产品类别",
+    "城市",
+    "订单状态",
+    "销售额"
+  ],
+  "user_prompt": "请统计已完成订单中，每个城市每个产品类别的销售总额和订单数量。\n\n输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/M1_ecommerce_orders.xlsx\n输出文件：<自动生成>",
+  "expected_outcome": "success"
+}

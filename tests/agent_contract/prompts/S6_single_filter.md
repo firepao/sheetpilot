@@ -6,7 +6,7 @@
 - **测试重点**: 单个过滤条件的正确使用
 
 ## 数据文件
-- **路径**: `D:\bitexcel\SheetPilot\tests\agent_contract\data\\S6_single_filter.xlsx`
+- **路径**: `D:/bitexcel/SheetPilot/tests/agent_contract/data/S6_single_filter.xlsx`
 - **工作表**: `订单数据`
 - **数据量**: 约136行
 - **表头行**: 第1行
@@ -24,7 +24,7 @@
 ```
 请统计已支付订单的总金额，按产品分组。
 
-输入文件：D:\bitexcel\SheetPilot\tests\agent_contract\data\\S6_single_filter.xlsx
+输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/S6_single_filter.xlsx
 输出文件：<自动生成>
 ```
 
@@ -32,7 +32,7 @@
 
 ### Step 1: 查询字段清单
 ```bash
-task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\S6_single_filter.xlsx
+task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/S6_single_filter.xlsx
 ```
 
 **预期返回**:
@@ -46,7 +46,7 @@ task-types --input D:\bitexcel\SheetPilot\tests\agent_contract\data\\S6_single_f
 {
   "schema_version": "1.0",
   "task_type": "summarize_table",
-  "input_file": "D:\bitexcel\SheetPilot\tests\agent_contract\data\\S6_single_filter.xlsx",
+  "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/S6_single_filter.xlsx",
   "output_file": "<AUTO-RESULT-DIR>/已支付订单汇总.xlsx",
   "user_request": "请统计已支付订单的总金额，按产品分组。",
   "source": {"sheet": "订单数据", "header_row": 1},

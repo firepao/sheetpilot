@@ -38,6 +38,9 @@ class AgentEvaluationTest(unittest.TestCase):
         }
         result = evaluate_run(bundle)
         self.assertTrue(oracle["passed"]); self.assertEqual(result["task_result"], "PASS"); self.assertEqual(result["quality_score"], 100)
+        self.assertEqual(result["benchmark"]["policy"], "benchmark-v1")
+        self.assertEqual(result["benchmark"]["score"], 100)
+        self.assertEqual(sum(result["benchmark"]["dimensions"].values()), 100)
 
     def test_critical_violation_forces_fail_and_null_quality_score(self):
         bundle = {"scenario": {"id": "bad", "expected_outcome": "success"}, "task_request": self.request,
@@ -53,6 +56,7 @@ class AgentEvaluationTest(unittest.TestCase):
         result = evaluate_run({"scenario": {"id": "reduced"}, "task_request": request, "commands": ["task-types"]})
         self.assertEqual(result["critical_violations"]["acceptance_reductions"], 1)
         self.assertEqual(result["task_result"], "FAIL")
+        self.assertLess(result["benchmark"]["dimensions"]["contract_and_safety"], 20)
 
     def test_missing_trace_fails_evidence_gate(self):
         result = evaluate_run({"scenario": {"id": "missing"}, "task_request": self.request})

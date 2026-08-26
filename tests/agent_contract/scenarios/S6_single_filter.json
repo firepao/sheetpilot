@@ -1,55 +1,22 @@
 {
-  "id": "S6",
-  "name": "single_filter_basic",
-  "level": "simple",
-  "description": "基础单条件过滤场景：eq操作符",
-  "data_file": "tests/agent_contract/data/S6_single_filter.xlsx",
+  "schema_version": "1.0",
+  "scenario_key": "S6_single_filter",
+  "id": "S6_single_filter",
+  "short_id": "S6",
+  "name": "S6: 单条件过滤",
+  "status": "active",
+  "evaluation_mode": "semantic",
+  "prompt_file": "S6_single_filter.md",
+  "data_file": "S6_single_filter.xlsx",
   "source": {
-    "sheet": "销售数据",
+    "sheet": "订单数据",
     "header_row": 1
   },
-  "user_prompt": "统计已支付订单各产品的销售额",
-  "expected_outcome": "success",
-  "ideal_interaction": {
-    "rounds": 1,
-    "cli_calls": ["task-types", "task-run", "task-status"],
-    "expected_bindings": "auto"
-  },
-  "task_request_template": {
-    "filters": [
-      {"id": "paid", "field": "支付状态", "operator": "eq", "value": "已支付"}
-    ],
-    "dimensions": [
-      {"id": "product", "field": "产品名称", "output_name": "产品名称"}
-    ],
-    "metrics": [
-      {"id": "total_sales", "function": "sum", "field": "销售额", "output_name": "销售额"}
-    ],
-    "sort": [
-      {"by": "total_sales", "direction": "desc"}
-    ]
-  },
-  "oracle_params": {
-    "method": "pandas_query",
-    "filters": "支付状态 == '已支付'",
-    "group_by": ["产品名称"],
-    "aggregations": {
-      "销售额": "sum"
-    },
-    "sort_by": [{"field": "销售额", "ascending": false}],
-    "expected_row_count": 8,
-    "expected_total": 280000,
-    "sample_rows": [
-      {"产品名称": "产品A", "销售额": 65000},
-      {"产品名称": "产品B", "销售额": 52000},
-      {"产品名称": "产品C", "销售额": 48000}
-    ]
-  },
-  "difficulty_factors": {
-    "data_quality": "clean",
-    "field_binding": "exact_match",
-    "business_logic": "single_filter",
-    "data_volume": "small"
-  },
-  "tags": ["simple", "single_filter", "eq_operator"]
+  "expected_source_fields": [
+    "产品名称",
+    "支付状态",
+    "订单金额"
+  ],
+  "user_prompt": "请统计已支付订单的总金额，按产品分组。\n\n输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/S6_single_filter.xlsx\n输出文件：<自动生成>",
+  "expected_outcome": "success"
 }
