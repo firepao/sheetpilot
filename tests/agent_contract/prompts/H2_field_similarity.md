@@ -6,7 +6,7 @@
 - **测试重点**: 相似字段名的精确识别
 
 ## 数据文件
-- **路径**: `D:/bitexcel/SheetPilot/tests/agent_contract/data/H2_field_similarity.xlsx`
+- **路径**: `tests/agent_contract/data/H2_field_similarity.xlsx`
 - **工作表**: `销售记录`
 - **数据量**: 约95行
 - **表头行**: 第1行
@@ -41,7 +41,7 @@
 ```
 请统计每个部门的平均工资。
 
-输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/H2_field_similarity.xlsx
+输入文件：tests/agent_contract/data/H2_field_similarity.xlsx
 输出文件：<自动生成>
 ```
 
@@ -59,7 +59,7 @@
 
 ### Step 1: 查询字段清单
 ```bash
-task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/H2_field_similarity.xlsx
+task-types --input tests/agent_contract/data/H2_field_similarity.xlsx
 ```
 
 **预期返回**:
@@ -77,7 +77,7 @@ task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/H2_field_sim
 {
   "schema_version": "1.0",
   "task_type": "summarize_table",
-  "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/H2_field_similarity.xlsx",
+  "input_file": "tests/agent_contract/data/H2_field_similarity.xlsx",
   "output_file": "<AUTO-RESULT-DIR>/部门工资统计.xlsx",
   "user_request": "请统计每个部门的平均工资。",
   "source": {"sheet": "销售记录", "header_row": 1},

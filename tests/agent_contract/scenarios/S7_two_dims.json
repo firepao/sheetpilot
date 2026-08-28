@@ -17,6 +17,6 @@
     "区域",
     "销售额"
   ],
-  "user_prompt": "请统计每个区域每个产品类别的销售额。\n\n输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/S7_two_dims.xlsx\n输出文件：<自动生成>",
+  "user_prompt": "请统计每个区域每个产品类别的销售额。\n\n输入文件：tests/agent_contract/data/S7_two_dims.xlsx\n输出文件：<自动生成>",
   "expected_outcome": "success"
 }

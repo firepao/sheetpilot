@@ -2,9 +2,9 @@
 
 ## 路径规范
 
-所有场景 Prompt 中的输入文件统一使用当前仓库的绝对路径：
+所有场景 Prompt 中的输入文件统一使用相对于项目根目录的路径：
 
-`D:/bitexcel/SheetPilot/tests/agent_contract/data/<文件名>.xlsx`
+`tests/agent_contract/data/<文件名>.xlsx`
 
 该目录下的文件名由场景 JSON 的 `data_file` 字段决定。输出文件继续使用运行时生成目录占位符，不把结果写死到用户机器上的固定目录。
 

@@ -1,5 +1,7 @@
 # SheetPilot Agent Contract 测试集 - Prompt索引
 
+> 本索引是 v1 初始 Prompt 集的历史索引，仅覆盖 8 个早期场景；当前完整 active 场景注册表以 `tests/agent_contract/scenarios/` 和 `default_execution_manifest.json` 为准，共 26 个场景。
+
 ## 概述
 
 本目录包含所有测试场景的Prompt文档，用于指导Agent执行测试和人工评估。
@@ -98,7 +100,7 @@ python -m tests.agent_contract.runner --level R
 
 ## 数据文件位置
 
-- **测试数据**: `D:/bitexcel/SheetPilot/tests/agent_contract/data/`
+- **测试数据**: `tests/agent_contract/data/`
 - **场景定义**: `tests/agent_contract/scenarios/`
 - **Prompt文档**: `tests/agent_contract/prompts/`（本目录）
 

@@ -47,9 +47,9 @@
 Agent 只看到 3 个命令：
 
 ```bash
-sheetpilot task-types [--input file.xlsx --sheet "明细" --header-row 1]
-sheetpilot task-run --request request.json
-sheetpilot task-status --task-id task-xxx
+sheetpilot-agent task-types [--input file.xlsx --sheet "明细" --header-row 1]
+sheetpilot-agent task-run --request request.json
+sheetpilot-agent task-status --task-id task-xxx
 ```
 
 **Agent 不提交：**
@@ -241,10 +241,10 @@ current-state.json           # 当前状态（RUNTIME_PASS/FAILED/NEEDS_BINDING�
 ### Skill 作用
 
 1. **环境准备**：提示 `pip install openpyxl`
-2. **查询字段**：`sheetpilot task-types --input orders.xlsx` → 返回 `available_fields`
+2. **查询字段**：`sheetpilot-agent task-types --input orders.xlsx` → 返回 `available_fields`
 3. **构造 Request**：提供 `count.rows` vs `count.non_empty` 的完整示例
-4. **提交任务**：`sheetpilot task-run --request req.json`
-5. **复核状态**：`sheetpilot task-status --task-id xxx`
+4. **提交任务**：`sheetpilot-agent task-run --request req.json`
+5. **复核状态**：`sheetpilot-agent task-status --task-id xxx`
 
 ### Agent 工作流（预期 6-8 步）
 

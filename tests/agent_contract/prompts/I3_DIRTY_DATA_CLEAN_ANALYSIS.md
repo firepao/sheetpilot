@@ -3,9 +3,9 @@
 ```text
 使用 $sheetpilot-excel-agent 处理：
 
-输入：D:/bitexcel/SheetPilot/tests/agent_contract/data/09_complex_dirty_logistics.xlsx
+输入：tests/agent_contract/data/09_complex_dirty_logistics.xlsx
 测试场景：I3
-输出：D:\bitexcel\SheetPilot\tests\agent_contract\results\<AUTO-RESULT-DIR>\logistics_clean_operations.xlsx
+输出：tests\agent_contract\results\<AUTO-RESULT-DIR>\logistics_clean_operations.xlsx
 
 使用“物流订单流水”，只统计清洗状态为“有效”、审核状态为“通过”且是否取消为“否”的记录。
 

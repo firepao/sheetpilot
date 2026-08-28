@@ -2,7 +2,7 @@
 
 ## 输入文件
 
-- 文件路径：`D:/bitexcel/SheetPilot/tests/agent_contract/data/B2_finance_close.xlsx`
+- 文件路径：`tests/agent_contract/data/B2_finance_close.xlsx`
 - 工作表：`科目余额`、`凭证明细`、`对账基准`
 - 表头行：1
 
@@ -11,7 +11,7 @@
 ```text
 请完成月末财务关账：只纳入审核状态为“已审核”的凭证，按科目类别汇总借方金额和贷方金额；将科目余额与对账基准按科目编码关联，计算系统余额与业务余额的差异，并标记差异不为零的科目。输出“关账检查”和“异常凭证”两个新工作表，保留原表和公式，不修改输入文件。
 
-输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/B2_finance_close.xlsx
+输入文件：tests/agent_contract/data/B2_finance_close.xlsx
 输出文件：<自动生成>
 ```
 

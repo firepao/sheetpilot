@@ -13,6 +13,6 @@
     "header_row": 1
   },
   "expected_source_fields": [],
-  "user_prompt": "请统计各区域的净销售收入。\n\n说明：\n- 表头有多个金额字段，需要选择正确的\"净销售收入\"列\n- 净销售收入 = 实际销售额扣除退货后的金额\n\n输入文件: D:/bitexcel/SheetPilot/tests/agent_contract/data/H3_sales_multi_amount.xlsx\n输出文件: <由Agent决定>",
+  "user_prompt": "请统计各区域的净销售收入。\n\n说明：\n- 表头有多个金额字段，需要选择正确的\"净销售收入\"列\n- 净销售收入 = 实际销售额扣除退货后的金额\n\n输入文件: tests/agent_contract/data/H3_sales_multi_amount.xlsx\n输出文件: <由Agent决定>",
   "expected_outcome": "success"
 }

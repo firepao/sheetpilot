@@ -2,19 +2,21 @@ $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 
-$sourceRoot = "D:\bitexcel\SheetPilot\skills"
+$sourceRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\skills")).Path
+$codexSkillsRoot = if ($env:CODEX_HOME) { Join-Path $env:CODEX_HOME "skills" } else { Join-Path $HOME ".codex\skills" }
+$bitAgentSkillsRoot = if ($env:BITAGENT_SKILLS_ROOT) { $env:BITAGENT_SKILLS_ROOT } else { Join-Path $HOME "bit-Agent\skills" }
 $installations = @(
     @{
         Name = "sheetpilot-run-review"
-        TargetRoot = "C:\Users\nine\.codex\skills"
+        TargetRoot = $codexSkillsRoot
     },
     @{
         Name = "sheetpilot-run-scorer"
-        TargetRoot = "C:\Users\nine\.codex\skills"
+        TargetRoot = $codexSkillsRoot
     },
     @{
         Name = "sheetpilot-excel-agent"
-        TargetRoot = "C:\Users\nine\bit-Agent\skills"
+        TargetRoot = $bitAgentSkillsRoot
     }
 )
 

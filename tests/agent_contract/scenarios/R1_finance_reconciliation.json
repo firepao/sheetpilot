@@ -13,6 +13,6 @@
     "header_row": 1
   },
   "expected_source_fields": [],
-  "user_prompt": "请分析科目余额表，按一级科目汇总借方金额和贷方金额。\n\n要求：\n- 按一级科目分组\n- 分别计算借方金额合计、贷方金额合计\n- 空值视为0处理\n- 按借方金额降序排列\n\n输入文件: D:/bitexcel/SheetPilot/tests/agent_contract/data/R1_finance_ledger.xlsx\n输出文件: <由Agent决定>",
+  "user_prompt": "请分析科目余额表，按一级科目汇总借方金额和贷方金额。\n\n要求：\n- 按一级科目分组\n- 分别计算借方金额合计、贷方金额合计\n- 空值视为0处理\n- 按借方金额降序排列\n\n输入文件: tests/agent_contract/data/R1_finance_ledger.xlsx\n输出文件: <由Agent决定>",
   "expected_outcome": "success"
 }

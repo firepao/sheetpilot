@@ -16,6 +16,6 @@
     "月份",
     "金额"
   ],
-  "user_prompt": "请按月份统计2024年的订单金额。\n\n输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/H1_date_ambiguity.xlsx\n输出文件：<自动生成>\n\n注意：日期格式可能不统一，请正确识别月份。",
+  "user_prompt": "请按月份统计2024年的订单金额。\n\n输入文件：tests/agent_contract/data/H1_date_ambiguity.xlsx\n输出文件：<自动生成>\n\n注意：日期格式可能不统一，请正确识别月份。",
   "expected_outcome": "success"
 }

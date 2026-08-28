@@ -2,7 +2,7 @@
 
 ## 输入文件
 
-- 文件路径：`D:/bitexcel/SheetPilot/tests/agent_contract/data/B3_supply_chain.xlsx`
+- 文件路径：`tests/agent_contract/data/B3_supply_chain.xlsx`
 - 工作表：`库存快照`、`供应商主数据`、`采购订单`
 - 表头行：1
 
@@ -11,7 +11,7 @@
 ```text
 请找出库存低于安全库存且库存状态不是“冻结”的物料，按物料类别统计预警 SKU 数量和库存缺口数量；再关联供应商主数据，按供应商输出质检合格率和在途采购金额。分别生成“库存预警”和“供应商表现”两个结果表。
 
-输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/B3_supply_chain.xlsx
+输入文件：tests/agent_contract/data/B3_supply_chain.xlsx
 输出文件：<自动生成>
 ```
 

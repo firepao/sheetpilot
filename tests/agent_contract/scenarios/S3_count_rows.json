@@ -15,6 +15,6 @@
   "expected_source_fields": [
     "城市"
   ],
-  "user_prompt": "请统计每个城市的订单数量。\n\n输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/S3_count_rows.xlsx\n输出文件：<自动生成>",
+  "user_prompt": "请统计每个城市的订单数量。\n\n输入文件：tests/agent_contract/data/S3_count_rows.xlsx\n输出文件：<自动生成>",
   "expected_outcome": "success"
 }

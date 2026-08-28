@@ -13,6 +13,6 @@
     "header_row": 1
   },
   "expected_source_fields": [],
-  "user_prompt": "使用 $sheetpilot-excel-agent 处理：\n\n输入：D:/bitexcel/SheetPilot/tests/agent_contract/data/07_complex_retail_operations.xlsx\n测试场景：N1_CREATE_COMPLEX_OPERATING_SUMMARY\n输出：D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\results\\<AUTO-RESULT-DIR>\\retail_regional_category_summary.xlsx\n\n使用“门店订单明细”，只统计审核状态为“通过”且是否取消为“否”的订单。\n\n按区域、产品品类分组，输出净销售收入、交易数量（过滤后的记录行数）、客户编号非空数量、平均订单金额和毛利合计，按净销售收入降序写入新工作表“区域品类经营汇总”。\n\n保留原工作簿中的所有工作表、公式和图表，不修改输入文件。完成后根据最终 task-status 报告执行状态、Task ID 和输出文件路径。",
+  "user_prompt": "使用 $sheetpilot-excel-agent 处理：\n\n输入：tests/agent_contract/data/07_complex_retail_operations.xlsx\n测试场景：N1_CREATE_COMPLEX_OPERATING_SUMMARY\n输出：D:\\bitexcel\\SheetPilot\\tests\\agent_contract\\results\\<AUTO-RESULT-DIR>\\retail_regional_category_summary.xlsx\n\n使用“门店订单明细”，只统计审核状态为“通过”且是否取消为“否”的订单。\n\n按区域、产品品类分组，输出净销售收入、交易数量（过滤后的记录行数）、客户编号非空数量、平均订单金额和毛利合计，按净销售收入降序写入新工作表“区域品类经营汇总”。\n\n保留原工作簿中的所有工作表、公式和图表，不修改输入文件。完成后根据最终 task-status 报告执行状态、Task ID 和输出文件路径。",
   "expected_outcome": "success"
 }

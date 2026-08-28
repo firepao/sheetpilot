@@ -2,7 +2,7 @@
 
 ## 输入文件
 
-- 文件路径：`D:/bitexcel/SheetPilot/tests/agent_contract/data/B2_finance_close.xlsx`
+- 文件路径：`tests/agent_contract/data/B2_finance_close.xlsx`
 - 工作表：`凭证明细`
 - 表头行：1
 
@@ -11,7 +11,7 @@
 ```text
 请检查凭证明细，找出待审核记录、金额异常记录和摘要缺失记录，按异常类型分类，保留凭证号、记账日期、科目名称、金额和原审核状态，生成“凭证异常工作清单”。不要修改原始凭证明细。
 
-输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/B2_finance_close.xlsx
+输入文件：tests/agent_contract/data/B2_finance_close.xlsx
 输出文件：<自动生成>
 ```
 

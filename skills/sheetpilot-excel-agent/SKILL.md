@@ -10,11 +10,10 @@ description: Use SheetPilot's Agent-facing Task API to produce auditable Excel s
 ## 快速开始
 
 ```powershell
-# 假设本 SKILL.md 路径为：C:\Users\nine\bit-Agent\skills\sheetpilot-excel-agent\SKILL.md
-# 则脚本路径为：C:\Users\nine\bit-Agent\skills\sheetpilot-excel-agent\scripts\sheetpilot_cli.py
+# 假设本 SKILL.md 位于已安装的 Skill 目录中，则脚本路径为：<skill-root>\scripts\sheetpilot_cli.py
 
 # 1. 查询字段清单（可选）
-python "C:\Users\nine\bit-Agent\skills\sheetpilot-excel-agent\scripts\sheetpilot_cli.py" task-types --input orders.xlsx --sheet 交易流水 --header-row 1
+python "<skill-root>\scripts\sheetpilot_cli.py" task-types --input orders.xlsx --sheet 交易流水 --header-row 1
 
 # 2. 构造请求并写入文件（UTF-8 无 BOM）
 @"
@@ -22,10 +21,10 @@ python "C:\Users\nine\bit-Agent\skills\sheetpilot-excel-agent\scripts\sheetpilot
 "@ | Out-File -FilePath request.json -Encoding UTF8
 
 # 3. 提交任务
-python "C:\Users\nine\bit-Agent\skills\sheetpilot-excel-agent\scripts\sheetpilot_cli.py" task-run --request request.json --auto-result-dir D:\results
+python "<skill-root>\scripts\sheetpilot_cli.py" task-run --request request.json --auto-result-dir D:\results
 
 # 4. 复核状态
-python "C:\Users\nine\bit-Agent\skills\sheetpilot-excel-agent\scripts\sheetpilot_cli.py" task-status --task-id task-abc123
+python "<skill-root>\scripts\sheetpilot_cli.py" task-status --task-id task-abc123
 ```
 
 ## 入口与路径发现
@@ -66,7 +65,7 @@ python "<skill-root>\scripts\sheetpilot_cli.py" task-status --task-id "<task-id>
 
 **配置示例**（PowerShell）：
 ```powershell
-$env:SHEETPILOT_ROOT = "D:\bitexcel\SheetPilot"
+$env:SHEETPILOT_ROOT = "D:\path\to\SheetPilot"
 ```
 
 **Python 依赖**：SheetPilot 需要 `openpyxl`。首次运行前或遇到 `ModuleNotFoundError` 时先安装：
@@ -389,14 +388,13 @@ python "<skill-root>\scripts\sheetpilot_cli.py" task-run --request request.json 
 ## 示例：完整流程
 
 ```powershell
-# 前提：假设 SKILL.md 在 C:\Users\nine\bit-Agent\skills\sheetpilot-excel-agent\SKILL.md
-# 则脚本路径为：C:\Users\nine\bit-Agent\skills\sheetpilot-excel-agent\scripts\sheetpilot_cli.py
+# 前提：假设 SKILL.md 在已安装的 Skill 目录中，则脚本路径为：<skill-root>\scripts\sheetpilot_cli.py
 
 # 0. 设置环境变量（如需要）
-$env:SHEETPILOT_ROOT = "D:\bitexcel\SheetPilot"
+$env:SHEETPILOT_ROOT = "D:\path\to\SheetPilot"
 
 # 1. 查询字段清单（可选但推荐）
-python "C:\Users\nine\bit-Agent\skills\sheetpilot-excel-agent\scripts\sheetpilot_cli.py" task-types --input orders.xlsx --sheet 交易流水 --header-row 1
+python "<skill-root>\scripts\sheetpilot_cli.py" task-types --input orders.xlsx --sheet 交易流水 --header-row 1
 
 # 2. 根据清单构造请求并写入文件
 @"
@@ -421,7 +419,7 @@ python "C:\Users\nine\bit-Agent\skills\sheetpilot-excel-agent\scripts\sheetpilot
 "@ | Out-File -FilePath request.json -Encoding UTF8
 
 # 3. 提交任务
-python "C:\Users\nine\bit-Agent\skills\sheetpilot-excel-agent\scripts\sheetpilot_cli.py" task-run --request request.json --auto-result-dir D:\results
+python "<skill-root>\scripts\sheetpilot_cli.py" task-run --request request.json --auto-result-dir D:\results
 
 # 4. 如返回 NEEDS_BINDING，对照 field_inventory 判断后提交修订
 @"
@@ -434,10 +432,10 @@ python "C:\Users\nine\bit-Agent\skills\sheetpilot-excel-agent\scripts\sheetpilot
 }
 "@ | Out-File -FilePath amendment.json -Encoding UTF8
 
-python "C:\Users\nine\bit-Agent\skills\sheetpilot-excel-agent\scripts\sheetpilot_cli.py" task-run --request amendment.json
+python "<skill-root>\scripts\sheetpilot_cli.py" task-run --request amendment.json
 
 # 5. 返回 RUNTIME_PASS 后复核
-python "C:\Users\nine\bit-Agent\skills\sheetpilot-excel-agent\scripts\sheetpilot_cli.py" task-status --task-id task-abc123
+python "<skill-root>\scripts\sheetpilot_cli.py" task-status --task-id task-abc123
 
 # 6. 确认 artifact_integrity=MATCHED + delivery_valid=true 后交付
 ```
@@ -485,7 +483,7 @@ $json | Out-File request.json -Encoding UTF8
 **解决**：
 ```powershell
 # 设置环境变量
-$env:SHEETPILOT_ROOT = "D:\bitexcel\SheetPilot"
+$env:SHEETPILOT_ROOT = "D:\path\to\SheetPilot"
 
 # 重新运行命令
 python "<skill-root>\scripts\sheetpilot_cli.py" task-types

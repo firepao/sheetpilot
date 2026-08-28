@@ -13,6 +13,6 @@
     "header_row": 1
   },
   "expected_source_fields": [],
-  "user_prompt": "请分析薪资明细表，按部门汇总薪资成本情况。\n\n要求：\n- 按部门分组\n- 计算以下指标：\n  1. 总薪资成本（实发工资总和）\n  2. 平均薪资（实发工资平均值）\n  3. 发薪人次（记录条数）\n- 按总薪资成本降序排列\n\n输入文件: D:/bitexcel/SheetPilot/tests/agent_contract/data/R3_hr_payroll.xlsx\n输出文件: <由Agent决定>",
+  "user_prompt": "请分析薪资明细表，按部门汇总薪资成本情况。\n\n要求：\n- 按部门分组\n- 计算以下指标：\n  1. 总薪资成本（实发工资总和）\n  2. 平均薪资（实发工资平均值）\n  3. 发薪人次（记录条数）\n- 按总薪资成本降序排列\n\n输入文件: tests/agent_contract/data/R3_hr_payroll.xlsx\n输出文件: <由Agent决定>",
   "expected_outcome": "success"
 }

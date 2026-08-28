@@ -6,7 +6,7 @@
 - **测试重点**: 混合日期格式的识别与解析
 
 ## 数据文件
-- **路径**: `D:/bitexcel/SheetPilot/tests/agent_contract/data/H1_date_ambiguity.xlsx`
+- **路径**: `tests/agent_contract/data/H1_date_ambiguity.xlsx`
 - **工作表**: `订单记录`
 - **数据量**: 约128行
 - **表头行**: 第1行
@@ -38,7 +38,7 @@
 ```
 请按月份统计2024年的订单金额。
 
-输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/H1_date_ambiguity.xlsx
+输入文件：tests/agent_contract/data/H1_date_ambiguity.xlsx
 输出文件：<自动生成>
 
 注意：日期格式可能不统一，请正确识别月份。
@@ -48,7 +48,7 @@
 
 ### Step 1: 查询字段清单
 ```bash
-task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/H1_date_ambiguity.xlsx
+task-types --input tests/agent_contract/data/H1_date_ambiguity.xlsx
 ```
 
 **预期返回**:
@@ -72,7 +72,7 @@ task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/H1_date_ambi
 {
   "schema_version": "1.0",
   "task_type": "summarize_table",
-  "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/H1_date_ambiguity.xlsx",
+  "input_file": "tests/agent_contract/data/H1_date_ambiguity.xlsx",
   "output_file": "<AUTO-RESULT-DIR>/月度订单统计.xlsx",
   "user_request": "请按月份统计2024年的订单金额。",
   "source": {"sheet": "订单记录", "header_row": 1},

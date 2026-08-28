@@ -5,6 +5,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from openpyxl import Workbook, load_workbook
 
@@ -142,6 +143,77 @@ class TaskApiTest(unittest.TestCase):
         status = self.runtime.status(result["task_id"])
         self.assertEqual(status["artifact_integrity"], "MODIFIED")
         self.assertFalse(status["delivery_valid"])
+
+    def test_validation_blocks_wrong_temporary_result_before_publication(self):
+        original = self.runtime._write_table
+
+        def corrupt(engine, table, sheet, anchor):
+            original(engine, table, sheet, anchor)
+            engine.write_cell(sheet, 2, 2, 999999)
+
+        with patch.object(self.runtime, "_write_table", side_effect=corrupt):
+            result = self.runtime.run(self.request())
+        self.assertEqual(result["status"], "VALIDATION_FAILED")
+        self.assertFalse(result["delivery_valid"])
+        self.assertFalse(Path(self.request()["output_file"]).exists())
+        task_dir = self.root / "state" / "tasks" / result["task_id"]
+        validation = json.loads((task_dir / "attempts" / "attempt-001" / "validation.json").read_text(encoding="utf-8"))
+        self.assertFalse(validation["passed"])
+        self.assertTrue(any(item["name"] == "output_values_and_order_match" and not item["passed"] for item in validation["checks"]))
+
+    def test_validation_blocks_wrong_output_headers(self):
+        original = self.runtime._write_table
+
+        def corrupt(engine, table, sheet, anchor):
+            original(engine, table, sheet, anchor)
+            engine.write_cell(sheet, 1, 1, "错误表头")
+
+        with patch.object(self.runtime, "_write_table", side_effect=corrupt):
+            result = self.runtime.run(self.request())
+        self.assertEqual(result["status"], "VALIDATION_FAILED")
+        self.assertFalse(Path(self.request()["output_file"]).exists())
+        self.assertTrue(any(item["name"] == "output_headers_match" and not item["passed"] for item in result["error"]["diagnostics"]))
+
+    def test_validation_blocks_extra_output_cells(self):
+        original = self.runtime._write_table
+
+        def corrupt(engine, table, sheet, anchor):
+            original(engine, table, sheet, anchor)
+            engine.write_cell(sheet, 100, 100, "意外数据")
+
+        with patch.object(self.runtime, "_write_table", side_effect=corrupt):
+            result = self.runtime.run(self.request())
+        self.assertEqual(result["status"], "VALIDATION_FAILED")
+        self.assertTrue(any(item["name"] == "output_has_no_extra_non_empty_cells" and not item["passed"] for item in result["error"]["diagnostics"]))
+
+    def test_validation_accepts_non_a1_anchor_and_records_evidence(self):
+        request = self.request()
+        request["output"]["anchor"] = "C3"
+        result = self.runtime.run(request)
+        self.assertEqual(result["status"], "RUNTIME_PASS")
+        self.assertTrue(result["evidence"]["validation"]["passed"])
+        self.assertEqual(result["evidence"]["validation"]["filtered_row_count"], 2)
+        self.assertTrue(result["evidence"]["validation"]["validation_hash"])
+        workbook = load_workbook(request["output_file"], data_only=True)
+        self.assertEqual(workbook["城市经营汇总"]["C3"].value, "城市")
+        self.assertEqual(workbook["城市经营汇总"]["D4"].value, 30)
+        workbook.close()
+
+    def test_validation_blocks_source_sheet_mutation(self):
+        original = self.runtime._write_table
+
+        def corrupt(engine, table, sheet, anchor):
+            original(engine, table, sheet, anchor)
+            source_workbook = load_workbook(self.source)
+            source_workbook["清洗明细"]["A2"] = "被篡改"
+            source_workbook.save(self.source)
+            source_workbook.close()
+
+        with patch.object(self.runtime, "_write_table", side_effect=corrupt):
+            result = self.runtime.run(self.request())
+        self.assertEqual(result["status"], "VALIDATION_FAILED")
+        self.assertFalse(Path(self.request()["output_file"]).exists())
+        self.assertFalse(result["error"]["diagnostics"][0]["passed"])
 
     def test_existing_target_sheet_fails_without_publishing(self):
         request=self.request(); request["output"]["sheet"]="清洗明细"

@@ -13,6 +13,6 @@
     "header_row": 1
   },
   "expected_source_fields": [],
-  "user_prompt": "请分析订单流水表，按客户消费金额分组统计客户价值分布。\n\n要求：\n- 只统计已完成订单（排除已取消、退款中订单）\n- 按客户分组计算总消费金额\n- 将客户分为3个价值层级：\n  · 高价值客户：总消费 > 10000\n  · 中价值客户：总消费 3000-10000\n  · 低价值客户：总消费 < 3000\n- 统计各层级的客户数量和总消费金额\n- 按价值层级排序（高→中→低）\n\n输入文件: D:/bitexcel/SheetPilot/tests/agent_contract/data/R4_customer_rfm.xlsx\n输出文件: <由Agent决定>",
+  "user_prompt": "请分析订单流水表，按客户消费金额分组统计客户价值分布。\n\n要求：\n- 只统计已完成订单（排除已取消、退款中订单）\n- 按客户分组计算总消费金额\n- 将客户分为3个价值层级：\n  · 高价值客户：总消费 > 10000\n  · 中价值客户：总消费 3000-10000\n  · 低价值客户：总消费 < 3000\n- 统计各层级的客户数量和总消费金额\n- 按价值层级排序（高→中→低）\n\n输入文件: tests/agent_contract/data/R4_customer_rfm.xlsx\n输出文件: <由Agent决定>",
   "expected_outcome": "success"
 }

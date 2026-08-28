@@ -2,7 +2,7 @@
 
 ## 输入文件
 
-- 文件路径：`D:/bitexcel/SheetPilot/tests/agent_contract/data/B1_retail_operations.xlsx`
+- 文件路径：`tests/agent_contract/data/B1_retail_operations.xlsx`
 - 工作表：`订单明细`
 - 表头行：1
 
@@ -11,7 +11,7 @@
 ```text
 请将已完成且未退货的订单按区域和下单月份制作销售额透视表，并把订单明细转换成长表供核查。结果写入新的工作表，原始数据保持不变；透视表需要有清晰表头并冻结首行。
 
-输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/B1_retail_operations.xlsx
+输入文件：tests/agent_contract/data/B1_retail_operations.xlsx
 输出文件：<自动生成>
 ```
 

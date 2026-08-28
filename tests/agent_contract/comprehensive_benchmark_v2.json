@@ -2,12 +2,12 @@
   "schema_version": "2.0",
   "name": "sheetpilot-real-workbook-benchmark-v2",
   "description": "以真实业务任务为中心的多工作表 Excel 测试集；同一工作簿覆盖读取、筛选、连接、聚合、透视、变换、公式、样式和交付保真。",
-  "data_root": "D:/bitexcel/SheetPilot/tests/agent_contract/data",
+  "data_root": "tests/agent_contract/data",
   "cases": [
     {
       "id": "B1_retail_management_summary",
       "prompt_file": "B1_retail_management_summary.md",
-      "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/B1_retail_operations.xlsx",
+      "input_file": "tests/agent_contract/data/B1_retail_operations.xlsx",
       "sheets": ["订单明细", "商品主数据", "渠道映射"],
       "user_prompt": "请分析订单明细，排除已取消或已退货订单，按区域和品类汇总销售额、订单数、客户编号非空数和平均订单金额，并关联商品主数据核对标准成本；结果按销售额降序写入‘区域品类经营汇总’，同时输出客户编号为空的异常明细。",
       "coverage": ["table.read", "table.filter", "table.join", "table.aggregate", "table.count", "table.sort", "range.write_table", "style.apply", "table.select"]
@@ -15,7 +15,7 @@
     {
       "id": "B1_retail_pivot_and_detail",
       "prompt_file": "B1_retail_pivot_and_detail.md",
-      "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/B1_retail_operations.xlsx",
+      "input_file": "tests/agent_contract/data/B1_retail_operations.xlsx",
       "sheets": ["订单明细"],
       "user_prompt": "请把已完成订单按区域和月份做销售额透视表，并保留订单状态、客户类型两个字段用于核查；同时把透视前的订单明细转换成长表，输出到新的工作表。",
       "coverage": ["table.filter", "table.pivot", "table.melt", "range.write_table", "freeze_panes.set"]
@@ -23,7 +23,7 @@
     {
       "id": "B2_finance_close_reconciliation",
       "prompt_file": "B2_finance_close_reconciliation.md",
-      "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/B2_finance_close.xlsx",
+      "input_file": "tests/agent_contract/data/B2_finance_close.xlsx",
       "sheets": ["科目余额", "凭证明细", "对账基准"],
       "user_prompt": "请完成月末财务关账：只纳入已审核凭证，按科目类别汇总借方和贷方金额；将科目余额与对账基准连接，计算差异并标记差异不为零的科目，输出‘关账检查’和‘异常凭证’两个结果表，保留原表不修改。",
       "coverage": ["table.filter", "table.aggregate", "table.join", "derive_column", "formula.write", "formula.find_errors", "range.write_table", "conditional_format.create"]
@@ -31,7 +31,7 @@
     {
       "id": "B2_finance_voucher_quality",
       "prompt_file": "B2_finance_voucher_quality.md",
-      "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/B2_finance_close.xlsx",
+      "input_file": "tests/agent_contract/data/B2_finance_close.xlsx",
       "sheets": ["凭证明细"],
       "user_prompt": "请检查凭证明细中的待审核记录、金额异常和摘要缺失，按异常类型分类并保留凭证号、日期、科目和金额，生成可供财务人员处理的异常工作清单。",
       "coverage": ["table.filter", "table.unique", "table.fill_missing", "table.sort", "range.write_table", "style.apply_table_default"]
@@ -39,7 +39,7 @@
     {
       "id": "B3_supply_inventory_alert",
       "prompt_file": "B3_supply_inventory_alert.md",
-      "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/B3_supply_chain.xlsx",
+      "input_file": "tests/agent_contract/data/B3_supply_chain.xlsx",
       "sheets": ["库存快照", "供应商主数据", "采购订单"],
       "user_prompt": "请找出库存低于安全库存且库存状态不是冻结的物料，按物料类别统计预警 SKU 数量和缺口数量；再关联供应商主数据，输出供应商维度的合格率和在途采购金额。",
       "coverage": ["table.filter", "table.join", "table.aggregate", "table.count", "table.sort", "range.write_table", "number_format.apply"]
@@ -47,7 +47,7 @@
     {
       "id": "B3_supplier_performance",
       "prompt_file": "B3_supplier_performance.md",
-      "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/B3_supply_chain.xlsx",
+      "input_file": "tests/agent_contract/data/B3_supply_chain.xlsx",
       "sheets": ["采购订单", "供应商主数据"],
       "user_prompt": "请只统计质检合格率达到 90% 且已经收货的采购订单，按供应商汇总采购金额、采购次数和平均质检合格率，按照采购金额降序输出，并把没有达到条件的供应商列入说明。",
       "coverage": ["table.filter", "table.aggregate", "table.sort", "table.unique", "range.write_table"]
@@ -55,7 +55,7 @@
     {
       "id": "B4_workforce_cost_and_utilization",
       "prompt_file": "B4_workforce_cost_and_utilization.md",
-      "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/B4_workforce.xlsx",
+      "input_file": "tests/agent_contract/data/B4_workforce.xlsx",
       "sheets": ["员工月度绩效", "部门目标"],
       "user_prompt": "请排除离职员工，按部门汇总实发工资、员工人数、平均实际工时和加班人数，并与部门预算连接计算预算使用率；预算超 90% 的部门标记为重点关注。",
       "coverage": ["table.filter", "table.aggregate", "table.join", "table.count", "derive_column", "conditional_format.create", "range.write_table"]
@@ -63,7 +63,7 @@
     {
       "id": "B4_workforce_performance",
       "prompt_file": "B4_workforce_performance.md",
-      "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/B4_workforce.xlsx",
+      "input_file": "tests/agent_contract/data/B4_workforce.xlsx",
       "sheets": ["员工月度绩效"],
       "user_prompt": "请统计绩效等级为优秀或良好的在职员工，按部门和项目编号汇总人数、实发工资和实际工时，结果按部门、工资降序排列，并保留员工编号非空统计。",
       "coverage": ["table.filter", "table.aggregate", "table.sort", "table.count", "range.write_table"]
@@ -71,7 +71,7 @@
     {
       "id": "B5_marketing_funnel_roi",
       "prompt_file": "B5_marketing_funnel_roi.md",
-      "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/B5_marketing_funnel.xlsx",
+      "input_file": "tests/agent_contract/data/B5_marketing_funnel.xlsx",
       "sheets": ["投放明细", "渠道目标"],
       "user_prompt": "请排除暂停广告组，按渠道汇总投放金额、曝光量、点击量、转化量和归因销售额，计算 CTR、转化率和 ROI，并关联渠道目标标记低于目标 ROI 的渠道；按 ROI 升序输出优化清单。",
       "coverage": ["table.filter", "table.aggregate", "table.join", "derive_column", "table.sort", "number_format.apply", "range.write_table"]
@@ -79,7 +79,7 @@
     {
       "id": "B5_marketing_monthly_pivot",
       "prompt_file": "B5_marketing_monthly_pivot.md",
-      "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/B5_marketing_funnel.xlsx",
+      "input_file": "tests/agent_contract/data/B5_marketing_funnel.xlsx",
       "sheets": ["投放明细"],
       "user_prompt": "请将投放明细按投放日期月份和渠道透视，输出每月投放金额、点击量和归因销售额；保留原始数据并在结果表冻结表头、设置金额和比例格式。",
       "coverage": ["table.pivot", "table.aggregate", "number_format.apply", "freeze_panes.set", "range.write_table"]
@@ -87,7 +87,7 @@
     {
       "id": "B6_workbook_formula_and_objects",
       "prompt_file": "B6_workbook_formula_and_objects.md",
-      "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/B6_workbook_objects.xlsx",
+      "input_file": "tests/agent_contract/data/B6_workbook_objects.xlsx",
       "sheets": ["运营看板"],
       "user_prompt": "请检查运营看板中的公式依赖和公式错误，保留现有公式；为销售额和订单数创建组合图表，设置月份为分类轴，增加‘可发布’命名区域和批注，并输出对象检查结果。不要破坏原工作表。",
       "coverage": ["formula.inspect_dependencies", "formula.find_errors", "chart.add_series", "chart.set_categories", "chart.inspect", "named_range.create", "comment.create"]
@@ -95,7 +95,7 @@
     {
       "id": "B7_workbook_admin",
       "prompt_file": "B7_workbook_admin.md",
-      "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/B7_workbook_admin.xlsx",
+      "input_file": "tests/agent_contract/data/B7_workbook_admin.xlsx",
       "sheets": ["月度报表", "模板"],
       "user_prompt": "请把月度报表复制为‘管理层报表’，删除空白模板工作表，并在新报表中冻结表头、开启自动筛选、调整列宽、保护工作表；不要修改原始月度报表。",
       "coverage": ["workbook.inspect", "workbook.list_sheets", "sheet.copy", "sheet.delete", "range.merge", "freeze_panes.set", "auto_filter.set", "column.set_width", "protection.set"]
@@ -103,7 +103,7 @@
     {
       "id": "B8_data_quality",
       "prompt_file": "B8_data_quality.md",
-      "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/B8_data_quality.xlsx",
+      "input_file": "tests/agent_contract/data/B8_data_quality.xlsx",
       "sheets": ["客户订单", "字段说明"],
       "user_prompt": "请清洗客户订单：按客户编号去重，补齐缺失负责人为‘待分配’，将订单状态为‘待补’或订单金额为空的记录列入异常清单；重命名输出字段为业务人员易懂的名称，并给出字段非空数和金额分布概览。",
       "coverage": ["table.deduplicate", "table.fill_missing", "table.rename_fields", "table.describe", "table.value_counts", "range.write_table", "style.apply_table_default"]
@@ -111,7 +111,7 @@
     {
       "id": "B9_report_publication",
       "prompt_file": "B9_report_publication.md",
-      "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/B9_report_publication.xlsx",
+      "input_file": "tests/agent_contract/data/B9_report_publication.xlsx",
       "sheets": ["经营数据", "参数"],
       "user_prompt": "请发布月度经营简报：复制并填充利润公式到全部月份，创建包含收入、成本和利润的柱状图，在结果表写入报告标题；设置金额数字格式、冻结首行、调整列宽，并保留原始工作表。",
       "coverage": ["formula.read", "formula.fill", "formula.copy", "chart.create", "number_format.apply", "freeze_panes.set", "column.set_width", "range.write", "style.copy"]
@@ -119,7 +119,7 @@
     {
       "id": "B10_delivery_maintenance",
       "prompt_file": "B10_delivery_maintenance.md",
-      "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/B10_delivery_maintenance.xlsx",
+      "input_file": "tests/agent_contract/data/B10_delivery_maintenance.xlsx",
       "sheets": ["交付清单", "说明"],
       "user_prompt": "请整理交付清单：读取并复制交付区域到新工作表，合并新表标题，给状态列增加数据验证和条件格式，为每条记录保留超链接；插入公司标识图片，并检查工作簿结构后输出最终交付文件。",
       "coverage": ["workbook.validate_structure", "range.read", "range.copy", "range.merge", "validation.create", "conditional_format.create", "hyperlink.create", "sheet.create"]

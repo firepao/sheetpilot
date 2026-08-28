@@ -2,7 +2,7 @@
 
 ## 输入文件
 
-- 文件路径：`D:/bitexcel/SheetPilot/tests/agent_contract/data/B10_delivery_maintenance.xlsx`
+- 文件路径：`tests/agent_contract/data/B10_delivery_maintenance.xlsx`
 - 工作表：`交付清单`、`说明`
 
 ## 用户需求（Prompt）
@@ -10,7 +10,7 @@
 ```text
 请整理交付清单：读取并复制交付区域到新工作表，合并新表标题，给状态列增加“待发布/已完成”数据验证和条件格式，为每条记录保留超链接；完成后检查工作簿结构并输出最终交付文件。原始清单保持不变。
 
-输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/B10_delivery_maintenance.xlsx
+输入文件：tests/agent_contract/data/B10_delivery_maintenance.xlsx
 输出文件：<自动生成>
 ```
 

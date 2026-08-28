@@ -16,6 +16,6 @@
     "实发工资",
     "部门"
   ],
-  "user_prompt": "请统计每个部门的平均工资。\n\n输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/H2_field_similarity.xlsx\n输出文件：<自动生成>",
+  "user_prompt": "请统计每个部门的平均工资。\n\n输入文件：tests/agent_contract/data/H2_field_similarity.xlsx\n输出文件：<自动生成>",
   "expected_outcome": "success"
 }

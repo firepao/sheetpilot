@@ -6,7 +6,7 @@
 - **测试重点**: 营销分析场景 + 多指标计算 + 时间序列数据
 
 ## 数据文件
-- **路径**: `D:/bitexcel/SheetPilot/tests/agent_contract/data/M4_marketing_roi.xlsx`
+- **路径**: `tests/agent_contract/data/M4_marketing_roi.xlsx`
 - **工作表**: `渠道数据`
 - **数据量**: 约151行（30天 × 5渠道）
 - **表头行**: 第1行
@@ -40,7 +40,7 @@
 ```
 请统计每个营销渠道30天的投放效果，包括总投放金额、总销售额和平均ROI。
 
-输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/M4_marketing_roi.xlsx
+输入文件：tests/agent_contract/data/M4_marketing_roi.xlsx
 输出文件：<自动生成>
 ```
 
@@ -61,7 +61,7 @@
 
 ### Step 1: 查询字段清单
 ```bash
-task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/M4_marketing_roi.xlsx
+task-types --input tests/agent_contract/data/M4_marketing_roi.xlsx
 ```
 
 **预期返回**:
@@ -81,7 +81,7 @@ task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/M4_marketing
 {
   "schema_version": "1.0",
   "task_type": "summarize_table",
-  "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/M4_marketing_roi.xlsx",
+  "input_file": "tests/agent_contract/data/M4_marketing_roi.xlsx",
   "output_file": "<AUTO-RESULT-DIR>/渠道投放效果.xlsx",
   "user_request": "请统计每个营销渠道30天的投放效果，包括总投放金额、总销售额和平均ROI。",
   "source": {"sheet": "渠道数据", "header_row": 1},

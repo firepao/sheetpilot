@@ -5,12 +5,12 @@ SheetPilot 是面向 Agent 的确定性 Excel 执行 Runtime。当前公开产�
 ## 当前接口
 
 ```powershell
-sheetpilot task-types
-sheetpilot task-run --request request.json
-sheetpilot task-status --task-id <task-id>
+sheetpilot-agent task-types --input <input.xlsx>
+sheetpilot-agent task-run --request request.json
+sheetpilot-agent task-status --task-id <task-id>
 ```
 
-`skills/sheetpilot-excel-agent` 通过独立的 `sheetpilot.agent_cli` 只暴露以上三个命令。旧 Planner/MVP CLI 保留用于兼容测试，不属于 Agent 产品接口。
+`sheetpilot-agent` 和 `python -m sheetpilot.agent_cli` 通过独立的 Agent CLI 只暴露以上三个命令。`sheetpilot` 仍指向旧兼容 CLI，保留用于兼容测试，不属于 Agent 产品接口。
 
 ## 目录
 
@@ -50,5 +50,6 @@ python -m unittest discover -s tests -p "test_*.py" -v
 - 输入文件不作为保存目标。
 - Acceptance 在 Task 创建后不可静默缩减。
 - Task/Attempt 目录由 Runtime 管理。
+- `summarize_table` 临时产物在发布前必须通过独立结果重算和工作簿结构验收；完整报告写入 Attempt 的 `validation.json`，验收失败不发布最终文件。
 - 只有 `RUNTIME_PASS + MATCHED + delivery_valid=true` 的当前产物可交付。
 - Runtime 数学验证与 Agent 业务语义判断必须分开报告。

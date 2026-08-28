@@ -2,8 +2,8 @@
   "schema_version": "1.0",
   "name": "default-statistical-regression",
   "description": "默认执行集：去除同构统计基线，保留核心原子语义、业务规则、边界场景和工作簿保真场景。当前源数据集已精简为 26 个场景。",
-  "scenario_root": "D:/bitexcel/SheetPilot/tests/agent_contract/scenarios",
-  "data_root": "D:/bitexcel/SheetPilot/tests/agent_contract/data",
+  "scenario_root": "scenarios",
+  "data_root": "data",
   "scenario_keys": [
     "S1_department_sales",
     "S3_count_rows",

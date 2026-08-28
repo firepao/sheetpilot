@@ -14,15 +14,15 @@ V2 不按原子能力拆成大量单步题，而是从用户任务出发，让�
 
 工作簿位于：
 
-`D:/bitexcel/SheetPilot/tests/agent_contract/data/`
+`tests/agent_contract/data/`（相对于项目根目录 `project/`）
 
 任务定义位于：
 
-`D:/bitexcel/SheetPilot/tests/agent_contract/comprehensive_benchmark_v2.json`
+`tests/agent_contract/comprehensive_benchmark_v2.json`
 
 数据生成脚本位于：
 
-`D:/bitexcel/SheetPilot/tests/agent_contract/generate_comprehensive_dataset.py`
+`tests/agent_contract/generate_comprehensive_dataset.py`
 
 ## 场景组成
 
@@ -51,6 +51,6 @@ V2 当前包含 15 个用户任务，使用 10 个多工作表工作簿：
 
 ## 覆盖审计
 
-当前 15 个 case 共声明 107 个能力覆盖项；每个工作簿都包含至少一个事实表和一个辅助表，所有输入文件均为仓库内绝对路径，并已通过 Excel 可读性检查。
+当前 15 个 case 共声明 104 条能力覆盖项，去重后为 50 个能力名称；每个工作簿都包含至少一个事实表和一个辅助表。注册表中的输入路径均为相对于项目根目录的路径，生成脚本和 Excel 可读性检查应在交接包内重新执行。
 
 旧的 26 个场景仍保留用于历史回归；V2 是后续能力扩展的主数据集。新增能力应优先在现有 V2 工作簿上增加一个真实任务，只有业务结构确实不同才新增工作簿。

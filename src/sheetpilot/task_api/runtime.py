@@ -20,6 +20,7 @@ from ..workspace import sha256_file
 from .compiler import collect_fields, compile_plan
 from .contract import acceptance_snapshot, invalid_response, stable_hash, task_type_manifest, validate_request
 from .inventory import build_inventory, cap_entries, read_headers
+from .validation import validate_summarize_table_artifact
 
 
 def default_state_root() -> Path:
@@ -188,7 +189,7 @@ class TaskRuntime:
                 # create_sheet 需要冲突检查，在执行前单独处理
                 if op == "create_sheet":
                     if step["sheet"] in engine.sheet_names():
-                        return self._attempt_failure(task_dir, task, attempt_id, "OUTPUT_CONFLICT", "execution", "目标工作表已存在。")
+                        return self._attempt_failure(task_dir, task, attempt_id, "OUTPUT_CONFLICT", "execution", "目标工作表已存在。", revision["request_revision"])
                     engine.create_sheet(step["sheet"])
                     continue
                 # write_table 结果写入工作簿，handler 返回 None，不存 results
@@ -200,23 +201,33 @@ class TaskRuntime:
                 results[step["id"]] = capability.handler(ctx, step, results)
             temporary = attempt_dir / "temporary-output.xlsx"; engine.save(temporary)
         except Exception as exc:
-            return self._attempt_failure(task_dir, task, attempt_id, "EXECUTION_FAILED", "execution", str(exc))
+            return self._attempt_failure(task_dir, task, attempt_id, "EXECUTION_FAILED", "execution", str(exc), revision["request_revision"])
         finally:
             engine.close()
+        validation = validate_summarize_table_artifact(
+            Path(task["input_file"]), temporary, request, binding_snapshot, task["input_sha256"]
+        )
+        _write_json(attempt_dir / "validation.json", validation)
+        if not validation["passed"]:
+            return self._attempt_failure(
+                task_dir, task, attempt_id, "VALIDATION_FAILED", "validation",
+                "独立结果重算或结构验收失败。", revision_number=revision["request_revision"],
+                diagnostics=validation["checks"],
+            )
         if sha256_file(Path(task["input_file"])) != task["input_sha256"]:
-            return self._attempt_failure(task_dir, task, attempt_id, "INPUT_CHANGED", "validation", "输入文件在执行期间发生变化。")
+            return self._attempt_failure(task_dir, task, attempt_id, "INPUT_CHANGED", "validation", "输入文件在执行期间发生变化。", revision["request_revision"])
         output = Path(task["output_file"]); output.parent.mkdir(parents=True, exist_ok=True)
-        if output.exists(): return self._attempt_failure(task_dir, task, attempt_id, "OUTPUT_CONFLICT", "publication", "输出文件已存在。")
+        if output.exists(): return self._attempt_failure(task_dir, task, attempt_id, "OUTPUT_CONFLICT", "publication", "输出文件已存在。", revision["request_revision"])
         staging = output.with_name(f".{output.name}.sheetpilot-{task['task_id']}-{attempt_id}.tmp")
         shutil.copy2(temporary, staging)
         try:
             os.link(staging, output)
         except FileExistsError:
-            staging.unlink(missing_ok=True); return self._attempt_failure(task_dir, task, attempt_id, "OUTPUT_CONFLICT", "publication", "输出文件已存在。")
+            staging.unlink(missing_ok=True); return self._attempt_failure(task_dir, task, attempt_id, "OUTPUT_CONFLICT", "publication", "输出文件已存在。", revision["request_revision"])
         except OSError:
-            staging.unlink(missing_ok=True); return self._attempt_failure(task_dir, task, attempt_id, "PUBLICATION_FAILED", "publication", "当前文件系统不支持 no-replace 原子发布。")
+            staging.unlink(missing_ok=True); return self._attempt_failure(task_dir, task, attempt_id, "PUBLICATION_FAILED", "publication", "当前文件系统不支持 no-replace 原子发布。", revision["request_revision"])
         staging.unlink(missing_ok=True); published_hash = sha256_file(output)
-        evidence = {"runtime_status": "RUNTIME_PASS", "internal_plan_hash": plan_hash, "validated_artifact_sha256": sha256_file(temporary), "published_sha256": published_hash, "coverage": plan["coverage"]}
+        evidence = {"runtime_status": "RUNTIME_PASS", "internal_plan_hash": plan_hash, "validated_artifact_sha256": sha256_file(temporary), "published_sha256": published_hash, "coverage": plan["coverage"], "validation": {"passed": True, "validation_hash": stable_hash(validation), "filtered_row_count": validation.get("filtered_row_count"), "group_count": validation.get("group_count")}}
         evidence["evidence_hash"] = stable_hash(evidence); _write_json(attempt_dir / "evidence.json", evidence)
         state = {"state": "RUNTIME_PASS", "terminal": True, "request_revision": revision["request_revision"], "latest_attempt": {"attempt_id": attempt_id, "state": "RUNTIME_PASS", "request_revision": revision["request_revision"], "finished_at": _now()}, "validated_published_sha256": published_hash, "delivery_valid": True, "artifact_integrity": "MATCHED", "evidence": evidence}
         _write_json(task_dir / "current-state.json", state)
@@ -287,9 +298,14 @@ class TaskRuntime:
         snapshot = {"source": binding["source"], "bindings": {slot["id"]: slot.get("selected_candidate_id") for slot in binding["slots"] if slot.get("selected_candidate_id")}}
         return stable_hash(snapshot), stable_hash([revision_number, request, snapshot])
 
-    def _attempt_failure(self, task_dir: Path, task: dict[str, Any], attempt_id: str, code: str, phase: str, message: str) -> dict[str, Any]:
-        response = self._error("EXECUTION_FAILED" if phase == "execution" else "PUBLICATION_FAILED", code, phase, message, task["task_id"], 1, attempt_id, phase != "publication", "RETRY_ATTEMPT" if phase != "publication" else "HUMAN_ACTION_REQUIRED")
-        _write_json(task_dir / "current-state.json", {"state": "FAILED", "terminal": False, "request_revision": 1, "latest_attempt": {"attempt_id": attempt_id, "state": response["status"], "request_revision": 1, "finished_at": _now()}, "delivery_valid": False, "recovery": response["error"]["recovery"]})
+    def _attempt_failure(self, task_dir: Path, task: dict[str, Any], attempt_id: str, code: str, phase: str, message: str, revision_number: int = 1, diagnostics: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+        status_by_phase = {"execution": "EXECUTION_FAILED", "validation": "VALIDATION_FAILED", "publication": "PUBLICATION_FAILED"}
+        status = status_by_phase.get(phase, "PUBLICATION_FAILED")
+        retryable = phase in {"execution", "validation"}
+        response = self._error(status, code, phase, message, task["task_id"], revision_number, attempt_id, retryable, "RETRY_ATTEMPT" if retryable else "HUMAN_ACTION_REQUIRED")
+        response["error"]["diagnostics"] = diagnostics or []
+        response.update({"artifact_integrity": None, "delivery_valid": False})
+        _write_json(task_dir / "current-state.json", {"state": "FAILED", "terminal": False, "request_revision": revision_number, "latest_attempt": {"attempt_id": attempt_id, "state": response["status"], "request_revision": revision_number, "finished_at": _now()}, "delivery_valid": False, "recovery": response["error"]["recovery"], "error": response["error"]})
         return response
 
     def _error(self, status: str, code: str, phase: str, message: str, task_id: str | None, revision: int | None, attempt_id: str | None, retryable: bool, action: str) -> dict[str, Any]:

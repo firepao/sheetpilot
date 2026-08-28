@@ -2,7 +2,7 @@
 
 ## 输入文件
 
-- 文件路径：`D:/bitexcel/SheetPilot/tests/agent_contract/data/B4_workforce.xlsx`
+- 文件路径：`tests/agent_contract/data/B4_workforce.xlsx`
 - 工作表：`员工月度绩效`
 - 表头行：1
 
@@ -11,7 +11,7 @@
 ```text
 请统计绩效等级为“优秀”或“良好”的在职员工，按部门和项目编号汇总员工人数、实发工资和实际工时，并保留员工编号非空数。结果先按部门排序，再按实发工资降序输出。
 
-输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/B4_workforce.xlsx
+输入文件：tests/agent_contract/data/B4_workforce.xlsx
 输出文件：<自动生成>
 ```
 

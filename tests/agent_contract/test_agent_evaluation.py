@@ -80,9 +80,9 @@ class AgentEvaluationTest(unittest.TestCase):
 
     def test_running_packaged_wrapper_is_not_source_access(self):
         audit = inspect_commands([
-            r'python "D:\bitexcel\SheetPilot\skills\sheetpilot-excel-agent\scripts\sheetpilot_cli.py" task-types',
-            r'python "D:\bitexcel\SheetPilot\skills\sheetpilot-excel-agent\scripts\sheetpilot_cli.py" task-run --request request.json',
-            r'python "D:\bitexcel\SheetPilot\skills\sheetpilot-excel-agent\scripts\sheetpilot_cli.py" task-status --task-id task-1',
+            r'python "D:\skill\sheetpilot-excel-agent\scripts\sheetpilot_cli.py" task-types',
+            r'python "D:\skill\sheetpilot-excel-agent\scripts\sheetpilot_cli.py" task-run --request request.json',
+            r'python "D:\skill\sheetpilot-excel-agent\scripts\sheetpilot_cli.py" task-status --task-id task-1',
         ])
         self.assertEqual(audit["source_access_attempts"], 0)
         self.assertEqual(audit["allowed_cli_calls"], 3)

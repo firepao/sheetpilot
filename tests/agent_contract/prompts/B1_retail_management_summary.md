@@ -2,7 +2,7 @@
 
 ## 输入文件
 
-- 文件路径：`D:/bitexcel/SheetPilot/tests/agent_contract/data/B1_retail_operations.xlsx`
+- 文件路径：`tests/agent_contract/data/B1_retail_operations.xlsx`
 - 工作表：`订单明细`
 - 辅助工作表：`商品主数据`、`渠道映射`
 - 表头行：1
@@ -12,7 +12,7 @@
 ```text
 请分析订单明细，排除订单状态为“已取消”或是否退货为“是”的记录，按区域和品类汇总销售额、订单数、客户编号非空数和平均订单金额。请关联商品主数据核对标准成本，结果按销售额降序写入新工作表“区域品类经营汇总”，并另外输出客户编号为空的异常明细。保留原工作簿不修改。
 
-输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/B1_retail_operations.xlsx
+输入文件：tests/agent_contract/data/B1_retail_operations.xlsx
 输出文件：<自动生成>
 ```
 

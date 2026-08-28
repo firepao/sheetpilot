@@ -6,7 +6,7 @@
 - **测试重点**: HR场景 + 平均值计算 + 过滤
 
 ## 数据文件
-- **路径**: `D:/bitexcel/SheetPilot/tests/agent_contract/data/M2_employee_performance.xlsx`
+- **路径**: `tests/agent_contract/data/M2_employee_performance.xlsx`
 - **工作表**: `员工绩效`
 - **数据量**: 约74行
 - **表头行**: 第1行
@@ -25,7 +25,7 @@
 ```
 请统计绩效等级为"优秀"和"良好"的员工，按部门汇总人数和平均绩效分数。
 
-输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/M2_employee_performance.xlsx
+输入文件：tests/agent_contract/data/M2_employee_performance.xlsx
 输出文件：<自动生成>
 ```
 
@@ -43,7 +43,7 @@
 
 ### Step 1: 查询字段清单
 ```bash
-task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/M2_employee_performance.xlsx
+task-types --input tests/agent_contract/data/M2_employee_performance.xlsx
 ```
 
 ### Step 2: 构造Task Request
@@ -52,7 +52,7 @@ task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/M2_employee_
 {
   "schema_version": "1.0",
   "task_type": "summarize_table",
-  "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/M2_employee_performance.xlsx",
+  "input_file": "tests/agent_contract/data/M2_employee_performance.xlsx",
   "output_file": "<AUTO-RESULT-DIR>/部门绩效汇总.xlsx",
   "user_request": "请统计绩效等级为"优秀"和"良好"的员工，按部门汇总人数和平均绩效分数。",
   "source": {"sheet": "员工绩效", "header_row": 1},

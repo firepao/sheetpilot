@@ -2,7 +2,7 @@
 
 ## 输入文件
 
-- 文件路径：`D:/bitexcel/SheetPilot/tests/agent_contract/data/B3_supply_chain.xlsx`
+- 文件路径：`tests/agent_contract/data/B3_supply_chain.xlsx`
 - 工作表：`采购订单`、`供应商主数据`
 - 表头行：1
 
@@ -11,7 +11,7 @@
 ```text
 请只统计质检合格率达到90%且收货状态为“已收货”的采购订单，按供应商汇总采购金额、采购次数和平均质检合格率，按采购金额降序输出。没有满足条件的供应商也要在结果说明中列出。
 
-输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/B3_supply_chain.xlsx
+输入文件：tests/agent_contract/data/B3_supply_chain.xlsx
 输出文件：<自动生成>
 ```
 

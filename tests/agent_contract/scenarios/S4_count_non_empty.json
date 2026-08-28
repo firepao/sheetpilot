@@ -16,6 +16,6 @@
     "注册渠道",
     "邮箱"
   ],
-  "user_prompt": "请统计每个注册渠道有多少用户填写了邮箱（邮箱字段非空的用户数）。\n\n输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/S4_count_non_empty.xlsx\n输出文件：<自动生成>",
+  "user_prompt": "请统计每个注册渠道有多少用户填写了邮箱（邮箱字段非空的用户数）。\n\n输入文件：tests/agent_contract/data/S4_count_non_empty.xlsx\n输出文件：<自动生成>",
   "expected_outcome": "success"
 }

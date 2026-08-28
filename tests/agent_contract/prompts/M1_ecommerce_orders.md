@@ -6,7 +6,7 @@
 - **测试重点**: 电商业务场景 + 双维度 + 双指标 + 过滤
 
 ## 数据文件
-- **路径**: `D:/bitexcel/SheetPilot/tests/agent_contract/data/M1_ecommerce_orders.xlsx`
+- **路径**: `tests/agent_contract/data/M1_ecommerce_orders.xlsx`
 - **工作表**: `订单明细`
 - **数据量**: 约342行
 - **表头行**: 第1行
@@ -25,7 +25,7 @@
 ```
 请统计已完成订单中，每个城市每个产品类别的销售总额和订单数量。
 
-输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/M1_ecommerce_orders.xlsx
+输入文件：tests/agent_contract/data/M1_ecommerce_orders.xlsx
 输出文件：<自动生成>
 ```
 
@@ -47,7 +47,7 @@
 
 ### Step 1: 查询字段清单
 ```bash
-task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/M1_ecommerce_orders.xlsx
+task-types --input tests/agent_contract/data/M1_ecommerce_orders.xlsx
 ```
 
 ### Step 2: 构造Task Request
@@ -56,7 +56,7 @@ task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/M1_ecommerce
 {
   "schema_version": "1.0",
   "task_type": "summarize_table",
-  "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/M1_ecommerce_orders.xlsx",
+  "input_file": "tests/agent_contract/data/M1_ecommerce_orders.xlsx",
   "output_file": "<AUTO-RESULT-DIR>/城市产品销售.xlsx",
   "user_request": "请统计已完成订单中，每个城市每个产品类别的销售总额和订单数量。",
   "source": {"sheet": "订单明细", "header_row": 1},

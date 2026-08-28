@@ -18,6 +18,6 @@
     "合格率(%)",
     "总金额"
   ],
-  "user_prompt": "请统计质检合格率大于等于90%的采购记录，按供应商汇总采购总额、采购次数和平均交货天数。\n\n输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/M6_supplier_analysis.xlsx\n输出文件：<自动生成>",
+  "user_prompt": "请统计质检合格率大于等于90%的采购记录，按供应商汇总采购总额、采购次数和平均交货天数。\n\n输入文件：tests/agent_contract/data/M6_supplier_analysis.xlsx\n输出文件：<自动生成>",
   "expected_outcome": "success"
 }

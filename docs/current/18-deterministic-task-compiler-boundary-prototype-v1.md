@@ -416,9 +416,9 @@ Compiler 不把内部 `PLAN_INVALID` 暴露给 Agent。只有 Agent 可行动的
 Skill 只使用：
 
 ```text
-sheetpilot task-types
-sheetpilot task-run --request <request.json>
-sheetpilot task-status --task-id <task-id>
+sheetpilot-agent task-types --input <input.xlsx>
+sheetpilot-agent task-run --request <request.json>
+sheetpilot-agent task-status --task-id <task-id>
 ```
 
 主 Agent CLI 不再注册：

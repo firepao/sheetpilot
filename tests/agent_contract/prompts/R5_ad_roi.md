@@ -10,7 +10,7 @@
 - 验证营销领域业务逻辑
 
 ## 输入文件
-- **文件路径**: `D:/bitexcel/SheetPilot/tests/agent_contract/data/R5_ad_roi.xlsx`
+- **文件路径**: `tests/agent_contract/data/R5_ad_roi.xlsx`
 - **工作表**: `广告投放`
 - **表头行**: 1
 - **数据特征**: 
@@ -32,7 +32,7 @@
   2. 这些广告组的总ROI
 - 按总ROI降序排列
 
-输入文件: D:/bitexcel/SheetPilot/tests/agent_contract/data/R5_ad_roi.xlsx
+输入文件: tests/agent_contract/data/R5_ad_roi.xlsx
 输出文件: <由Agent决定>
 ```
 
@@ -40,7 +40,7 @@
 
 1. **查询字段清单**
    ```bash
-   sheetpilot task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/R5_ad_roi.xlsx --sheet 广告投放 --header-row 1
+   sheetpilot-agent task-types --input tests/agent_contract/data/R5_ad_roi.xlsx --sheet 广告投放 --header-row 1
    ```
 
 2. **构造Task Request**
@@ -53,12 +53,12 @@
 
 3. **提交任务**
    ```bash
-   sheetpilot task-run --request request.json --auto-result-dir <result-dir>
+   sheetpilot-agent task-run --request request.json --auto-result-dir <result-dir>
    ```
 
 4. **复核状态**
    ```bash
-   sheetpilot task-status --task-id <task-id>
+   sheetpilot-agent task-status --task-id <task-id>
    ```
 
 ## 预期结果

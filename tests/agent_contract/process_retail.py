@@ -8,12 +8,15 @@
 - 写入新工作表"区域品类经营汇总"
 - 保留原工作簿所有工作表、公式和图表
 """
+from pathlib import Path
+
 import openpyxl
 import os
 from copy import copy
 
-input_path = r"D:\bitexcel\SheetPilot\tests\agent_contract\data\07_complex_retail_operations.xlsx"
-result_dir = r"D:\bitexcel\SheetPilot\tests\agent_contract\results"
+ROOT = Path(__file__).resolve().parent
+input_path = ROOT / "data" / "07_complex_retail_operations.xlsx"
+result_dir = ROOT / "results"
 output_dir = None
 
 # 查找生成的结果目录

@@ -6,7 +6,7 @@
 - **测试重点**: 多维度分组（2个维度）
 
 ## 数据文件
-- **路径**: `D:/bitexcel/SheetPilot/tests/agent_contract/data/S7_two_dims.xlsx`
+- **路径**: `tests/agent_contract/data/S7_two_dims.xlsx`
 - **工作表**: `销售数据`
 - **数据量**: 约192行
 - **表头行**: 第1行
@@ -23,7 +23,7 @@
 ```
 请统计每个区域每个产品类别的销售额。
 
-输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/S7_two_dims.xlsx
+输入文件：tests/agent_contract/data/S7_two_dims.xlsx
 输出文件：<自动生成>
 ```
 
@@ -31,7 +31,7 @@
 
 ### Step 1: 查询字段清单
 ```bash
-task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/S7_two_dims.xlsx
+task-types --input tests/agent_contract/data/S7_two_dims.xlsx
 ```
 
 **预期返回**:
@@ -45,7 +45,7 @@ task-types --input D:/bitexcel/SheetPilot/tests/agent_contract/data/S7_two_dims.
 {
   "schema_version": "1.0",
   "task_type": "summarize_table",
-  "input_file": "D:/bitexcel/SheetPilot/tests/agent_contract/data/S7_two_dims.xlsx",
+  "input_file": "tests/agent_contract/data/S7_two_dims.xlsx",
   "output_file": "<AUTO-RESULT-DIR>/区域产品销售.xlsx",
   "user_request": "请统计每个区域每个产品类别的销售额。",
   "source": {"sheet": "销售数据", "header_row": 1},

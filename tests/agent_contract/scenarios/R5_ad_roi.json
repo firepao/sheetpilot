@@ -13,6 +13,6 @@
     "header_row": 1
   },
   "expected_source_fields": [],
-  "user_prompt": "请分析广告投放数据，找出各渠道ROI表现良好的广告组。\n\n要求：\n- 只统计ROI > 1.5的广告组（表示每投入1元回报超过1.5元）\n- 按投放渠道分组\n- 统计各渠道的：\n  1. 高ROI广告组数量\n  2. 这些广告组的总ROI\n- 按总ROI降序排列\n\n输入文件: D:/bitexcel/SheetPilot/tests/agent_contract/data/R5_ad_roi.xlsx\n输出文件: <由Agent决定>",
+  "user_prompt": "请分析广告投放数据，找出各渠道ROI表现良好的广告组。\n\n要求：\n- 只统计ROI > 1.5的广告组（表示每投入1元回报超过1.5元）\n- 按投放渠道分组\n- 统计各渠道的：\n  1. 高ROI广告组数量\n  2. 这些广告组的总ROI\n- 按总ROI降序排列\n\n输入文件: tests/agent_contract/data/R5_ad_roi.xlsx\n输出文件: <由Agent决定>",
   "expected_outcome": "success"
 }

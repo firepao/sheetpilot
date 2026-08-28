@@ -16,6 +16,6 @@
     "数学成绩",
     "班级"
   ],
-  "user_prompt": "请统计每个班级的数学平均分。\n\n输入文件：D:/bitexcel/SheetPilot/tests/agent_contract/data/S5_average.xlsx\n输出文件：<自动生成>",
+  "user_prompt": "请统计每个班级的数学平均分。\n\n输入文件：tests/agent_contract/data/S5_average.xlsx\n输出文件：<自动生成>",
   "expected_outcome": "success"
 }
